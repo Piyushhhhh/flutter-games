@@ -596,7 +596,7 @@ class _SpaceInvadersScreenState extends State<SpaceInvadersScreen>
                 animation: _gameController,
                 builder: (context, child) {
                   return CustomPaint(
-                    painter: StarfieldPainter(_gameController.value),
+                    painter: GalaxyBackgroundPainter(_gameController.value),
                   );
                 },
               ),
@@ -1354,6 +1354,622 @@ class SpaceInvadersPainter extends CustomPainter {
   bool shouldRepaint(SpaceInvadersPainter oldDelegate) {
     return oldDelegate.gameState != gameState;
   }
+}
+
+// Enhanced galaxy background painter with planets, asteroids, and cosmic effects
+class GalaxyBackgroundPainter extends CustomPainter {
+  final double animationValue;
+  final List<Star> stars;
+  final List<Planet> planets;
+  final List<Asteroid> asteroids;
+  final List<NebulaCloud> nebulaClouds;
+  final List<CosmicDust> cosmicDust;
+
+  GalaxyBackgroundPainter(this.animationValue)
+      : stars = _generateStars(),
+        planets = _generatePlanets(),
+        asteroids = _generateAsteroids(),
+        nebulaClouds = _generateNebulaClouds(),
+        cosmicDust = _generateCosmicDust();
+
+  static List<Star> _generateStars() {
+    final random = math.Random(42); // Fixed seed for consistent stars
+    return List.generate(150, (index) {
+      return Star(
+        position: Offset(random.nextDouble(), random.nextDouble()),
+        size: random.nextDouble() * 3 + 0.5,
+        brightness: random.nextDouble() * 0.8 + 0.2,
+        color: _getStarColor(random.nextInt(5)),
+        twinkleSpeed: random.nextDouble() * 2 + 0.5,
+        twinkleOffset: random.nextDouble() * math.pi * 2,
+      );
+    });
+  }
+
+  static List<Planet> _generatePlanets() {
+    final random = math.Random(123); // Fixed seed for consistent planets
+    return List.generate(3, (index) {
+      return Planet(
+        position: Offset(random.nextDouble(), random.nextDouble()),
+        size: random.nextDouble() * 60 + 20,
+        color: _getPlanetColor(index),
+        atmosphereColor: _getPlanetAtmosphereColor(index),
+        rotationSpeed: random.nextDouble() * 0.5 + 0.1,
+        hasRings: random.nextBool(),
+        ringColor: _getPlanetRingColor(index),
+      );
+    });
+  }
+
+  static List<Asteroid> _generateAsteroids() {
+    final random = math.Random(456); // Fixed seed for consistent asteroids
+    return List.generate(12, (index) {
+      return Asteroid(
+        position: Offset(random.nextDouble(), random.nextDouble()),
+        size: random.nextDouble() * 8 + 2,
+        speed: random.nextDouble() * 0.3 + 0.1,
+        rotationSpeed: random.nextDouble() * 4 + 1,
+        color: _getAsteroidColor(random.nextInt(3)),
+        shape: random.nextInt(4), // Different asteroid shapes
+      );
+    });
+  }
+
+  static List<NebulaCloud> _generateNebulaClouds() {
+    final random = math.Random(789); // Fixed seed for consistent nebulae
+    return List.generate(4, (index) {
+      return NebulaCloud(
+        position: Offset(random.nextDouble(), random.nextDouble()),
+        size: random.nextDouble() * 200 + 100,
+        color: _getNebulaColor(index),
+        density: random.nextDouble() * 0.3 + 0.1,
+        pulseSpeed: random.nextDouble() * 0.5 + 0.2,
+      );
+    });
+  }
+
+  static List<CosmicDust> _generateCosmicDust() {
+    final random = math.Random(321); // Fixed seed for consistent cosmic dust
+    return List.generate(50, (index) {
+      return CosmicDust(
+        position: Offset(random.nextDouble(), random.nextDouble()),
+        size: random.nextDouble() * 2 + 0.5,
+        speed: random.nextDouble() * 0.8 + 0.2,
+        color: _getCosmicDustColor(random.nextInt(4)),
+        opacity: random.nextDouble() * 0.6 + 0.2,
+      );
+    });
+  }
+
+  static Color _getStarColor(int type) {
+    switch (type) {
+      case 0:
+        return const Color(0xFFFFFFFF); // White dwarf
+      case 1:
+        return const Color(0xFFFFF3E0); // Yellow star
+      case 2:
+        return const Color(0xFFFFE0B2); // Orange star
+      case 3:
+        return const Color(0xFFFF8A65); // Red star
+      case 4:
+        return const Color(0xFFE3F2FD); // Blue giant
+      default:
+        return const Color(0xFFFFFFFF);
+    }
+  }
+
+  static Color _getPlanetColor(int index) {
+    switch (index) {
+      case 0:
+        return const Color(0xFF4FC3F7); // Ice planet
+      case 1:
+        return const Color(0xFFFF7043); // Mars-like planet
+      case 2:
+        return const Color(0xFF66BB6A); // Earth-like planet
+      default:
+        return const Color(0xFF9C27B0); // Gas giant
+    }
+  }
+
+  static Color _getPlanetAtmosphereColor(int index) {
+    switch (index) {
+      case 0:
+        return const Color(0xFF81D4FA); // Ice planet atmosphere
+      case 1:
+        return const Color(0xFFFFAB91); // Mars-like atmosphere
+      case 2:
+        return const Color(0xFF81C784); // Earth-like atmosphere
+      default:
+        return const Color(0xFFAB47BC); // Gas giant atmosphere
+    }
+  }
+
+  static Color _getPlanetRingColor(int index) {
+    switch (index) {
+      case 0:
+        return const Color(0xFFE1F5FE); // Ice rings
+      case 1:
+        return const Color(0xFFFFCCBC); // Rocky rings
+      case 2:
+        return const Color(0xFFC8E6C9); // Organic rings
+      default:
+        return const Color(0xFFE1BEE7); // Gas rings
+    }
+  }
+
+  static Color _getAsteroidColor(int type) {
+    switch (type) {
+      case 0:
+        return const Color(0xFF795548); // Rocky asteroid
+      case 1:
+        return const Color(0xFF607D8B); // Metallic asteroid
+      case 2:
+        return const Color(0xFF8D6E63); // Carbonaceous asteroid
+      default:
+        return const Color(0xFF5D4037); // Dark asteroid
+    }
+  }
+
+  static Color _getNebulaColor(int index) {
+    switch (index) {
+      case 0:
+        return const Color(0xFFFF4081); // Pink nebula
+      case 1:
+        return const Color(0xFF00BCD4); // Cyan nebula
+      case 2:
+        return const Color(0xFF9C27B0); // Purple nebula
+      case 3:
+        return const Color(0xFF4CAF50); // Green nebula
+      default:
+        return const Color(0xFFFF9800); // Orange nebula
+    }
+  }
+
+  static Color _getCosmicDustColor(int type) {
+    switch (type) {
+      case 0:
+        return const Color(0xFFFFEB3B); // Golden dust
+      case 1:
+        return const Color(0xFFE91E63); // Cosmic dust
+      case 2:
+        return const Color(0xFF3F51B5); // Stellar dust
+      case 3:
+        return const Color(0xFF009688); // Nebular dust
+      default:
+        return const Color(0xFFFFFFFF); // White dust
+    }
+  }
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // Don't paint if size is invalid
+    if (size.width <= 0 || size.height <= 0) {
+      return;
+    }
+
+    // Draw background gradient
+    _drawSpaceBackground(canvas, size);
+
+    // Draw nebula clouds (furthest background)
+    _drawNebulaClouds(canvas, size);
+
+    // Draw cosmic dust
+    _drawCosmicDust(canvas, size);
+
+    // Draw distant galaxies
+    _drawDistantGalaxies(canvas, size);
+
+    // Draw planets (middle background)
+    _drawPlanets(canvas, size);
+
+    // Draw asteroids (moving objects)
+    _drawAsteroids(canvas, size);
+
+    // Draw enhanced star field (foreground)
+    _drawEnhancedStars(canvas, size);
+  }
+
+  void _drawSpaceBackground(Canvas canvas, Size size) {
+    final rect = Rect.fromLTWH(0, 0, size.width, size.height);
+    final gradient = RadialGradient(
+      center: Alignment.center,
+      radius: 1.5,
+      colors: [
+        const Color(0xFF1A0033).withOpacity(0.8),
+        const Color(0xFF0A0A0A).withOpacity(0.9),
+        const Color(0xFF000000),
+      ],
+      stops: const [0.0, 0.7, 1.0],
+    );
+
+    final paint = Paint()..shader = gradient.createShader(rect);
+    canvas.drawRect(rect, paint);
+  }
+
+  void _drawNebulaClouds(Canvas canvas, Size size) {
+    for (final cloud in nebulaClouds) {
+      final x = cloud.position.dx * size.width;
+      final y = cloud.position.dy * size.height;
+      final pulse =
+          math.sin(animationValue * cloud.pulseSpeed * math.pi) * 0.3 + 0.7;
+
+      final paint = Paint()
+        ..color = cloud.color.withOpacity(cloud.density * pulse)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 40);
+
+      canvas.drawCircle(
+        Offset(x, y),
+        cloud.size * pulse,
+        paint,
+      );
+
+      // Add inner glow
+      final innerPaint = Paint()
+        ..color = cloud.color.withOpacity(cloud.density * pulse * 0.5)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 20);
+
+      canvas.drawCircle(
+        Offset(x, y),
+        cloud.size * 0.6 * pulse,
+        innerPaint,
+      );
+    }
+  }
+
+  void _drawCosmicDust(Canvas canvas, Size size) {
+    for (final dust in cosmicDust) {
+      final x = dust.position.dx * size.width;
+      final y =
+          (dust.position.dy * size.height + animationValue * dust.speed * 30) %
+              size.height;
+
+      final paint = Paint()
+        ..color = dust.color.withOpacity(dust.opacity)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2);
+
+      canvas.drawCircle(
+        Offset(x, y),
+        dust.size,
+        paint,
+      );
+    }
+  }
+
+  void _drawDistantGalaxies(Canvas canvas, Size size) {
+    final galaxies = [
+      {'x': 0.1, 'y': 0.2, 'size': 15.0, 'color': Color(0xFF9C27B0)},
+      {'x': 0.8, 'y': 0.15, 'size': 12.0, 'color': Color(0xFF3F51B5)},
+      {'x': 0.3, 'y': 0.8, 'size': 10.0, 'color': Color(0xFF00BCD4)},
+    ];
+
+    for (final galaxy in galaxies) {
+      final x = (galaxy['x'] as double) * size.width;
+      final y = (galaxy['y'] as double) * size.height;
+      final galaxySize = galaxy['size'] as double;
+      final color = galaxy['color'] as Color;
+
+      final paint = Paint()
+        ..color = color.withOpacity(0.3)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8);
+
+      // Draw spiral galaxy shape
+      canvas.drawCircle(Offset(x, y), galaxySize, paint);
+
+      // Add spiral arms
+      final armPaint = Paint()
+        ..color = color.withOpacity(0.2)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4);
+
+      canvas.drawCircle(
+          Offset(x - galaxySize * 0.3, y), galaxySize * 0.7, armPaint);
+      canvas.drawCircle(
+          Offset(x + galaxySize * 0.3, y), galaxySize * 0.7, armPaint);
+    }
+  }
+
+  void _drawPlanets(Canvas canvas, Size size) {
+    for (final planet in planets) {
+      final x = planet.position.dx * size.width;
+      final y = planet.position.dy * size.height;
+      final rotation = animationValue * planet.rotationSpeed;
+
+      // Draw planet atmosphere
+      final atmospherePaint = Paint()
+        ..color = planet.atmosphereColor.withOpacity(0.4)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10);
+
+      canvas.drawCircle(
+        Offset(x, y),
+        planet.size * 1.2,
+        atmospherePaint,
+      );
+
+      // Draw planet surface
+      final surfacePaint = Paint()
+        ..color = planet.color
+        ..style = PaintingStyle.fill;
+
+      canvas.drawCircle(
+        Offset(x, y),
+        planet.size,
+        surfacePaint,
+      );
+
+      // Draw planet surface details
+      final detailPaint = Paint()
+        ..color = planet.color.withOpacity(0.7)
+        ..style = PaintingStyle.fill;
+
+      // Add rotating surface features
+      final feature1X = x + math.cos(rotation) * planet.size * 0.3;
+      final feature1Y = y + math.sin(rotation) * planet.size * 0.3;
+      canvas.drawCircle(
+          Offset(feature1X, feature1Y), planet.size * 0.2, detailPaint);
+
+      final feature2X = x + math.cos(rotation + math.pi) * planet.size * 0.5;
+      final feature2Y = y + math.sin(rotation + math.pi) * planet.size * 0.5;
+      canvas.drawCircle(
+          Offset(feature2X, feature2Y), planet.size * 0.15, detailPaint);
+
+      // Draw planet rings if present
+      if (planet.hasRings) {
+        final ringPaint = Paint()
+          ..color = planet.ringColor.withOpacity(0.6)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2;
+
+        canvas.drawCircle(
+          Offset(x, y),
+          planet.size * 1.5,
+          ringPaint,
+        );
+
+        canvas.drawCircle(
+          Offset(x, y),
+          planet.size * 1.7,
+          ringPaint,
+        );
+      }
+
+      // Draw planet highlight
+      final highlightPaint = Paint()
+        ..color = Colors.white.withOpacity(0.3)
+        ..style = PaintingStyle.fill;
+
+      final highlightX = x - planet.size * 0.3;
+      final highlightY = y - planet.size * 0.3;
+      canvas.drawCircle(
+          Offset(highlightX, highlightY), planet.size * 0.2, highlightPaint);
+    }
+  }
+
+  void _drawAsteroids(Canvas canvas, Size size) {
+    for (final asteroid in asteroids) {
+      final x = asteroid.position.dx * size.width;
+      final y = (asteroid.position.dy * size.height +
+              animationValue * asteroid.speed * 40) %
+          size.height;
+      final rotation = animationValue * asteroid.rotationSpeed;
+
+      final paint = Paint()
+        ..color = asteroid.color
+        ..style = PaintingStyle.fill;
+
+      canvas.save();
+      canvas.translate(x, y);
+      canvas.rotate(rotation);
+
+      // Draw different asteroid shapes
+      switch (asteroid.shape) {
+        case 0:
+          _drawRockyAsteroid(canvas, asteroid.size, paint);
+          break;
+        case 1:
+          _drawMetallicAsteroid(canvas, asteroid.size, paint);
+          break;
+        case 2:
+          _drawIrregularAsteroid(canvas, asteroid.size, paint);
+          break;
+        case 3:
+          _drawCarbonAsteroid(canvas, asteroid.size, paint);
+          break;
+      }
+
+      canvas.restore();
+    }
+  }
+
+  void _drawRockyAsteroid(Canvas canvas, double size, Paint paint) {
+    final path = Path();
+    path.moveTo(-size, 0);
+    path.lineTo(-size * 0.5, -size * 0.8);
+    path.lineTo(size * 0.3, -size * 0.6);
+    path.lineTo(size, 0);
+    path.lineTo(size * 0.7, size * 0.8);
+    path.lineTo(-size * 0.3, size * 0.9);
+    path.close();
+    canvas.drawPath(path, paint);
+  }
+
+  void _drawMetallicAsteroid(Canvas canvas, double size, Paint paint) {
+    canvas.drawCircle(Offset.zero, size, paint);
+
+    // Add metallic highlights
+    final highlightPaint = Paint()
+      ..color = Colors.white.withOpacity(0.5)
+      ..style = PaintingStyle.fill;
+
+    canvas.drawCircle(
+        Offset(-size * 0.3, -size * 0.3), size * 0.2, highlightPaint);
+  }
+
+  void _drawIrregularAsteroid(Canvas canvas, double size, Paint paint) {
+    final path = Path();
+    path.moveTo(-size * 0.8, 0);
+    path.lineTo(-size * 0.4, -size);
+    path.lineTo(size * 0.2, -size * 0.7);
+    path.lineTo(size * 0.9, -size * 0.2);
+    path.lineTo(size * 0.6, size * 0.3);
+    path.lineTo(size * 0.1, size);
+    path.lineTo(-size * 0.5, size * 0.8);
+    path.close();
+    canvas.drawPath(path, paint);
+  }
+
+  void _drawCarbonAsteroid(Canvas canvas, double size, Paint paint) {
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromCenter(
+            center: Offset.zero, width: size * 1.6, height: size * 1.2),
+        Radius.circular(size * 0.2),
+      ),
+      paint,
+    );
+  }
+
+  void _drawEnhancedStars(Canvas canvas, Size size) {
+    for (final star in stars) {
+      final x = star.position.dx * size.width;
+      final y =
+          (star.position.dy * size.height + animationValue * 20) % size.height;
+
+      // Calculate twinkling effect
+      final twinkle = math.sin(
+                  animationValue * star.twinkleSpeed * math.pi * 2 +
+                      star.twinkleOffset) *
+              0.5 +
+          0.5;
+      final currentBrightness = star.brightness * twinkle;
+
+      final paint = Paint()
+        ..color = star.color.withOpacity(currentBrightness)
+        ..style = PaintingStyle.fill;
+
+      // Draw star with glow effect
+      if (star.size > 2) {
+        final glowPaint = Paint()
+          ..color = star.color.withOpacity(currentBrightness * 0.3)
+          ..maskFilter = MaskFilter.blur(BlurStyle.normal, star.size * 2);
+
+        canvas.drawCircle(Offset(x, y), star.size * 2, glowPaint);
+      }
+
+      canvas.drawCircle(Offset(x, y), star.size, paint);
+
+      // Draw star spikes for bright stars
+      if (star.size > 2.5) {
+        final spikePaint = Paint()
+          ..color = star.color.withOpacity(currentBrightness * 0.8)
+          ..strokeWidth = 1
+          ..style = PaintingStyle.stroke;
+
+        canvas.drawLine(
+          Offset(x - star.size * 3, y),
+          Offset(x + star.size * 3, y),
+          spikePaint,
+        );
+        canvas.drawLine(
+          Offset(x, y - star.size * 3),
+          Offset(x, y + star.size * 3),
+          spikePaint,
+        );
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(GalaxyBackgroundPainter oldDelegate) {
+    return oldDelegate.animationValue != animationValue;
+  }
+}
+
+// Enhanced background object classes
+class Star {
+  final Offset position;
+  final double size;
+  final double brightness;
+  final Color color;
+  final double twinkleSpeed;
+  final double twinkleOffset;
+
+  Star({
+    required this.position,
+    required this.size,
+    required this.brightness,
+    required this.color,
+    required this.twinkleSpeed,
+    required this.twinkleOffset,
+  });
+}
+
+class Planet {
+  final Offset position;
+  final double size;
+  final Color color;
+  final Color atmosphereColor;
+  final double rotationSpeed;
+  final bool hasRings;
+  final Color ringColor;
+
+  Planet({
+    required this.position,
+    required this.size,
+    required this.color,
+    required this.atmosphereColor,
+    required this.rotationSpeed,
+    required this.hasRings,
+    required this.ringColor,
+  });
+}
+
+class Asteroid {
+  final Offset position;
+  final double size;
+  final double speed;
+  final double rotationSpeed;
+  final Color color;
+  final int shape;
+
+  Asteroid({
+    required this.position,
+    required this.size,
+    required this.speed,
+    required this.rotationSpeed,
+    required this.color,
+    required this.shape,
+  });
+}
+
+class NebulaCloud {
+  final Offset position;
+  final double size;
+  final Color color;
+  final double density;
+  final double pulseSpeed;
+
+  NebulaCloud({
+    required this.position,
+    required this.size,
+    required this.color,
+    required this.density,
+    required this.pulseSpeed,
+  });
+}
+
+class CosmicDust {
+  final Offset position;
+  final double size;
+  final double speed;
+  final Color color;
+  final double opacity;
+
+  CosmicDust({
+    required this.position,
+    required this.size,
+    required this.speed,
+    required this.color,
+    required this.opacity,
+  });
 }
 
 class StarfieldPainter extends CustomPainter {
