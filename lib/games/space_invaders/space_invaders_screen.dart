@@ -2,22 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:async';
 import 'dart:math' as math;
-import '../core/constants/app_constants.dart';
-import '../core/theme/app_theme.dart';
-import '../widgets/common_widgets.dart';
-import '../models/game_models.dart';
+import '../../core/constants/app_constants.dart';
+import '../../core/theme/app_theme.dart';
+import '../../widgets/common_widgets.dart';
+import '../../models/game_models.dart';
 
-class SpaceShooterGame extends StatefulWidget {
-  const SpaceShooterGame({super.key});
+class SpaceInvadersScreen extends StatefulWidget {
+  const SpaceInvadersScreen({super.key});
 
   @override
-  State<SpaceShooterGame> createState() => _SpaceShooterGameState();
+  State<SpaceInvadersScreen> createState() => _SpaceInvadersScreenState();
 }
 
-class _SpaceShooterGameState extends State<SpaceShooterGame>
+class _SpaceInvadersScreenState extends State<SpaceInvadersScreen>
     with TickerProviderStateMixin {
   late AnimationController _gameController;
-  late SpaceShooterGameState _gameState;
+  late SpaceInvadersGameState _gameState;
   Timer? _gameTimer;
   Timer? _enemySpawnTimer;
   Timer? _levelTimer;
@@ -45,7 +45,7 @@ class _SpaceShooterGameState extends State<SpaceShooterGame>
       duration: const Duration(hours: 1),
       vsync: this,
     );
-    _gameState = SpaceShooterGameState.initial();
+    _gameState = SpaceInvadersGameState.initial();
     _setupGame();
   }
 
@@ -76,7 +76,7 @@ class _SpaceShooterGameState extends State<SpaceShooterGame>
   void _startGame() {
     setState(() {
       _isGameActive = true;
-      _gameState = SpaceShooterGameState.initial().copyWith(
+      _gameState = SpaceInvadersGameState.initial().copyWith(
         playerPosition: Offset(_gameSize.width / 2, _gameSize.height - 80),
         gameState: GameState.playing,
       );
@@ -341,7 +341,7 @@ class _SpaceShooterGameState extends State<SpaceShooterGame>
   void _resetGame() {
     setState(() {
       _isGameActive = false;
-      _gameState = SpaceShooterGameState.initial().copyWith(
+      _gameState = SpaceInvadersGameState.initial().copyWith(
         playerPosition: Offset(_gameSize.width / 2, _gameSize.height - 80),
       );
     });
@@ -455,7 +455,7 @@ class _SpaceShooterGameState extends State<SpaceShooterGame>
             // Game canvas
             Positioned.fill(
               child: CustomPaint(
-                painter: SpaceShooterPainter(_gameState),
+                painter: SpaceInvadersPainter(_gameState),
               ),
             ),
 
@@ -627,7 +627,7 @@ class _SpaceShooterGameState extends State<SpaceShooterGame>
 }
 
 // Game state management
-class SpaceShooterGameState {
+class SpaceInvadersGameState {
   final GameState gameState;
   final Offset playerPosition;
   final List<Bullet> bullets;
@@ -636,7 +636,7 @@ class SpaceShooterGameState {
   final int level;
   final int lives;
 
-  const SpaceShooterGameState({
+  const SpaceInvadersGameState({
     required this.gameState,
     required this.playerPosition,
     required this.bullets,
@@ -646,8 +646,8 @@ class SpaceShooterGameState {
     required this.lives,
   });
 
-  factory SpaceShooterGameState.initial() {
-    return const SpaceShooterGameState(
+  factory SpaceInvadersGameState.initial() {
+    return const SpaceInvadersGameState(
       gameState: GameState.initial,
       playerPosition: Offset(200, 500),
       bullets: [],
@@ -658,7 +658,7 @@ class SpaceShooterGameState {
     );
   }
 
-  SpaceShooterGameState copyWith({
+  SpaceInvadersGameState copyWith({
     GameState? gameState,
     Offset? playerPosition,
     List<Bullet>? bullets,
@@ -667,7 +667,7 @@ class SpaceShooterGameState {
     int? level,
     int? lives,
   }) {
-    return SpaceShooterGameState(
+    return SpaceInvadersGameState(
       gameState: gameState ?? this.gameState,
       playerPosition: playerPosition ?? this.playerPosition,
       bullets: bullets ?? this.bullets,
@@ -739,10 +739,10 @@ class Enemy {
 }
 
 // Custom painters for game rendering
-class SpaceShooterPainter extends CustomPainter {
-  final SpaceShooterGameState gameState;
+class SpaceInvadersPainter extends CustomPainter {
+  final SpaceInvadersGameState gameState;
 
-  SpaceShooterPainter(this.gameState);
+  SpaceInvadersPainter(this.gameState);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -824,7 +824,7 @@ class SpaceShooterPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(SpaceShooterPainter oldDelegate) {
+  bool shouldRepaint(SpaceInvadersPainter oldDelegate) {
     return oldDelegate.gameState != gameState;
   }
 }

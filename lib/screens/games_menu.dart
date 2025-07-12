@@ -5,8 +5,11 @@ import '../core/constants/app_constants.dart';
 import '../core/theme/app_theme.dart';
 import '../widgets/common_widgets.dart';
 import '../models/game_models.dart';
-import '../games/tic_tac_toe.dart';
-import '../games/game_2048.dart';
+import '../games/tic_tac_toe/tic_tac_toe.dart';
+import '../games/game_2048/game_2048.dart';
+import '../games/space_invaders/space_invaders.dart';
+import '../games/neon_runner/neon_runner.dart';
+import '../games/cyber_quest/cyber_quest.dart';
 
 class GamesMenu extends StatefulWidget {
   const GamesMenu({super.key});
@@ -105,15 +108,17 @@ class _GamesMenuState extends State<GamesMenu> with TickerProviderStateMixin {
           SafeArea(
             child: FadeTransition(
               opacity: _fadeAnimation,
-              child: Column(
-                children: [
-                  const SizedBox(height: 100),
-                  _buildRetroHeader(),
-                  _buildRetroSearchBar(),
-                  Expanded(
-                    child: _buildRetroGamesList(),
-                  ),
-                ],
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 100),
+                    _buildRetroHeader(),
+                    _buildRetroSearchBar(),
+                    _buildRetroGamesList(),
+                    const SizedBox(height: 100), // Bottom padding
+                  ],
+                ),
               ),
             ),
           ),
@@ -311,6 +316,7 @@ class _GamesMenuState extends State<GamesMenu> with TickerProviderStateMixin {
         ],
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           // Header bar
           Container(
@@ -336,9 +342,9 @@ class _GamesMenuState extends State<GamesMenu> with TickerProviderStateMixin {
             ),
           ),
           // Games list
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.all(16),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
               children: [
                 _buildRetroGameCard(
                   'TIC TAC TOE',
@@ -363,7 +369,7 @@ class _GamesMenuState extends State<GamesMenu> with TickerProviderStateMixin {
                   'ARCADE CLASSIC',
                   const Color(0xFFFF0080),
                   const Color(0xFF8A2BE2),
-                  false,
+                  true,
                   'space_invaders',
                 ),
                 const SizedBox(height: 16),
@@ -384,7 +390,6 @@ class _GamesMenuState extends State<GamesMenu> with TickerProviderStateMixin {
                   false,
                   'cyber_quest',
                 ),
-                const SizedBox(height: 80),
               ],
             ),
           ),
@@ -575,11 +580,16 @@ class _GamesMenuState extends State<GamesMenu> with TickerProviderStateMixin {
 
     switch (gameId) {
       case 'tic_tac_toe':
-        gameWidget = const TicTacToeGame();
+        gameWidget = const TicTacToeScreen();
         break;
       case '2048':
-        gameWidget = const Game2048();
+        gameWidget = const Game2048Screen();
         break;
+      case 'space_invaders':
+        gameWidget = const SpaceInvadersScreen();
+        break;
+      case 'neon_runner':
+      case 'cyber_quest':
       default:
         _showRetroComingSoonDialog(gameId);
         return;

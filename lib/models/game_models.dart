@@ -944,3 +944,6 @@ class Game2048State {
   @override
   String toString() => 'Game2048State(score: $score, tiles: ${tiles.length})';
 }
+// === 2048 Game Models ===
+
+/// Enum for swipe directions in 2048

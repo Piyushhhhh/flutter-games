@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:math' as math;
-import '../models/game_models.dart';
-import '../core/constants/app_constants.dart';
-import '../core/theme/app_theme.dart';
+import '../../models/game_models.dart';
+import '../../core/constants/app_constants.dart';
+import '../../core/theme/app_theme.dart';
 import 'game_2048_controller.dart';
 
-class Game2048 extends StatefulWidget {
-  const Game2048({super.key});
+class Game2048Screen extends StatefulWidget {
+  const Game2048Screen({super.key});
 
   @override
-  State<Game2048> createState() => _Game2048State();
+  State<Game2048Screen> createState() => _Game2048ScreenState();
 }
 
-class _Game2048State extends State<Game2048> with TickerProviderStateMixin {
+class _Game2048ScreenState extends State<Game2048Screen>
+    with TickerProviderStateMixin {
   late Game2048Controller _controller;
   late AnimationController _scaleController;
   late AnimationController _slideController;

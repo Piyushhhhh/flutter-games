@@ -2,8 +2,8 @@ import 'dart:math';
 import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../models/game_models.dart';
-import '../core/constants/app_constants.dart';
+import '../../models/game_models.dart';
+import '../../core/constants/app_constants.dart';
 
 /// Controller for 2048 game logic
 class Game2048Controller extends ChangeNotifier {
