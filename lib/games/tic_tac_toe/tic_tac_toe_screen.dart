@@ -609,7 +609,7 @@ class _TicTacToeScreenState extends State<TicTacToeScreen>
         builder: (context, child) {
           return Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 16),
+            padding: const EdgeInsets.symmetric(vertical: 12),
             decoration: BoxDecoration(
               color: const Color(0xFF00FFFF).withOpacity(0.2),
               border: Border.all(
@@ -660,31 +660,38 @@ class _TicTacToeScreenState extends State<TicTacToeScreen>
   }
 
   Widget _buildGameView() {
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          const SizedBox(height: 20),
-          // Status section
-          _buildRetroStatusSection(),
-          const SizedBox(height: 20),
-          // Game board
-          _buildRetroGameBoard(),
-          const SizedBox(height: 20),
-          // Stats section
-          _buildRetroStats(),
-          const SizedBox(height: 20),
-          // Action buttons
-          _buildRetroActionButtons(),
-          const SizedBox(height: 20),
-        ],
-      ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SafeArea(
+          child: Column(
+            children: [
+              const SizedBox(height: 8),
+              // Status section - more compact
+              _buildRetroStatusSection(),
+              const SizedBox(height: 12),
+              // Game board - flexible
+              Expanded(
+                flex: 3,
+                child: _buildRetroGameBoard(),
+              ),
+              const SizedBox(height: 12),
+              // Stats section - compact
+              _buildRetroStats(),
+              const SizedBox(height: 12),
+              // Action buttons - always visible
+              _buildRetroActionButtons(),
+              const SizedBox(height: 8),
+            ],
+          ),
+        );
+      },
     );
   }
 
   Widget _buildRetroStatusSection() {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         color: Colors.black.withOpacity(0.8),
         border: Border.all(
@@ -702,39 +709,28 @@ class _TicTacToeScreenState extends State<TicTacToeScreen>
       child: Column(
         children: [
           // Status header
-          Container(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            decoration: const BoxDecoration(
-              border: Border(
-                bottom: BorderSide(
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.info_outline,
+                color: Color(0xFF00FFFF),
+                size: 18,
+              ),
+              const SizedBox(width: 8),
+              const Text(
+                'GAME STATUS',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'monospace',
                   color: Color(0xFF00FFFF),
-                  width: 1,
+                  letterSpacing: 1,
                 ),
               ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(
-                  Icons.info_outline,
-                  color: Color(0xFF00FFFF),
-                  size: 20,
-                ),
-                const SizedBox(width: 8),
-                const Text(
-                  'GAME STATUS',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'monospace',
-                    color: Color(0xFF00FFFF),
-                    letterSpacing: 1,
-                  ),
-                ),
-              ],
-            ),
+            ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           // Current player or status
           if (gameState.isComputerThinking)
             Row(
@@ -829,107 +825,113 @@ class _TicTacToeScreenState extends State<TicTacToeScreen>
   }
 
   Widget _buildRetroGameBoard() {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20),
-      child: AspectRatio(
-        aspectRatio: 1.0,
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.8),
-            border: Border.all(
-              color: const Color(0xFF00FFFF),
-              width: 3,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFF00FFFF).withOpacity(0.3),
-                blurRadius: 20,
-                spreadRadius: 3,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final size = constraints.maxWidth > constraints.maxHeight
+            ? constraints.maxHeight
+            : constraints.maxWidth;
+        return Center(
+          child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 20),
+            width: size - 40,
+            height: size - 40,
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.8),
+              border: Border.all(
+                color: const Color(0xFF00FFFF),
+                width: 3,
               ),
-            ],
-          ),
-          child: GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              crossAxisSpacing: 2,
-              mainAxisSpacing: 2,
-            ),
-            itemCount: 9,
-            itemBuilder: (context, index) {
-              final player = gameState.board.cells[index];
-              final isWinning = winningCells.contains(index);
-              final isEnabled =
-                  !gameState.isComputerThinking && !gameState.isGameOver;
-
-              return GestureDetector(
-                onTap: isEnabled && player == Player.none
-                    ? () => _makeMove(index)
-                    : null,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: isWinning
-                        ? const Color(0xFF00FFFF).withOpacity(0.2)
-                        : Colors.black.withOpacity(0.5),
-                    border: Border.all(
-                      color: isWinning
-                          ? const Color(0xFF00FFFF)
-                          : const Color(0xFF444444),
-                      width: 1,
-                    ),
-                    boxShadow: isWinning
-                        ? [
-                            BoxShadow(
-                              color: const Color(0xFF00FFFF).withOpacity(0.5),
-                              blurRadius: 10,
-                            ),
-                          ]
-                        : null,
-                  ),
-                  child: Center(
-                    child: player != Player.none
-                        ? AnimatedBuilder(
-                            animation: _neonAnimation,
-                            builder: (context, child) {
-                              return Text(
-                                player.symbol,
-                                style: TextStyle(
-                                  fontSize: 48,
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: 'monospace',
-                                  color: player == Player.x
-                                      ? const Color(0xFF00FFFF)
-                                      : const Color(0xFFFF0080),
-                                  shadows: [
-                                    Shadow(
-                                      color: (player == Player.x
-                                              ? const Color(0xFF00FFFF)
-                                              : const Color(0xFFFF0080))
-                                          .withOpacity(
-                                              _neonAnimation.value * 0.8),
-                                      blurRadius: 15,
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                          )
-                        : Container(),
-                  ),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF00FFFF).withOpacity(0.3),
+                  blurRadius: 20,
+                  spreadRadius: 3,
                 ),
-              );
-            },
+              ],
+            ),
+            child: GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                crossAxisSpacing: 2,
+                mainAxisSpacing: 2,
+              ),
+              itemCount: 9,
+              itemBuilder: (context, index) {
+                final player = gameState.board.cells[index];
+                final isWinning = winningCells.contains(index);
+                final isEnabled =
+                    !gameState.isComputerThinking && !gameState.isGameOver;
+
+                return GestureDetector(
+                  onTap: isEnabled && player == Player.none
+                      ? () => _makeMove(index)
+                      : null,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: isWinning
+                          ? const Color(0xFF00FFFF).withOpacity(0.2)
+                          : Colors.black.withOpacity(0.5),
+                      border: Border.all(
+                        color: isWinning
+                            ? const Color(0xFF00FFFF)
+                            : const Color(0xFF444444),
+                        width: 1,
+                      ),
+                      boxShadow: isWinning
+                          ? [
+                              BoxShadow(
+                                color: const Color(0xFF00FFFF).withOpacity(0.5),
+                                blurRadius: 10,
+                              ),
+                            ]
+                          : null,
+                    ),
+                    child: Center(
+                      child: player != Player.none
+                          ? AnimatedBuilder(
+                              animation: _neonAnimation,
+                              builder: (context, child) {
+                                return Text(
+                                  player.symbol,
+                                  style: TextStyle(
+                                    fontSize: 48,
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: 'monospace',
+                                    color: player == Player.x
+                                        ? const Color(0xFF00FFFF)
+                                        : const Color(0xFFFF0080),
+                                    shadows: [
+                                      Shadow(
+                                        color: (player == Player.x
+                                                ? const Color(0xFF00FFFF)
+                                                : const Color(0xFFFF0080))
+                                            .withOpacity(
+                                                _neonAnimation.value * 0.8),
+                                        blurRadius: 15,
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            )
+                          : Container(),
+                    ),
+                  ),
+                );
+              },
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
   Widget _buildRetroStats() {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         color: Colors.black.withOpacity(0.7),
         border: Border.all(
@@ -950,14 +952,14 @@ class _TicTacToeScreenState extends State<TicTacToeScreen>
           const Text(
             'GAME STATISTICS',
             style: TextStyle(
-              fontSize: 14,
+              fontSize: 12,
               fontWeight: FontWeight.bold,
               fontFamily: 'monospace',
               color: Color(0xFF00FF00),
               letterSpacing: 1,
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           // Stats grid
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -985,7 +987,7 @@ class _TicTacToeScreenState extends State<TicTacToeScreen>
         Text(
           value,
           style: TextStyle(
-            fontSize: 20,
+            fontSize: 18,
             fontWeight: FontWeight.bold,
             fontFamily: 'monospace',
             color: color,
@@ -997,11 +999,11 @@ class _TicTacToeScreenState extends State<TicTacToeScreen>
             ],
           ),
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 2),
         Text(
           label,
           style: const TextStyle(
-            fontSize: 10,
+            fontSize: 9,
             fontFamily: 'monospace',
             color: Color(0xFF666666),
             letterSpacing: 1,
@@ -1025,7 +1027,7 @@ class _TicTacToeScreenState extends State<TicTacToeScreen>
                       _resetGame();
                     },
               child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 16),
+                padding: const EdgeInsets.symmetric(vertical: 12),
                 decoration: BoxDecoration(
                   color: const Color(0xFF00FF00).withOpacity(0.2),
                   border: Border.all(
@@ -1082,7 +1084,7 @@ class _TicTacToeScreenState extends State<TicTacToeScreen>
                       _changeGameMode();
                     },
               child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 16),
+                padding: const EdgeInsets.symmetric(vertical: 12),
                 decoration: BoxDecoration(
                   color: const Color(0xFFFF0080).withOpacity(0.2),
                   border: Border.all(
