@@ -7,13 +7,13 @@ import 'screens/games_menu.dart';
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Set system UI overlay style
+  // Set system UI overlay style for retro theme
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
       statusBarIconBrightness: Brightness.light,
-      systemNavigationBarColor: Colors.transparent,
-      systemNavigationBarIconBrightness: Brightness.dark,
+      systemNavigationBarColor: Color(0xFF000000),
+      systemNavigationBarIconBrightness: Brightness.light,
     ),
   );
 
@@ -32,10 +32,10 @@ class FlutterGamesApp extends StatelessWidget {
       // Theme configuration
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.system,
+      themeMode: ThemeMode.dark,
 
-      // Home screen with sliding pages
-      home: const SlidingPagesContainer(),
+      // Home screen with retro interface
+      home: const RetroGameHub(),
 
       // Performance optimizations
       builder: (context, child) {
@@ -53,44 +53,44 @@ class FlutterGamesApp extends StatelessWidget {
   }
 }
 
-class SlidingPagesContainer extends StatefulWidget {
-  const SlidingPagesContainer({super.key});
+class RetroGameHub extends StatefulWidget {
+  const RetroGameHub({super.key});
 
   @override
-  State<SlidingPagesContainer> createState() => _SlidingPagesContainerState();
+  State<RetroGameHub> createState() => _RetroGameHubState();
 }
 
-class _SlidingPagesContainerState extends State<SlidingPagesContainer>
+class _RetroGameHubState extends State<RetroGameHub>
     with TickerProviderStateMixin {
   late PageController _pageController;
-  late AnimationController _indicatorController;
-  late Animation<double> _indicatorAnimation;
+  late AnimationController _neonController;
+  late Animation<double> _neonAnimation;
   int _currentPage = 0;
 
-  final List<PageData> _pages = [
-    PageData(
-      title: 'Games',
-      icon: Icons.games,
-      color: const Color(0xFF667eea),
+  final List<RetroPageData> _pages = [
+    RetroPageData(
+      title: 'GAMES',
+      icon: Icons.videogame_asset,
+      color: const Color(0xFF00FFFF),
       content: const GamesMenu(),
     ),
-    PageData(
-      title: 'Profile',
-      icon: Icons.person,
-      color: const Color(0xFF764ba2),
-      content: const ProfilePage(),
-    ),
-    PageData(
-      title: 'Stats',
+    RetroPageData(
+      title: 'STATS',
       icon: Icons.analytics,
-      color: const Color(0xFF6B73FF),
-      content: const StatsPage(),
+      color: const Color(0xFF00FF00),
+      content: const RetroStatsPage(),
     ),
-    PageData(
-      title: 'Settings',
+    RetroPageData(
+      title: 'PROFILE',
+      icon: Icons.person,
+      color: const Color(0xFFFF0080),
+      content: const RetroProfilePage(),
+    ),
+    RetroPageData(
+      title: 'CONFIG',
       icon: Icons.settings,
-      color: const Color(0xFF8B5CF6),
-      content: const SettingsPage(),
+      color: const Color(0xFFFFFF00),
+      content: const RetroSettingsPage(),
     ),
   ];
 
@@ -98,23 +98,24 @@ class _SlidingPagesContainerState extends State<SlidingPagesContainer>
   void initState() {
     super.initState();
     _pageController = PageController();
-    _indicatorController = AnimationController(
-      duration: const Duration(milliseconds: 300),
+    _neonController = AnimationController(
+      duration: const Duration(milliseconds: 2000),
       vsync: this,
     );
-    _indicatorAnimation = Tween<double>(
-      begin: 0,
-      end: 1,
+    _neonAnimation = Tween<double>(
+      begin: 0.3,
+      end: 1.0,
     ).animate(CurvedAnimation(
-      parent: _indicatorController,
+      parent: _neonController,
       curve: Curves.easeInOut,
     ));
+    _neonController.repeat(reverse: true);
   }
 
   @override
   void dispose() {
     _pageController.dispose();
-    _indicatorController.dispose();
+    _neonController.dispose();
     super.dispose();
   }
 
@@ -122,169 +123,140 @@ class _SlidingPagesContainerState extends State<SlidingPagesContainer>
     setState(() {
       _currentPage = page;
     });
-    _indicatorController.reset();
-    _indicatorController.forward();
-    HapticFeedback.lightImpact();
+    HapticFeedback.heavyImpact();
+  }
+
+  void _onBottomNavTap(int index) {
+    _pageController.animateToPage(
+      index,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          // Page content
-          PageView.builder(
-            controller: _pageController,
-            onPageChanged: _onPageChanged,
-            physics: const BouncingScrollPhysics(),
-            itemCount: _pages.length,
-            itemBuilder: (context, index) {
-              return _pages[index].content;
-            },
-          ),
-
-          // Page indicators
-          Positioned(
-            bottom: 50,
-            left: 0,
-            right: 0,
-            child: _buildPageIndicators(),
-          ),
-
-          // Page title overlay
-          Positioned(
-            top: 60,
-            left: 0,
-            right: 0,
-            child: _buildPageTitle(),
-          ),
-        ],
+      backgroundColor: const Color(0xFF000000),
+      body: PageView.builder(
+        controller: _pageController,
+        onPageChanged: _onPageChanged,
+        physics: const BouncingScrollPhysics(),
+        itemCount: _pages.length,
+        itemBuilder: (context, index) {
+          return _pages[index].content;
+        },
       ),
+      bottomNavigationBar: _buildRetroBottomNav(),
     );
   }
 
-  Widget _buildPageIndicators() {
+  Widget _buildRetroBottomNav() {
     return Container(
-      height: 60,
+      height: 80,
+      decoration: BoxDecoration(
+        color: const Color(0xFF000000),
+        border: const Border(
+          top: BorderSide(
+            color: Color(0xFF00FFFF),
+            width: 2,
+          ),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF00FFFF).withOpacity(0.3),
+            blurRadius: 20,
+            offset: const Offset(0, -10),
+          ),
+        ],
+      ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: List.generate(_pages.length, (index) {
           final isSelected = index == _currentPage;
+          final page = _pages[index];
+
           return GestureDetector(
-            onTap: () {
-              _pageController.animateToPage(
-                index,
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeInOut,
-              );
-            },
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              margin: const EdgeInsets.symmetric(horizontal: 8),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? Colors.white.withOpacity(0.9)
-                    : Colors.white.withOpacity(0.3),
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: isSelected
-                    ? [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 10,
-                          offset: const Offset(0, 5),
-                        ),
-                      ]
-                    : null,
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    _pages[index].icon,
-                    size: 20,
+            onTap: () => _onBottomNavTap(index),
+            child: AnimatedBuilder(
+              animation: _neonAnimation,
+              builder: (context, child) {
+                return Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
                     color: isSelected
-                        ? _pages[index].color
-                        : Colors.white.withOpacity(0.8),
+                        ? page.color.withOpacity(0.2)
+                        : Colors.transparent,
+                    border: isSelected
+                        ? Border.all(
+                            color: page.color,
+                            width: 1,
+                          )
+                        : null,
+                    boxShadow: isSelected
+                        ? [
+                            BoxShadow(
+                              color: page.color
+                                  .withOpacity(_neonAnimation.value * 0.6),
+                              blurRadius: 10,
+                              spreadRadius: 1,
+                            ),
+                          ]
+                        : null,
                   ),
-                  if (isSelected) ...[
-                    const SizedBox(width: 8),
-                    Text(
-                      _pages[index].title,
-                      style: TextStyle(
-                        color: _pages[index].color,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        page.icon,
+                        size: 20,
+                        color: isSelected
+                            ? Color.lerp(page.color, Colors.white,
+                                _neonAnimation.value * 0.3)
+                            : const Color(0xFF666666),
                       ),
-                    ),
-                  ],
-                ],
-              ),
+                      const SizedBox(height: 4),
+                      Text(
+                        page.title,
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight:
+                              isSelected ? FontWeight.bold : FontWeight.normal,
+                          fontFamily: 'monospace',
+                          color: isSelected
+                              ? Color.lerp(page.color, Colors.white,
+                                  _neonAnimation.value * 0.3)
+                              : const Color(0xFF666666),
+                          letterSpacing: 1,
+                        ),
+                      ),
+                      if (isSelected)
+                        Container(
+                          margin: const EdgeInsets.only(top: 2),
+                          width: 20,
+                          height: 2,
+                          color: page.color,
+                        ),
+                    ],
+                  ),
+                );
+              },
             ),
           );
         }),
       ),
     );
   }
-
-  Widget _buildPageTitle() {
-    return AnimatedBuilder(
-      animation: _indicatorAnimation,
-      builder: (context, child) {
-        return Transform.translate(
-          offset: Offset(0, -20 * (1 - _indicatorAnimation.value)),
-          child: Opacity(
-            opacity: _indicatorAnimation.value,
-            child: Center(
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.9),
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 10,
-                      offset: const Offset(0, 5),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      _pages[_currentPage].icon,
-                      color: _pages[_currentPage].color,
-                      size: 24,
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      _pages[_currentPage].title,
-                      style: TextStyle(
-                        color: _pages[_currentPage].color,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
 }
 
-class PageData {
+class RetroPageData {
   final String title;
   final IconData icon;
   final Color color;
   final Widget content;
 
-  const PageData({
+  const RetroPageData({
     required this.title,
     required this.icon,
     required this.color,
@@ -292,88 +264,93 @@ class PageData {
   });
 }
 
-// Profile Page
-class ProfilePage extends StatelessWidget {
-  const ProfilePage({super.key});
+// Retro Stats Page
+class RetroStatsPage extends StatelessWidget {
+  const RetroStatsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
           colors: [
-            Color(0xFF764ba2),
-            Color(0xFF667eea),
-            Color(0xFF6B73FF),
+            Color(0xFF0D001A),
+            Color(0xFF1A0033),
+            Color(0xFF000000),
           ],
         ),
       ),
       child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(20),
           child: Column(
             children: [
-              const SizedBox(height: 80),
-              // Profile Avatar
+              const SizedBox(height: 60),
               Container(
-                width: 120,
-                height: 120,
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.white.withOpacity(0.2),
                   border: Border.all(
-                    color: Colors.white.withOpacity(0.3),
-                    width: 3,
+                    color: const Color(0xFF00FF00),
+                    width: 2,
                   ),
-                ),
-                child: const Icon(
-                  Icons.person,
-                  size: 60,
-                  color: Colors.white,
-                ),
-              ),
-              const SizedBox(height: 24),
-              const Text(
-                'Player Profile',
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Level 1 Gamer',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.white.withOpacity(0.8),
-                ),
-              ),
-              const SizedBox(height: 40),
-              // Profile Stats
-              Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 20,
-                      offset: const Offset(0, 10),
+                      color: const Color(0xFF00FF00).withOpacity(0.5),
+                      blurRadius: 15,
+                      spreadRadius: 2,
                     ),
                   ],
                 ),
-                child: Column(
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    _buildStatItem('Games Played', '0'),
-                    const Divider(),
-                    _buildStatItem('High Score', '0'),
-                    const Divider(),
-                    _buildStatItem('Achievements', '0'),
+                    Icon(
+                      Icons.analytics,
+                      size: 40,
+                      color: Color(0xFF00FF00),
+                    ),
+                    SizedBox(width: 16),
+                    Text(
+                      'STATISTICS',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'monospace',
+                        color: Color(0xFF00FF00),
+                        letterSpacing: 2,
+                      ),
+                    ),
                   ],
+                ),
+              ),
+              const SizedBox(height: 40),
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.black,
+                    border: Border.all(
+                      color: const Color(0xFF00FF00),
+                      width: 2,
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      _buildRetroStatItem(
+                          'GAMES PLAYED', '0', const Color(0xFF00FFFF)),
+                      const SizedBox(height: 16),
+                      _buildRetroStatItem(
+                          'HIGH SCORE', '0', const Color(0xFFFF0080)),
+                      const SizedBox(height: 16),
+                      _buildRetroStatItem(
+                          'PLAY TIME', '00:00:00', const Color(0xFFFFFF00)),
+                      const SizedBox(height: 16),
+                      _buildRetroStatItem(
+                          'ACHIEVEMENTS', '0/50', const Color(0xFF8A2BE2)),
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -383,25 +360,35 @@ class ProfilePage extends StatelessWidget {
     );
   }
 
-  Widget _buildStatItem(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+  Widget _buildRetroStatItem(String label, String value, Color color) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        border: Border.all(
+          color: color,
+          width: 1,
+        ),
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
             label,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
+            style: TextStyle(
+              fontSize: 14,
+              fontFamily: 'monospace',
+              color: color,
+              letterSpacing: 1,
             ),
           ),
           Text(
             value,
-            style: const TextStyle(
-              fontSize: 16,
+            style: TextStyle(
+              fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF764ba2),
+              fontFamily: 'monospace',
+              color: color,
             ),
           ),
         ],
@@ -410,68 +397,228 @@ class ProfilePage extends StatelessWidget {
   }
 }
 
-// Stats Page
-class StatsPage extends StatelessWidget {
-  const StatsPage({super.key});
+// Retro Profile Page
+class RetroProfilePage extends StatelessWidget {
+  const RetroProfilePage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
           colors: [
-            Color(0xFF6B73FF),
-            Color(0xFF764ba2),
-            Color(0xFF667eea),
+            Color(0xFF0D001A),
+            Color(0xFF1A0033),
+            Color(0xFF000000),
           ],
         ),
       ),
       child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(20),
           child: Column(
             children: [
-              const SizedBox(height: 80),
-              const Icon(
-                Icons.analytics,
-                size: 80,
-                color: Colors.white,
+              const SizedBox(height: 60),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: const Color(0xFFFF0080),
+                    width: 2,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFFFF0080).withOpacity(0.5),
+                      blurRadius: 15,
+                      spreadRadius: 2,
+                    ),
+                  ],
+                ),
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.person,
+                      size: 40,
+                      color: Color(0xFFFF0080),
+                    ),
+                    SizedBox(width: 16),
+                    Text(
+                      'USER PROFILE',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'monospace',
+                        color: Color(0xFFFF0080),
+                        letterSpacing: 2,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 40),
+              // Profile avatar
+              Container(
+                width: 100,
+                height: 100,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFF0080).withOpacity(0.2),
+                  border: Border.all(
+                    color: const Color(0xFFFF0080),
+                    width: 3,
+                  ),
+                ),
+                child: const Icon(
+                  Icons.person,
+                  size: 50,
+                  color: Color(0xFFFF0080),
+                ),
+              ),
+              const SizedBox(height: 20),
               const Text(
-                'Game Statistics',
+                'PLAYER_001',
                 style: TextStyle(
-                  fontSize: 28,
+                  fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  fontFamily: 'monospace',
+                  color: Color(0xFFFF0080),
+                  letterSpacing: 2,
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'LEVEL: NEWBIE',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontFamily: 'monospace',
+                  color: Color(0xFF00FFFF),
+                  letterSpacing: 1,
                 ),
               ),
               const SizedBox(height: 40),
               Expanded(
                 child: Container(
-                  padding: const EdgeInsets.all(24),
+                  padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 20,
-                        offset: const Offset(0, 10),
+                    color: Colors.black,
+                    border: Border.all(
+                      color: const Color(0xFFFF0080),
+                      width: 2,
+                    ),
+                  ),
+                  child: const Center(
+                    child: Text(
+                      'PROFILE DATA LOADING...\n\nCOMPLETE GAMES TO\nUNLOCK ACHIEVEMENTS',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontFamily: 'monospace',
+                        color: Color(0xFF666666),
+                        letterSpacing: 1,
+                        height: 1.5,
                       ),
-                    ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// Retro Settings Page
+class RetroSettingsPage extends StatelessWidget {
+  const RetroSettingsPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Color(0xFF0D001A),
+            Color(0xFF1A0033),
+            Color(0xFF000000),
+          ],
+        ),
+      ),
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            children: [
+              const SizedBox(height: 60),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: const Color(0xFFFFFF00),
+                    width: 2,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFFFFFF00).withOpacity(0.5),
+                      blurRadius: 15,
+                      spreadRadius: 2,
+                    ),
+                  ],
+                ),
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.settings,
+                      size: 40,
+                      color: Color(0xFFFFFF00),
+                    ),
+                    SizedBox(width: 16),
+                    Text(
+                      'SYSTEM CONFIG',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'monospace',
+                        color: Color(0xFFFFFF00),
+                        letterSpacing: 2,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 40),
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.black,
+                    border: Border.all(
+                      color: const Color(0xFFFFFF00),
+                      width: 2,
+                    ),
                   ),
                   child: Column(
                     children: [
-                      _buildStatCard('Total Games', '0', Icons.games),
+                      _buildRetroSettingItem(
+                          'SOUND FX', true, const Color(0xFF00FFFF)),
                       const SizedBox(height: 16),
-                      _buildStatCard('Win Rate', '0%', Icons.trending_up),
+                      _buildRetroSettingItem(
+                          'MUSIC', true, const Color(0xFF00FF00)),
                       const SizedBox(height: 16),
-                      _buildStatCard('Time Played', '0h 0m', Icons.timer),
+                      _buildRetroSettingItem(
+                          'VIBRATION', true, const Color(0xFFFF0080)),
                       const SizedBox(height: 16),
-                      _buildStatCard('Best Streak', '0', Icons.whatshot),
+                      _buildRetroSettingItem(
+                          'SCANLINES', true, const Color(0xFF8A2BE2)),
+                      const SizedBox(height: 16),
+                      _buildRetroSettingItem(
+                          'CRT MODE', false, const Color(0xFFFFFF00)),
                     ],
                   ),
                 ),
@@ -483,146 +630,47 @@ class StatsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildStatCard(String title, String value, IconData icon) {
+  Widget _buildRetroSettingItem(String label, bool value, Color color) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF6B73FF), Color(0xFF764ba2)],
+        color: color.withOpacity(0.1),
+        border: Border.all(
+          color: color,
+          width: 1,
         ),
-        borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Icon(icon, color: Colors.white, size: 24),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                Text(
-                  value,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 14,
+              fontFamily: 'monospace',
+              color: color,
+              letterSpacing: 1,
             ),
           ),
-        ],
-      ),
-    );
-  }
-}
-
-// Settings Page
-class SettingsPage extends StatelessWidget {
-  const SettingsPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Color(0xFF8B5CF6),
-            Color(0xFF6B73FF),
-            Color(0xFF764ba2),
-          ],
-        ),
-      ),
-      child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            children: [
-              const SizedBox(height: 80),
-              const Icon(
-                Icons.settings,
-                size: 80,
-                color: Colors.white,
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            decoration: BoxDecoration(
+              color: value ? color.withOpacity(0.3) : Colors.transparent,
+              border: Border.all(
+                color: color,
+                width: 1,
               ),
-              const SizedBox(height: 24),
-              const Text(
-                'Settings',
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-              const SizedBox(height: 40),
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 20,
-                        offset: const Offset(0, 10),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                      _buildSettingItem('Sound Effects', true, Icons.volume_up),
-                      const Divider(),
-                      _buildSettingItem('Music', true, Icons.music_note),
-                      const Divider(),
-                      _buildSettingItem('Vibration', true, Icons.vibration),
-                      const Divider(),
-                      _buildSettingItem(
-                          'Notifications', false, Icons.notifications),
-                      const Divider(),
-                      _buildSettingItem('Dark Mode', false, Icons.dark_mode),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSettingItem(String title, bool value, IconData icon) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        children: [
-          Icon(icon, color: const Color(0xFF8B5CF6), size: 24),
-          const SizedBox(width: 16),
-          Expanded(
+            ),
             child: Text(
-              title,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
+              value ? 'ON' : 'OFF',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'monospace',
+                color: color,
+                letterSpacing: 1,
               ),
             ),
-          ),
-          Switch(
-            value: value,
-            onChanged: (newValue) {
-              // Handle setting changes
-            },
-            activeColor: const Color(0xFF8B5CF6),
           ),
         ],
       ),

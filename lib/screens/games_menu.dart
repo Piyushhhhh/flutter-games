@@ -17,33 +17,31 @@ class GamesMenu extends StatefulWidget {
 
 class _GamesMenuState extends State<GamesMenu> with TickerProviderStateMixin {
   late AnimationController _fadeController;
-  late AnimationController _slideController;
-  late AnimationController _pulseController;
+  late AnimationController _neonController;
+  late AnimationController _scanlineController;
   late Animation<double> _fadeAnimation;
-  late Animation<Offset> _slideAnimation;
-  late Animation<double> _pulseAnimation;
+  late Animation<double> _neonAnimation;
+  late Animation<double> _scanlineAnimation;
 
   @override
   void initState() {
     super.initState();
 
-    // Initialize animation controllers
     _fadeController = AnimationController(
       duration: const Duration(milliseconds: 1200),
       vsync: this,
     );
 
-    _slideController = AnimationController(
-      duration: const Duration(milliseconds: 1000),
-      vsync: this,
-    );
-
-    _pulseController = AnimationController(
+    _neonController = AnimationController(
       duration: const Duration(milliseconds: 2000),
       vsync: this,
     );
 
-    // Initialize animations
+    _scanlineController = AnimationController(
+      duration: const Duration(milliseconds: 3000),
+      vsync: this,
+    );
+
     _fadeAnimation = Tween<double>(
       begin: 0.0,
       end: 1.0,
@@ -52,33 +50,32 @@ class _GamesMenuState extends State<GamesMenu> with TickerProviderStateMixin {
       curve: Curves.easeOutCubic,
     ));
 
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.3),
-      end: Offset.zero,
+    _neonAnimation = Tween<double>(
+      begin: 0.3,
+      end: 1.0,
     ).animate(CurvedAnimation(
-      parent: _slideController,
-      curve: Curves.easeOutBack,
-    ));
-
-    _pulseAnimation = Tween<double>(
-      begin: 1.0,
-      end: 1.05,
-    ).animate(CurvedAnimation(
-      parent: _pulseController,
+      parent: _neonController,
       curve: Curves.easeInOut,
     ));
 
-    // Start animations
+    _scanlineAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _scanlineController,
+      curve: Curves.linear,
+    ));
+
     _fadeController.forward();
-    _slideController.forward();
-    _pulseController.repeat(reverse: true);
+    _neonController.repeat(reverse: true);
+    _scanlineController.repeat();
   }
 
   @override
   void dispose() {
     _fadeController.dispose();
-    _slideController.dispose();
-    _pulseController.dispose();
+    _neonController.dispose();
+    _scanlineController.dispose();
     super.dispose();
   }
 
@@ -87,83 +84,164 @@ class _GamesMenuState extends State<GamesMenu> with TickerProviderStateMixin {
     return Container(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
           colors: [
-            Color(0xFF667eea),
-            Color(0xFF764ba2),
-            Color(0xFF6B73FF),
+            Color(0xFF0D001A), // Deep purple
+            Color(0xFF1A0033), // Purple-black
+            Color(0xFF2D1B69), // Electric purple
+            Color(0xFF000000), // Black
           ],
-          stops: [0.0, 0.5, 1.0],
+          stops: [0.0, 0.3, 0.7, 1.0],
         ),
       ),
-      child: SafeArea(
-        child: FadeTransition(
-          opacity: _fadeAnimation,
-          child: SlideTransition(
-            position: _slideAnimation,
-            child: Column(
-              children: [
-                const SizedBox(height: 100), // Space for page title overlay
-                _buildHeader(),
-                Expanded(
-                  child: _buildGamesList(),
-                ),
-              ],
+      child: Stack(
+        children: [
+          // Retro grid background
+          _buildRetroGrid(),
+          // CRT scanlines effect
+          _buildScanlines(),
+          // Main content
+          SafeArea(
+            child: FadeTransition(
+              opacity: _fadeAnimation,
+              child: Column(
+                children: [
+                  const SizedBox(height: 100),
+                  _buildRetroHeader(),
+                  _buildRetroSearchBar(),
+                  Expanded(
+                    child: _buildRetroGamesList(),
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }
 
-  Widget _buildHeader() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+  Widget _buildRetroGrid() {
+    return CustomPaint(
+      size: Size.infinite,
+      painter: RetroGridPainter(),
+    );
+  }
+
+  Widget _buildScanlines() {
+    return AnimatedBuilder(
+      animation: _scanlineAnimation,
+      builder: (context, child) {
+        return Container(
+          width: double.infinity,
+          height: double.infinity,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.transparent,
+                const Color(0xFF00FFFF).withOpacity(0.05),
+                Colors.transparent,
+              ],
+              stops: [
+                (_scanlineAnimation.value - 0.1).clamp(0.0, 1.0),
+                _scanlineAnimation.value,
+                (_scanlineAnimation.value + 0.1).clamp(0.0, 1.0),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildRetroHeader() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Column(
         children: [
-          // App icon with floating animation
+          // Neon logo
           AnimatedBuilder(
-            animation: _pulseAnimation,
+            animation: _neonAnimation,
             builder: (context, child) {
-              return Transform.scale(
-                scale: _pulseAnimation.value,
-                child: Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        Colors.white.withOpacity(0.3),
-                        Colors.white.withOpacity(0.1),
-                      ],
+              return Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: const Color(0xFF00FFFF),
+                    width: 2,
+                  ),
+                  borderRadius:
+                      BorderRadius.circular(0), // Sharp corners for retro feel
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF00FFFF)
+                          .withOpacity(_neonAnimation.value * 0.8),
+                      blurRadius: 20,
+                      spreadRadius: 2,
                     ),
-                    borderRadius: BorderRadius.circular(24),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 20,
-                        offset: const Offset(0, 10),
+                    BoxShadow(
+                      color: const Color(0xFFFF0080)
+                          .withOpacity(_neonAnimation.value * 0.6),
+                      blurRadius: 30,
+                      spreadRadius: 1,
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.videogame_asset,
+                      size: 40,
+                      color: Color.lerp(
+                        const Color(0xFF00FFFF),
+                        const Color(0xFFFF0080),
+                        _neonAnimation.value,
                       ),
-                    ],
-                  ),
-                  child: const Icon(
-                    Icons.games,
-                    size: 50,
-                    color: Colors.white,
-                  ),
+                    ),
+                    const SizedBox(width: 16),
+                    Text(
+                      'RETRO ARCADE',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'monospace',
+                        color: Color.lerp(
+                          const Color(0xFF00FFFF),
+                          const Color(0xFFFF0080),
+                          _neonAnimation.value,
+                        ),
+                        shadows: [
+                          Shadow(
+                            color: const Color(0xFF00FFFF)
+                                .withOpacity(_neonAnimation.value),
+                            blurRadius: 10,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               );
             },
           ),
-
           const SizedBox(height: 16),
-
           Text(
-            'Select your next adventure',
+            'SELECT YOUR GAME',
             style: TextStyle(
-              fontSize: 16,
-              color: Colors.white.withOpacity(0.9),
-              fontWeight: FontWeight.w500,
+              fontSize: 14,
+              fontFamily: 'monospace',
+              color: const Color(0xFF00FF00).withOpacity(0.8),
+              letterSpacing: 2,
+              shadows: [
+                Shadow(
+                  color: const Color(0xFF00FF00).withOpacity(0.5),
+                  blurRadius: 5,
+                ),
+              ],
             ),
           ),
         ],
@@ -171,400 +249,497 @@ class _GamesMenuState extends State<GamesMenu> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildGamesList() {
-    final games = _getAvailableGames();
-
+  Widget _buildRetroSearchBar() {
     return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(32),
-          topRight: Radius.circular(32),
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          children: [
-            // Handle bar
-            Container(
-              width: 50,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.grey.shade300,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-
-            const SizedBox(height: 32),
-
-            Expanded(
-              child: ListView.builder(
-                physics: const BouncingScrollPhysics(),
-                itemCount: games.length,
-                itemBuilder: (context, index) {
-                  return TweenAnimationBuilder<double>(
-                    duration: Duration(milliseconds: 600 + (index * 100)),
-                    tween: Tween(begin: 0.0, end: 1.0),
-                    curve: Curves.easeOutBack,
-                    builder: (context, value, child) {
-                      return Transform.translate(
-                        offset: Offset(0, 30 * (1 - value)),
-                        child: Opacity(
-                          opacity: value.clamp(0.0, 1.0),
-                          child: _buildInteractiveGameCard(games[index], index),
-                        ),
-                      );
-                    },
-                  );
-                },
-              ),
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      child: Container(
+        height: 50,
+        decoration: BoxDecoration(
+          color: Colors.black,
+          border: Border.all(
+            color: const Color(0xFF00FFFF),
+            width: 2,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF00FFFF).withOpacity(0.3),
+              blurRadius: 10,
+              spreadRadius: 1,
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildInteractiveGameCard(GameItem game, int index) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 20),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {
-            HapticFeedback.lightImpact();
-            if (game.isAvailable) {
-              _navigateToGame(context, game);
-            } else {
-              _showComingSoonDialog(game.name);
-            }
-          },
-          borderRadius: BorderRadius.circular(20),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              gradient: game.isAvailable
-                  ? _getGameGradient(game.id)
-                  : LinearGradient(
-                      colors: [Colors.grey.shade200, Colors.grey.shade300],
-                    ),
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: game.isAvailable
-                      ? _getGameColor(game.id).withOpacity(0.3)
-                      : Colors.grey.withOpacity(0.2),
-                  blurRadius: 20,
-                  offset: const Offset(0, 8),
-                ),
-                BoxShadow(
-                  color: Colors.white.withOpacity(0.1),
-                  blurRadius: 1,
-                  offset: const Offset(0, 1),
-                ),
-              ],
+        child: TextField(
+          style: const TextStyle(
+            color: Color(0xFF00FF00),
+            fontFamily: 'monospace',
+            fontSize: 16,
+          ),
+          decoration: InputDecoration(
+            hintText: '> SEARCH GAMES_',
+            hintStyle: TextStyle(
+              color: const Color(0xFF00FF00).withOpacity(0.5),
+              fontFamily: 'monospace',
             ),
-            child: Row(
-              children: [
-                // Icon container with glow effect
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color:
-                        Colors.white.withOpacity(game.isAvailable ? 0.2 : 0.1),
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: game.isAvailable
-                        ? [
-                            BoxShadow(
-                              color: Colors.white.withOpacity(0.3),
-                              blurRadius: 8,
-                              spreadRadius: 1,
-                            ),
-                          ]
-                        : null,
-                  ),
-                  child: Icon(
-                    _getGameIcon(game.iconName),
-                    size: 32,
-                    color:
-                        game.isAvailable ? Colors.white : Colors.grey.shade500,
-                  ),
-                ),
-
-                const SizedBox(width: 20),
-
-                // Game info
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              game.name,
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: game.isAvailable
-                                    ? Colors.white
-                                    : Colors.grey.shade600,
-                              ),
-                            ),
-                          ),
-                          if (!game.isAvailable)
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.orange.shade100,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text(
-                                'Soon',
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.orange.shade700,
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        game.description,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: game.isAvailable
-                              ? Colors.white.withOpacity(0.8)
-                              : Colors.grey.shade500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                // Arrow with bounce animation
-                if (game.isAvailable)
-                  TweenAnimationBuilder<double>(
-                    duration: const Duration(milliseconds: 1000),
-                    tween: Tween(begin: 0.0, end: 1.0),
-                    curve: Curves.elasticOut,
-                    builder: (context, value, child) {
-                      return Transform.translate(
-                        offset: Offset(10 * (1 - value), 0),
-                        child: Icon(
-                          Icons.arrow_forward_ios,
-                          color: Colors.white,
-                          size: 20,
-                        ),
-                      );
-                    },
-                  ),
-              ],
+            prefixIcon: const Icon(
+              Icons.search,
+              color: Color(0xFF00FFFF),
             ),
+            border: InputBorder.none,
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           ),
         ),
       ),
     );
   }
 
-  void _navigateToGame(BuildContext context, GameItem game) {
-    // Add a cool transition animation
-    switch (game.id) {
-      case 'tic_tac_toe':
-        _navigateWithAnimation(const TicTacToeGame());
-        break;
-      case '2048':
-        _navigateWithAnimation(const Game2048());
-        break;
-      default:
-        _showComingSoonDialog(game.name);
-    }
-  }
-
-  void _navigateWithAnimation(Widget destination) {
-    Navigator.push(
-      context,
-      PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) => destination,
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          const begin = Offset(1.0, 0.0);
-          const end = Offset.zero;
-          const curve = Curves.easeInOutCubic;
-
-          var tween = Tween(begin: begin, end: end).chain(
-            CurveTween(curve: curve),
-          );
-
-          return SlideTransition(
-            position: animation.drive(tween),
-            child: FadeTransition(
-              opacity: animation,
-              child: child,
+  Widget _buildRetroGamesList() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20),
+      decoration: BoxDecoration(
+        color: Colors.black.withOpacity(0.7),
+        border: Border.all(
+          color: const Color(0xFF00FFFF),
+          width: 2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF00FFFF).withOpacity(0.2),
+            blurRadius: 15,
+            spreadRadius: 2,
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          // Header bar
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Color(0xFF2D1B69),
+                  Color(0xFF5B2C87),
+                ],
+              ),
             ),
-          );
-        },
-        transitionDuration: const Duration(milliseconds: 600),
+            child: const Text(
+              'GAME LIBRARY',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'monospace',
+                color: Color(0xFF00FFFF),
+                letterSpacing: 2,
+              ),
+            ),
+          ),
+          // Games list
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
+                _buildRetroGameCard(
+                  'TIC TAC TOE',
+                  'CLASSIC STRATEGY',
+                  const Color(0xFF00FFFF),
+                  const Color(0xFFFF0080),
+                  true,
+                  'tic_tac_toe',
+                ),
+                const SizedBox(height: 16),
+                _buildRetroGameCard(
+                  '2048',
+                  'PUZZLE FUSION',
+                  const Color(0xFF00FF00),
+                  const Color(0xFFFFFF00),
+                  true,
+                  '2048',
+                ),
+                const SizedBox(height: 16),
+                _buildRetroGameCard(
+                  'SPACE INVADERS',
+                  'ARCADE CLASSIC',
+                  const Color(0xFFFF0080),
+                  const Color(0xFF8A2BE2),
+                  false,
+                  'space_invaders',
+                ),
+                const SizedBox(height: 16),
+                _buildRetroGameCard(
+                  'NEON RUNNER',
+                  'ENDLESS CHASE',
+                  const Color(0xFFFFFF00),
+                  const Color(0xFFFF4500),
+                  false,
+                  'neon_runner',
+                ),
+                const SizedBox(height: 16),
+                _buildRetroGameCard(
+                  'CYBER QUEST',
+                  'RPG ADVENTURE',
+                  const Color(0xFF8A2BE2),
+                  const Color(0xFF00FFFF),
+                  false,
+                  'cyber_quest',
+                ),
+                const SizedBox(height: 80),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  void _showComingSoonDialog(String gameName) {
-    HapticFeedback.lightImpact();
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+  Widget _buildRetroGameCard(String title, String subtitle, Color primaryColor,
+      Color accentColor, bool isAvailable, String gameId) {
+    return GestureDetector(
+      onTap: () {
+        HapticFeedback.heavyImpact();
+        if (isAvailable) {
+          _navigateToGame(gameId);
+        } else {
+          _showRetroComingSoonDialog(title);
+        }
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.black,
+          border: Border.all(
+            color: isAvailable ? primaryColor : const Color(0xFF444444),
+            width: 2,
+          ),
+          boxShadow: isAvailable
+              ? [
+                  BoxShadow(
+                    color: primaryColor.withOpacity(0.3),
+                    blurRadius: 10,
+                    spreadRadius: 1,
+                  ),
+                  BoxShadow(
+                    color: accentColor.withOpacity(0.2),
+                    blurRadius: 20,
+                    spreadRadius: 2,
+                  ),
+                ]
+              : null,
         ),
-        title: Row(
+        child: Row(
           children: [
+            // Game icon
             Container(
-              padding: const EdgeInsets.all(8),
+              width: 60,
+              height: 60,
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Colors.orange.shade400, Colors.orange.shade600],
+                color: isAvailable
+                    ? primaryColor.withOpacity(0.2)
+                    : const Color(0xFF222222),
+                border: Border.all(
+                  color: isAvailable ? primaryColor : const Color(0xFF444444),
+                  width: 2,
                 ),
-                borderRadius: BorderRadius.circular(12),
               ),
-              child: const Icon(Icons.hourglass_empty,
-                  color: Colors.white, size: 20),
+              child: Icon(
+                _getGameIcon(gameId),
+                size: 30,
+                color: isAvailable ? primaryColor : const Color(0xFF666666),
+              ),
+            ),
+            const SizedBox(width: 16),
+            // Game info
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'monospace',
+                      color:
+                          isAvailable ? primaryColor : const Color(0xFF666666),
+                      shadows: isAvailable
+                          ? [
+                              Shadow(
+                                color: primaryColor.withOpacity(0.5),
+                                blurRadius: 5,
+                              ),
+                            ]
+                          : null,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontFamily: 'monospace',
+                      color: isAvailable
+                          ? accentColor.withOpacity(0.8)
+                          : const Color(0xFF444444),
+                      letterSpacing: 1,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Status indicator
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: isAvailable
+                    ? primaryColor.withOpacity(0.2)
+                    : const Color(0xFF222222),
+                border: Border.all(
+                  color: isAvailable ? primaryColor : const Color(0xFF444444),
+                  width: 1,
+                ),
+              ),
+              child: Text(
+                isAvailable ? 'READY' : 'LOCKED',
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'monospace',
+                  color: isAvailable ? primaryColor : const Color(0xFF666666),
+                  letterSpacing: 1,
+                ),
+              ),
             ),
             const SizedBox(width: 12),
-            const Text('Coming Soon!'),
+            // Play button
+            if (isAvailable)
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: primaryColor.withOpacity(0.2),
+                  border: Border.all(
+                    color: primaryColor,
+                    width: 2,
+                  ),
+                ),
+                child: Icon(
+                  Icons.play_arrow,
+                  color: primaryColor,
+                  size: 20,
+                ),
+              )
+            else
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF222222),
+                  border: Border.all(
+                    color: const Color(0xFF444444),
+                    width: 2,
+                  ),
+                ),
+                child: const Icon(
+                  Icons.lock,
+                  color: Color(0xFF666666),
+                  size: 16,
+                ),
+              ),
           ],
         ),
-        content: Text(
-          '$gameName is under development and will be available soon. Stay tuned for updates!',
-        ),
-        actions: [
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.blue.shade400, Colors.blue.shade600],
-              ),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text(
-                'Got it!',
-                style:
-                    TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }
 
-  List<GameItem> _getAvailableGames() {
-    return [
-      const GameItem(
-        id: 'tic_tac_toe',
-        name: 'Tic Tac Toe',
-        description: 'Classic 3x3 grid game',
-        iconName: 'grid_3x3',
-        isAvailable: true,
-      ),
-      const GameItem(
-        id: 'space_shooter',
-        name: 'Space Shooter',
-        description: 'Defend Earth from alien invasion',
-        iconName: 'rocket_launch',
-        isAvailable: false,
-      ),
-      const GameItem(
-        id: 'snake',
-        name: 'Snake Game',
-        description: 'Classic snake game',
-        iconName: 'games',
-        isAvailable: false,
-      ),
-      const GameItem(
-        id: '2048',
-        name: '2048',
-        description: 'Slide to combine numbers',
-        iconName: 'apps',
-        isAvailable: true,
-      ),
-      const GameItem(
-        id: 'memory_match',
-        name: 'Memory Match',
-        description: 'Match the cards',
-        iconName: 'memory',
-        isAvailable: false,
-      ),
-    ];
-  }
-
-  IconData _getGameIcon(String iconName) {
-    switch (iconName) {
-      case 'grid_3x3':
+  IconData _getGameIcon(String gameId) {
+    switch (gameId) {
+      case 'tic_tac_toe':
         return Icons.grid_3x3;
-      case 'rocket_launch':
-        return Icons.rocket_launch;
-      case 'games':
-        return Icons.games;
-      case 'apps':
+      case '2048':
         return Icons.apps;
-      case 'memory':
-        return Icons.memory;
+      case 'space_invaders':
+        return Icons.rocket_launch;
+      case 'neon_runner':
+        return Icons.directions_run;
+      case 'cyber_quest':
+        return Icons.psychology;
       default:
-        return Icons.videogame_asset;
+        return Icons.games;
     }
   }
 
-  Color _getGameColor(String gameId) {
+  void _navigateToGame(String gameId) {
+    Widget? gameWidget;
+
     switch (gameId) {
       case 'tic_tac_toe':
-        return Colors.deepPurple;
-      case 'space_shooter':
-        return Colors.pink;
-      case 'snake':
-        return Colors.green;
+        gameWidget = const TicTacToeGame();
+        break;
       case '2048':
-        return Colors.orange;
-      case 'memory_match':
-        return Colors.blue;
+        gameWidget = const Game2048();
+        break;
       default:
-        return Colors.deepPurple;
+        _showRetroComingSoonDialog(gameId);
+        return;
+    }
+
+    if (gameWidget != null) {
+      Navigator.push(
+        context,
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) => gameWidget!,
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return SlideTransition(
+              position: Tween<Offset>(
+                begin: const Offset(1.0, 0.0),
+                end: Offset.zero,
+              ).animate(CurvedAnimation(
+                parent: animation,
+                curve: Curves.easeInOut,
+              )),
+              child: FadeTransition(
+                opacity: animation,
+                child: child,
+              ),
+            );
+          },
+          transitionDuration: const Duration(milliseconds: 600),
+        ),
+      );
     }
   }
 
-  Gradient _getGameGradient(String gameId) {
-    switch (gameId) {
-      case 'tic_tac_toe':
-        return LinearGradient(
-          colors: [Colors.deepPurple.shade400, Colors.deepPurple.shade700],
-        );
-      case 'space_shooter':
-        return LinearGradient(
-          colors: [Colors.pink.shade400, Colors.pink.shade700],
-        );
-      case 'snake':
-        return LinearGradient(
-          colors: [Colors.green.shade400, Colors.green.shade700],
-        );
-      case '2048':
-        return LinearGradient(
-          colors: [Colors.orange.shade400, Colors.orange.shade700],
-        );
-      case 'memory_match':
-        return LinearGradient(
-          colors: [Colors.blue.shade400, Colors.blue.shade700],
-        );
-      default:
-        return LinearGradient(
-          colors: [Colors.deepPurple.shade400, Colors.deepPurple.shade700],
-        );
+  void _showRetroComingSoonDialog(String gameName) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: Colors.black,
+            border: Border.all(
+              color: const Color(0xFF00FFFF),
+              width: 3,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF00FFFF).withOpacity(0.5),
+                blurRadius: 20,
+                spreadRadius: 2,
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'SYSTEM MESSAGE',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'monospace',
+                  color: Color(0xFF00FFFF),
+                  letterSpacing: 2,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Container(
+                width: double.infinity,
+                height: 2,
+                color: const Color(0xFF00FFFF),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'GAME: $gameName',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontFamily: 'monospace',
+                  color: Color(0xFF00FF00),
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'STATUS: UNDER DEVELOPMENT',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontFamily: 'monospace',
+                  color: Color(0xFFFFFF00),
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'AVAILABILITY: COMING SOON',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontFamily: 'monospace',
+                  color: Color(0xFFFF0080),
+                ),
+              ),
+              const SizedBox(height: 24),
+              GestureDetector(
+                onTap: () => Navigator.of(context).pop(),
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF00FFFF).withOpacity(0.2),
+                    border: Border.all(
+                      color: const Color(0xFF00FFFF),
+                      width: 2,
+                    ),
+                  ),
+                  child: const Text(
+                    'ACKNOWLEDGE',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'monospace',
+                      color: Color(0xFF00FFFF),
+                      letterSpacing: 1,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class RetroGridPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = const Color(0xFF00FFFF).withOpacity(0.1)
+      ..strokeWidth = 1
+      ..style = PaintingStyle.stroke;
+
+    const double gridSize = 30;
+
+    // Draw vertical lines
+    for (double x = 0; x <= size.width; x += gridSize) {
+      canvas.drawLine(
+        Offset(x, 0),
+        Offset(x, size.height),
+        paint,
+      );
+    }
+
+    // Draw horizontal lines
+    for (double y = 0; y <= size.height; y += gridSize) {
+      canvas.drawLine(
+        Offset(0, y),
+        Offset(size.width, y),
+        paint,
+      );
     }
   }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
