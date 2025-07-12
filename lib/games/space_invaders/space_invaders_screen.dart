@@ -21,22 +21,24 @@ class _SpaceInvadersScreenState extends State<SpaceInvadersScreen>
   Timer? _gameTimer;
   Timer? _enemySpawnTimer;
   Timer? _levelTimer;
+  Timer? _autoShootTimer;
 
   final GlobalKey _gameAreaKey = GlobalKey();
   Size _gameSize = const Size(400, 600);
 
   bool _isGameActive = false;
-  bool _leftPressed = false;
-  bool _rightPressed = false;
-  bool _shootPressed = false;
+  bool _isPanning = false;
+  double _panVelocity = 0.0;
   DateTime _lastShot = DateTime.now();
 
   // Game constants
   static const double _playerSpeed = 200.0;
   static const double _bulletSpeed = 300.0;
   static const double _enemySpeed = 80.0;
-  static const double _shootCooldown = 0.2; // seconds
+  static const double _shootCooldown = 0.3; // seconds for auto-shooting
   static const Duration _gameTick = Duration(milliseconds: 16); // ~60 FPS
+  static const Duration _autoShootInterval =
+      Duration(milliseconds: 300); // Auto-shoot every 300ms
 
   @override
   void initState() {
@@ -55,6 +57,7 @@ class _SpaceInvadersScreenState extends State<SpaceInvadersScreen>
     _gameTimer?.cancel();
     _enemySpawnTimer?.cancel();
     _levelTimer?.cancel();
+    _autoShootTimer?.cancel();
     super.dispose();
   }
 
@@ -104,6 +107,13 @@ class _SpaceInvadersScreenState extends State<SpaceInvadersScreen>
         _nextLevel();
       }
     });
+
+    // Auto-shooting timer
+    _autoShootTimer = Timer.periodic(_autoShootInterval, (timer) {
+      if (_isGameActive) {
+        _autoShoot();
+      }
+    });
   }
 
   void _updateGame() {
@@ -120,11 +130,6 @@ class _SpaceInvadersScreenState extends State<SpaceInvadersScreen>
     // Update enemies
     _updateEnemies(deltaTime);
 
-    // Handle shooting
-    if (_shootPressed && _canShoot()) {
-      _shoot();
-    }
-
     // Check collisions
     _checkCollisions();
 
@@ -135,25 +140,8 @@ class _SpaceInvadersScreenState extends State<SpaceInvadersScreen>
   }
 
   void _updatePlayerMovement(double deltaTime) {
-    Offset newPosition = _gameState.playerPosition;
-
-    if (_leftPressed) {
-      newPosition = Offset(
-        math.max(20, newPosition.dx - _playerSpeed * deltaTime),
-        newPosition.dy,
-      );
-    }
-    if (_rightPressed) {
-      newPosition = Offset(
-        math.min(
-            _gameSize.width - 20, newPosition.dx + _playerSpeed * deltaTime),
-        newPosition.dy,
-      );
-    }
-
-    if (newPosition != _gameState.playerPosition) {
-      _gameState = _gameState.copyWith(playerPosition: newPosition);
-    }
+    // Player movement is now handled entirely by gestures
+    // This method is kept for consistency but no longer performs button-based movement
   }
 
   void _updateBullets(double deltaTime) {
@@ -210,7 +198,7 @@ class _SpaceInvadersScreenState extends State<SpaceInvadersScreen>
     });
   }
 
-  void _shoot() {
+  void _autoShoot() {
     if (!_canShoot()) return;
 
     _lastShot = DateTime.now();
@@ -235,6 +223,75 @@ class _SpaceInvadersScreenState extends State<SpaceInvadersScreen>
   bool _canShoot() {
     final now = DateTime.now();
     return now.difference(_lastShot).inMilliseconds > (_shootCooldown * 1000);
+  }
+
+  void _handlePanStart(DragStartDetails details) {
+    _isPanning = true;
+    _panVelocity = 0.0;
+  }
+
+  void _handlePanUpdate(DragUpdateDetails details) {
+    if (!_isGameActive || !_isPanning) return;
+
+    final double deltaX = details.delta.dx;
+    final double sensitivity = 4.0;
+
+    // Update velocity for smoother movement
+    _panVelocity = deltaX * sensitivity;
+
+    Offset newPosition = _gameState.playerPosition;
+    newPosition = Offset(
+      math.max(
+          20, math.min(_gameSize.width - 20, newPosition.dx + _panVelocity)),
+      newPosition.dy,
+    );
+
+    if (newPosition != _gameState.playerPosition) {
+      setState(() {
+        _gameState = _gameState.copyWith(playerPosition: newPosition);
+      });
+    }
+  }
+
+  void _handlePanEnd(DragEndDetails details) {
+    _isPanning = false;
+    _panVelocity = 0.0;
+  }
+
+  void _handleTap(TapDownDetails details) {
+    if (!_isGameActive) return;
+
+    final RenderBox? renderBox =
+        _gameAreaKey.currentContext?.findRenderObject() as RenderBox?;
+    if (renderBox != null) {
+      final localPosition = renderBox.globalToLocal(details.globalPosition);
+      final screenWidth = renderBox.size.width;
+      final tapX = localPosition.dx;
+
+      // Move player immediately towards tap position
+      Offset newPosition = _gameState.playerPosition;
+      const double tapMoveDistance = 50.0;
+
+      if (tapX < screenWidth / 2) {
+        // Tap on left side - move left
+        newPosition = Offset(
+          math.max(20, newPosition.dx - tapMoveDistance),
+          newPosition.dy,
+        );
+      } else {
+        // Tap on right side - move right
+        newPosition = Offset(
+          math.min(_gameSize.width - 20, newPosition.dx + tapMoveDistance),
+          newPosition.dy,
+        );
+      }
+
+      if (newPosition != _gameState.playerPosition) {
+        setState(() {
+          _gameState = _gameState.copyWith(playerPosition: newPosition);
+        });
+      }
+    }
   }
 
   void _checkCollisions() {
@@ -334,6 +391,7 @@ class _SpaceInvadersScreenState extends State<SpaceInvadersScreen>
     _gameTimer?.cancel();
     _enemySpawnTimer?.cancel();
     _levelTimer?.cancel();
+    _autoShootTimer?.cancel();
 
     HapticFeedback.heavyImpact();
   }
@@ -350,35 +408,49 @@ class _SpaceInvadersScreenState extends State<SpaceInvadersScreen>
     _gameTimer?.cancel();
     _enemySpawnTimer?.cancel();
     _levelTimer?.cancel();
+    _autoShootTimer?.cancel();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: GameAppBar(
-        title: 'Space Shooter',
+      backgroundColor: Colors.transparent,
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        title: const Text(
+          'Space Shooter',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
         actions: [
           IconButton(
             onPressed: _resetGame,
-            icon: const Icon(Icons.refresh),
+            icon: const Icon(Icons.refresh, color: Colors.white),
           ),
         ],
       ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Game stats
-            _buildGameStats(),
+      body: Stack(
+        children: [
+          // Full screen game area
+          Positioned.fill(
+            child: _buildGameArea(),
+          ),
 
-            // Game area
-            Expanded(
-              child: _buildGameArea(),
-            ),
-
-            // Controls
-            _buildControls(),
-          ],
-        ),
+          // Game stats overlay
+          Positioned(
+            top: AppBar().preferredSize.height +
+                MediaQuery.of(context).padding.top +
+                10,
+            left: 0,
+            right: 0,
+            child: _buildGameStats(),
+          ),
+        ],
       ),
     );
   }
@@ -386,6 +458,11 @@ class _SpaceInvadersScreenState extends State<SpaceInvadersScreen>
   Widget _buildGameStats() {
     return Container(
       padding: const EdgeInsets.all(AppConstants.spacingM),
+      margin: const EdgeInsets.symmetric(horizontal: AppConstants.spacingM),
+      decoration: BoxDecoration(
+        color: Colors.black.withOpacity(0.6),
+        borderRadius: BorderRadius.circular(AppConstants.radiusM),
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
@@ -404,7 +481,7 @@ class _SpaceInvadersScreenState extends State<SpaceInvadersScreen>
           label,
           style: const TextStyle(
             fontSize: AppConstants.fontS,
-            color: AppTheme.textSecondaryColor,
+            color: Colors.white70,
           ),
         ),
         Text(
@@ -412,7 +489,7 @@ class _SpaceInvadersScreenState extends State<SpaceInvadersScreen>
           style: const TextStyle(
             fontSize: AppConstants.fontXL,
             fontWeight: FontWeight.bold,
-            color: AppTheme.textPrimaryColor,
+            color: Colors.white,
           ),
         ),
       ],
@@ -424,8 +501,8 @@ class _SpaceInvadersScreenState extends State<SpaceInvadersScreen>
       key: _gameAreaKey,
       width: double.infinity,
       height: double.infinity,
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
@@ -434,10 +511,12 @@ class _SpaceInvadersScreenState extends State<SpaceInvadersScreen>
             Color(0xFF2D3748),
           ],
         ),
-        borderRadius: BorderRadius.circular(AppConstants.radiusM),
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(AppConstants.radiusM),
+      child: GestureDetector(
+        onPanStart: _handlePanStart,
+        onPanUpdate: _handlePanUpdate,
+        onPanEnd: _handlePanEnd,
+        onTapDown: _handleTap,
         child: Stack(
           children: [
             // Background stars
@@ -550,77 +629,6 @@ class _SpaceInvadersScreenState extends State<SpaceInvadersScreen>
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildControls() {
-    return Container(
-      padding: const EdgeInsets.all(AppConstants.spacingM),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          // Left movement
-          GestureDetector(
-            onTapDown: (_) => setState(() => _leftPressed = true),
-            onTapUp: (_) => setState(() => _leftPressed = false),
-            onTapCancel: () => setState(() => _leftPressed = false),
-            child: Container(
-              width: 60,
-              height: 60,
-              decoration: BoxDecoration(
-                color: _leftPressed ? AppTheme.primaryColor : Colors.grey[300],
-                borderRadius: BorderRadius.circular(AppConstants.radiusM),
-              ),
-              child: const Icon(
-                Icons.arrow_left,
-                size: AppConstants.iconXL,
-                color: Colors.white,
-              ),
-            ),
-          ),
-
-          // Shoot button
-          GestureDetector(
-            onTapDown: (_) => setState(() => _shootPressed = true),
-            onTapUp: (_) => setState(() => _shootPressed = false),
-            onTapCancel: () => setState(() => _shootPressed = false),
-            child: Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                color:
-                    _shootPressed ? AppTheme.errorColor : AppTheme.accentColor,
-                borderRadius: BorderRadius.circular(40),
-              ),
-              child: const Icon(
-                Icons.radio_button_checked,
-                size: AppConstants.iconXL,
-                color: Colors.white,
-              ),
-            ),
-          ),
-
-          // Right movement
-          GestureDetector(
-            onTapDown: (_) => setState(() => _rightPressed = true),
-            onTapUp: (_) => setState(() => _rightPressed = false),
-            onTapCancel: () => setState(() => _rightPressed = false),
-            child: Container(
-              width: 60,
-              height: 60,
-              decoration: BoxDecoration(
-                color: _rightPressed ? AppTheme.primaryColor : Colors.grey[300],
-                borderRadius: BorderRadius.circular(AppConstants.radiusM),
-              ),
-              child: const Icon(
-                Icons.arrow_right,
-                size: AppConstants.iconXL,
-                color: Colors.white,
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }
