@@ -378,7 +378,7 @@ class _GamesMenuState extends State<GamesMenu> with TickerProviderStateMixin {
                   'ENDLESS CHASE',
                   const Color(0xFFFFFF00),
                   const Color(0xFFFF4500),
-                  false,
+                  true,
                   'neon_runner',
                 ),
                 const SizedBox(height: 16),
@@ -589,6 +589,8 @@ class _GamesMenuState extends State<GamesMenu> with TickerProviderStateMixin {
         gameWidget = const SpaceInvadersScreen();
         break;
       case 'neon_runner':
+        gameWidget = const NeonRunnerScreen();
+        break;
       case 'cyber_quest':
       default:
         _showRetroComingSoonDialog(gameId);
