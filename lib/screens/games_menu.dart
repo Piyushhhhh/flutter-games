@@ -341,24 +341,6 @@ class _GamesMenuState extends State<GamesMenu> with TickerProviderStateMixin {
             child: Column(
               children: [
                 _buildRetroGameCard(
-                  'TIC TAC TOE',
-                  'CLASSIC STRATEGY',
-                  const Color(0xFF00FFFF),
-                  const Color(0xFFFF0080),
-                  true,
-                  'tic_tac_toe',
-                ),
-                const SizedBox(height: 16),
-                _buildRetroGameCard(
-                  '2048',
-                  'PUZZLE FUSION',
-                  const Color(0xFF00FF00),
-                  const Color(0xFFFFFF00),
-                  true,
-                  '2048',
-                ),
-                const SizedBox(height: 16),
-                _buildRetroGameCard(
                   'SPACE INVADERS',
                   'ARCADE CLASSIC',
                   const Color(0xFFFF0080),
@@ -374,6 +356,24 @@ class _GamesMenuState extends State<GamesMenu> with TickerProviderStateMixin {
                   const Color(0xFFFF4500),
                   true,
                   'neon_runner',
+                ),
+                const SizedBox(height: 16),
+                _buildRetroGameCard(
+                  '2048',
+                  'PUZZLE FUSION',
+                  const Color(0xFF00FF00),
+                  const Color(0xFFFFFF00),
+                  true,
+                  '2048',
+                ),
+                const SizedBox(height: 16),
+                _buildRetroGameCard(
+                  'TIC TAC TOE',
+                  'CLASSIC STRATEGY',
+                  const Color(0xFF00FFFF),
+                  const Color(0xFFFF0080),
+                  true,
+                  'tic_tac_toe',
                 ),
                 const SizedBox(height: 16),
                 _buildRetroGameCard(
