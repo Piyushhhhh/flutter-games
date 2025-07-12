@@ -1103,7 +1103,7 @@ class _Game2048ScreenState extends State<Game2048Screen>
     }
   }
 
-  void _move(Direction direction) async {
+  Future<void> _move(Direction direction) async {
     if (_isAnimating) return;
 
     _isAnimating = true;

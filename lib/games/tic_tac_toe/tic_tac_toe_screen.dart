@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'dart:math' as math;
 import '../../core/constants/app_constants.dart';
 import 'tic_tac_toe_models.dart';
 import 'tic_tac_toe_constants.dart';
@@ -24,12 +23,10 @@ class _TicTacToeScreenState extends State<TicTacToeScreen>
   late AnimationController _fadeController;
   late AnimationController _neonController;
   late AnimationController _scanlineController;
-  late AnimationController _glitchController;
 
   late Animation<double> _fadeAnimation;
   late Animation<double> _neonAnimation;
   late Animation<double> _scanlineAnimation;
-  late Animation<double> _glitchAnimation;
 
   @override
   void initState() {
@@ -50,11 +47,6 @@ class _TicTacToeScreenState extends State<TicTacToeScreen>
 
     _scanlineController = AnimationController(
       duration: const Duration(milliseconds: 3000),
-      vsync: this,
-    );
-
-    _glitchController = AnimationController(
-      duration: const Duration(milliseconds: 200),
       vsync: this,
     );
 
@@ -82,14 +74,6 @@ class _TicTacToeScreenState extends State<TicTacToeScreen>
       curve: Curves.linear,
     ));
 
-    _glitchAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _glitchController,
-      curve: Curves.easeInOut,
-    ));
-
     _fadeController.forward();
     _neonController.repeat(reverse: true);
     _scanlineController.repeat();
@@ -100,7 +84,6 @@ class _TicTacToeScreenState extends State<TicTacToeScreen>
     _fadeController.dispose();
     _neonController.dispose();
     _scanlineController.dispose();
-    _glitchController.dispose();
     super.dispose();
   }
 
@@ -1262,7 +1245,7 @@ class _TicTacToeScreenState extends State<TicTacToeScreen>
     }
   }
 
-  void _makeComputerMove() async {
+  Future<void> _makeComputerMove() async {
     setState(() {
       gameState = gameState.copyWith(isComputerThinking: true);
     });
