@@ -1,0 +1,839 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'dart:async';
+import 'dart:math' as math;
+import '../core/constants/app_constants.dart';
+import '../core/theme/app_theme.dart';
+import '../widgets/common_widgets.dart';
+import '../models/game_models.dart';
+
+class SpaceShooterGame extends StatefulWidget {
+  const SpaceShooterGame({super.key});
+
+  @override
+  State<SpaceShooterGame> createState() => _SpaceShooterGameState();
+}
+
+class _SpaceShooterGameState extends State<SpaceShooterGame>
+    with TickerProviderStateMixin {
+  late AnimationController _gameController;
+  late SpaceShooterGameState _gameState;
+  late Timer _gameTimer;
+  late Timer _enemySpawnTimer;
+  late Timer _levelTimer;
+
+  final GlobalKey _gameAreaKey = GlobalKey();
+  Size _gameSize = const Size(400, 600);
+
+  bool _isGameActive = false;
+  bool _leftPressed = false;
+  bool _rightPressed = false;
+  bool _shootPressed = false;
+  DateTime _lastShot = DateTime.now();
+
+  // Game constants
+  static const double _playerSpeed = 200.0;
+  static const double _bulletSpeed = 300.0;
+  static const double _enemySpeed = 80.0;
+  static const double _shootCooldown = 0.2; // seconds
+  static const int _enemiesPerWave = 5;
+  static const Duration _gameTick = Duration(milliseconds: 16); // ~60 FPS
+
+  @override
+  void initState() {
+    super.initState();
+    _gameController = AnimationController(
+      duration: const Duration(hours: 1),
+      vsync: this,
+    );
+    _gameState = SpaceShooterGameState.initial();
+    _setupGame();
+  }
+
+  @override
+  void dispose() {
+    _gameController.dispose();
+    _gameTimer.cancel();
+    _enemySpawnTimer.cancel();
+    _levelTimer.cancel();
+    super.dispose();
+  }
+
+  void _setupGame() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final RenderBox? renderBox =
+          _gameAreaKey.currentContext?.findRenderObject() as RenderBox?;
+      if (renderBox != null) {
+        setState(() {
+          _gameSize = renderBox.size;
+          _gameState = _gameState.copyWith(
+            playerPosition: Offset(_gameSize.width / 2, _gameSize.height - 80),
+          );
+        });
+      }
+    });
+  }
+
+  void _startGame() {
+    setState(() {
+      _isGameActive = true;
+      _gameState = SpaceShooterGameState.initial().copyWith(
+        playerPosition: Offset(_gameSize.width / 2, _gameSize.height - 80),
+        gameState: GameState.playing,
+      );
+    });
+
+    _gameController.repeat();
+
+    // Main game loop
+    _gameTimer = Timer.periodic(_gameTick, (timer) {
+      if (_isGameActive) {
+        _updateGame();
+      }
+    });
+
+    // Enemy spawning
+    _enemySpawnTimer = Timer.periodic(const Duration(seconds: 2), (timer) {
+      if (_isGameActive) {
+        _spawnEnemy();
+      }
+    });
+
+    // Level progression
+    _levelTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
+      if (_isGameActive) {
+        _nextLevel();
+      }
+    });
+  }
+
+  void _updateGame() {
+    if (!_isGameActive) return;
+
+    final double deltaTime = _gameTick.inMilliseconds / 1000.0;
+
+    // Update player movement
+    _updatePlayerMovement(deltaTime);
+
+    // Update bullets
+    _updateBullets(deltaTime);
+
+    // Update enemies
+    _updateEnemies(deltaTime);
+
+    // Handle shooting
+    if (_shootPressed && _canShoot()) {
+      _shoot();
+    }
+
+    // Check collisions
+    _checkCollisions();
+
+    // Remove off-screen objects
+    _cleanupObjects();
+
+    setState(() {});
+  }
+
+  void _updatePlayerMovement(double deltaTime) {
+    Offset newPosition = _gameState.playerPosition;
+
+    if (_leftPressed) {
+      newPosition = Offset(
+        math.max(20, newPosition.dx - _playerSpeed * deltaTime),
+        newPosition.dy,
+      );
+    }
+    if (_rightPressed) {
+      newPosition = Offset(
+        math.min(
+            _gameSize.width - 20, newPosition.dx + _playerSpeed * deltaTime),
+        newPosition.dy,
+      );
+    }
+
+    _gameState = _gameState.copyWith(playerPosition: newPosition);
+  }
+
+  void _updateBullets(double deltaTime) {
+    final updatedBullets = _gameState.bullets.map((bullet) {
+      return bullet.copyWith(
+        position: Offset(
+          bullet.position.dx,
+          bullet.position.dy - _bulletSpeed * deltaTime,
+        ),
+      );
+    }).toList();
+
+    _gameState = _gameState.copyWith(bullets: updatedBullets);
+  }
+
+  void _updateEnemies(double deltaTime) {
+    final updatedEnemies = _gameState.enemies.map((enemy) {
+      return enemy.copyWith(
+        position: Offset(
+          enemy.position.dx + enemy.velocity.dx * deltaTime,
+          enemy.position.dy + (_enemySpeed + _gameState.level * 10) * deltaTime,
+        ),
+      );
+    }).toList();
+
+    _gameState = _gameState.copyWith(enemies: updatedEnemies);
+  }
+
+  void _spawnEnemy() {
+    if (!_isGameActive) return;
+
+    final random = math.Random();
+    final x = random.nextDouble() * (_gameSize.width - 40) + 20;
+    final enemyType = EnemyType.values[random.nextInt(EnemyType.values.length)];
+
+    final enemy = Enemy(
+      position: Offset(x, -20),
+      velocity: Offset(
+        (random.nextDouble() - 0.5) * 50, // Random horizontal movement
+        0,
+      ),
+      type: enemyType,
+      health: enemyType.health,
+    );
+
+    _gameState = _gameState.copyWith(
+      enemies: [..._gameState.enemies, enemy],
+    );
+  }
+
+  void _shoot() {
+    if (!_canShoot()) return;
+
+    _lastShot = DateTime.now();
+    final bullet = Bullet(
+      position: Offset(
+        _gameState.playerPosition.dx,
+        _gameState.playerPosition.dy - 10,
+      ),
+      velocity: const Offset(0, -1),
+    );
+
+    _gameState = _gameState.copyWith(
+      bullets: [..._gameState.bullets, bullet],
+    );
+
+    // Play sound effect (haptic feedback)
+    HapticFeedback.lightImpact();
+  }
+
+  bool _canShoot() {
+    final now = DateTime.now();
+    return now.difference(_lastShot).inMilliseconds > (_shootCooldown * 1000);
+  }
+
+  void _checkCollisions() {
+    // Check bullet-enemy collisions
+    final remainingBullets = <Bullet>[];
+    final remainingEnemies = <Enemy>[];
+    int points = 0;
+
+    for (final bullet in _gameState.bullets) {
+      bool bulletHit = false;
+
+      for (final enemy in _gameState.enemies) {
+        if (_isColliding(bullet.position, enemy.position, 20)) {
+          bulletHit = true;
+          final updatedEnemy = enemy.copyWith(health: enemy.health - 1);
+
+          if (updatedEnemy.health <= 0) {
+            points += enemy.type.points;
+            // Enemy destroyed, add explosion effect
+            HapticFeedback.mediumImpact();
+          } else {
+            remainingEnemies.add(updatedEnemy);
+          }
+        } else {
+          remainingEnemies.add(enemy);
+        }
+      }
+
+      if (!bulletHit) {
+        remainingBullets.add(bullet);
+      }
+    }
+
+    // Check player-enemy collisions
+    for (final enemy in remainingEnemies) {
+      if (_isColliding(_gameState.playerPosition, enemy.position, 25)) {
+        _gameOver();
+        return;
+      }
+    }
+
+    // Check if enemies reached bottom
+    for (final enemy in remainingEnemies) {
+      if (enemy.position.dy > _gameSize.height) {
+        _gameState = _gameState.copyWith(lives: _gameState.lives - 1);
+        if (_gameState.lives <= 0) {
+          _gameOver();
+          return;
+        }
+      }
+    }
+
+    _gameState = _gameState.copyWith(
+      bullets: remainingBullets,
+      enemies: remainingEnemies
+          .where((e) => e.position.dy <= _gameSize.height + 20)
+          .toList(),
+      score: _gameState.score + points,
+    );
+  }
+
+  bool _isColliding(Offset pos1, Offset pos2, double radius) {
+    final distance = (pos1 - pos2).distance;
+    return distance < radius;
+  }
+
+  void _cleanupObjects() {
+    // Remove bullets that are off-screen
+    final visibleBullets =
+        _gameState.bullets.where((bullet) => bullet.position.dy > -10).toList();
+
+    _gameState = _gameState.copyWith(bullets: visibleBullets);
+  }
+
+  void _nextLevel() {
+    _gameState = _gameState.copyWith(level: _gameState.level + 1);
+    HapticFeedback.heavyImpact();
+  }
+
+  void _gameOver() {
+    setState(() {
+      _isGameActive = false;
+      _gameState = _gameState.copyWith(gameState: GameState.gameOver);
+    });
+
+    _gameController.stop();
+    _gameTimer.cancel();
+    _enemySpawnTimer.cancel();
+    _levelTimer.cancel();
+
+    HapticFeedback.heavyImpact();
+  }
+
+  void _resetGame() {
+    setState(() {
+      _isGameActive = false;
+      _gameState = SpaceShooterGameState.initial().copyWith(
+        playerPosition: Offset(_gameSize.width / 2, _gameSize.height - 80),
+      );
+    });
+
+    _gameController.stop();
+    _gameTimer.cancel();
+    _enemySpawnTimer.cancel();
+    _levelTimer.cancel();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: GameAppBar(
+        title: 'Space Shooter',
+        actions: [
+          IconButton(
+            onPressed: _resetGame,
+            icon: const Icon(Icons.refresh),
+          ),
+        ],
+      ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Game stats
+            _buildGameStats(),
+
+            // Game area
+            Expanded(
+              child: _buildGameArea(),
+            ),
+
+            // Controls
+            _buildControls(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGameStats() {
+    return Container(
+      padding: const EdgeInsets.all(AppConstants.spacingM),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          _buildStatItem('Score', _gameState.score.toString()),
+          _buildStatItem('Level', _gameState.level.toString()),
+          _buildStatItem('Lives', _gameState.lives.toString()),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatItem(String label, String value) {
+    return Column(
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: AppConstants.fontS,
+            color: AppTheme.textSecondaryColor,
+          ),
+        ),
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: AppConstants.fontXL,
+            fontWeight: FontWeight.bold,
+            color: AppTheme.textPrimaryColor,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildGameArea() {
+    return Container(
+      key: _gameAreaKey,
+      width: double.infinity,
+      height: double.infinity,
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Color(0xFF0D1B2A),
+            Color(0xFF1B263B),
+            Color(0xFF2D3748),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(AppConstants.radiusM),
+      ),
+      child: Stack(
+        children: [
+          // Background stars
+          AnimatedBuilder(
+            animation: _gameController,
+            builder: (context, child) {
+              return CustomPaint(
+                painter: StarfieldPainter(_gameController.value),
+                size: _gameSize,
+              );
+            },
+          ),
+
+          // Game canvas
+          CustomPaint(
+            painter: SpaceShooterPainter(_gameState),
+            size: _gameSize,
+          ),
+
+          // Game over overlay
+          if (_gameState.gameState == GameState.gameOver)
+            _buildGameOverOverlay(),
+
+          // Start game overlay
+          if (_gameState.gameState == GameState.initial)
+            _buildStartGameOverlay(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGameOverOverlay() {
+    return Container(
+      color: Colors.black54,
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              'GAME OVER',
+              style: TextStyle(
+                fontSize: AppConstants.fontDisplay,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(height: AppConstants.spacingL),
+            Text(
+              'Final Score: ${_gameState.score}',
+              style: const TextStyle(
+                fontSize: AppConstants.fontXL,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(height: AppConstants.spacingXL),
+            AnimatedGameButton(
+              text: 'Play Again',
+              icon: Icons.replay,
+              backgroundColor: AppTheme.primaryColor,
+              onPressed: () {
+                _resetGame();
+                _startGame();
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStartGameOverlay() {
+    return Container(
+      color: Colors.black54,
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.rocket_launch,
+              size: AppConstants.iconXXXL,
+              color: Colors.white,
+            ),
+            const SizedBox(height: AppConstants.spacingL),
+            const Text(
+              'SPACE SHOOTER',
+              style: TextStyle(
+                fontSize: AppConstants.fontDisplay,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(height: AppConstants.spacingM),
+            const Text(
+              'Defend Earth from alien invasion!',
+              style: TextStyle(
+                fontSize: AppConstants.fontL,
+                color: Colors.white70,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: AppConstants.spacingXL),
+            AnimatedGameButton(
+              text: 'Start Game',
+              icon: Icons.play_arrow,
+              backgroundColor: AppTheme.primaryColor,
+              onPressed: _startGame,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildControls() {
+    return Container(
+      padding: const EdgeInsets.all(AppConstants.spacingM),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          // Left movement
+          GestureDetector(
+            onTapDown: (_) => setState(() => _leftPressed = true),
+            onTapUp: (_) => setState(() => _leftPressed = false),
+            onTapCancel: () => setState(() => _leftPressed = false),
+            child: Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                color: _leftPressed ? AppTheme.primaryColor : Colors.grey[300],
+                borderRadius: BorderRadius.circular(AppConstants.radiusM),
+              ),
+              child: const Icon(
+                Icons.arrow_left,
+                size: AppConstants.iconXL,
+                color: Colors.white,
+              ),
+            ),
+          ),
+
+          // Shoot button
+          GestureDetector(
+            onTapDown: (_) => setState(() => _shootPressed = true),
+            onTapUp: (_) => setState(() => _shootPressed = false),
+            onTapCancel: () => setState(() => _shootPressed = false),
+            child: Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color:
+                    _shootPressed ? AppTheme.errorColor : AppTheme.accentColor,
+                borderRadius: BorderRadius.circular(40),
+              ),
+              child: const Icon(
+                Icons.radio_button_checked,
+                size: AppConstants.iconXL,
+                color: Colors.white,
+              ),
+            ),
+          ),
+
+          // Right movement
+          GestureDetector(
+            onTapDown: (_) => setState(() => _rightPressed = true),
+            onTapUp: (_) => setState(() => _rightPressed = false),
+            onTapCancel: () => setState(() => _rightPressed = false),
+            child: Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                color: _rightPressed ? AppTheme.primaryColor : Colors.grey[300],
+                borderRadius: BorderRadius.circular(AppConstants.radiusM),
+              ),
+              child: const Icon(
+                Icons.arrow_right,
+                size: AppConstants.iconXL,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// Game state management
+class SpaceShooterGameState {
+  final GameState gameState;
+  final Offset playerPosition;
+  final List<Bullet> bullets;
+  final List<Enemy> enemies;
+  final int score;
+  final int level;
+  final int lives;
+
+  const SpaceShooterGameState({
+    required this.gameState,
+    required this.playerPosition,
+    required this.bullets,
+    required this.enemies,
+    required this.score,
+    required this.level,
+    required this.lives,
+  });
+
+  factory SpaceShooterGameState.initial() {
+    return const SpaceShooterGameState(
+      gameState: GameState.initial,
+      playerPosition: Offset(200, 500),
+      bullets: [],
+      enemies: [],
+      score: 0,
+      level: 1,
+      lives: 3,
+    );
+  }
+
+  SpaceShooterGameState copyWith({
+    GameState? gameState,
+    Offset? playerPosition,
+    List<Bullet>? bullets,
+    List<Enemy>? enemies,
+    int? score,
+    int? level,
+    int? lives,
+  }) {
+    return SpaceShooterGameState(
+      gameState: gameState ?? this.gameState,
+      playerPosition: playerPosition ?? this.playerPosition,
+      bullets: bullets ?? this.bullets,
+      enemies: enemies ?? this.enemies,
+      score: score ?? this.score,
+      level: level ?? this.level,
+      lives: lives ?? this.lives,
+    );
+  }
+}
+
+// Game entities
+class Bullet {
+  final Offset position;
+  final Offset velocity;
+
+  const Bullet({
+    required this.position,
+    required this.velocity,
+  });
+
+  Bullet copyWith({
+    Offset? position,
+    Offset? velocity,
+  }) {
+    return Bullet(
+      position: position ?? this.position,
+      velocity: velocity ?? this.velocity,
+    );
+  }
+}
+
+enum EnemyType {
+  scout(health: 1, points: 10),
+  fighter(health: 2, points: 25),
+  bomber(health: 3, points: 50);
+
+  const EnemyType({required this.health, required this.points});
+  final int health;
+  final int points;
+}
+
+class Enemy {
+  final Offset position;
+  final Offset velocity;
+  final EnemyType type;
+  final int health;
+
+  const Enemy({
+    required this.position,
+    required this.velocity,
+    required this.type,
+    required this.health,
+  });
+
+  Enemy copyWith({
+    Offset? position,
+    Offset? velocity,
+    EnemyType? type,
+    int? health,
+  }) {
+    return Enemy(
+      position: position ?? this.position,
+      velocity: velocity ?? this.velocity,
+      type: type ?? this.type,
+      health: health ?? this.health,
+    );
+  }
+}
+
+// Custom painters for game rendering
+class SpaceShooterPainter extends CustomPainter {
+  final SpaceShooterGameState gameState;
+
+  SpaceShooterPainter(this.gameState);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // Draw player
+    _drawPlayer(canvas, gameState.playerPosition);
+
+    // Draw bullets
+    for (final bullet in gameState.bullets) {
+      _drawBullet(canvas, bullet.position);
+    }
+
+    // Draw enemies
+    for (final enemy in gameState.enemies) {
+      _drawEnemy(canvas, enemy.position, enemy.type);
+    }
+  }
+
+  void _drawPlayer(Canvas canvas, Offset position) {
+    final paint = Paint()
+      ..color = AppTheme.primaryColor
+      ..style = PaintingStyle.fill;
+
+    final path = Path();
+    path.moveTo(position.dx, position.dy - 15);
+    path.lineTo(position.dx - 15, position.dy + 15);
+    path.lineTo(position.dx + 15, position.dy + 15);
+    path.close();
+
+    canvas.drawPath(path, paint);
+
+    // Draw engine glow
+    final glowPaint = Paint()
+      ..color = Colors.cyan.withOpacity(0.7)
+      ..style = PaintingStyle.fill;
+
+    canvas.drawCircle(
+      Offset(position.dx, position.dy + 10),
+      5,
+      glowPaint,
+    );
+  }
+
+  void _drawBullet(Canvas canvas, Offset position) {
+    final paint = Paint()
+      ..color = Colors.yellow
+      ..style = PaintingStyle.fill;
+
+    canvas.drawCircle(position, 3, paint);
+  }
+
+  void _drawEnemy(Canvas canvas, Offset position, EnemyType type) {
+    final paint = Paint()
+      ..color = _getEnemyColor(type)
+      ..style = PaintingStyle.fill;
+
+    final path = Path();
+    path.moveTo(position.dx, position.dy + 15);
+    path.lineTo(position.dx - 12, position.dy - 15);
+    path.lineTo(position.dx + 12, position.dy - 15);
+    path.close();
+
+    canvas.drawPath(path, paint);
+  }
+
+  Color _getEnemyColor(EnemyType type) {
+    switch (type) {
+      case EnemyType.scout:
+        return AppTheme.successColor;
+      case EnemyType.fighter:
+        return AppTheme.warningColor;
+      case EnemyType.bomber:
+        return AppTheme.errorColor;
+    }
+  }
+
+  @override
+  bool shouldRepaint(SpaceShooterPainter oldDelegate) {
+    return oldDelegate.gameState != gameState;
+  }
+}
+
+class StarfieldPainter extends CustomPainter {
+  final double animationValue;
+  final List<Offset> stars;
+
+  StarfieldPainter(this.animationValue) : stars = _generateStars();
+
+  static List<Offset> _generateStars() {
+    final random = math.Random(42); // Fixed seed for consistent stars
+    return List.generate(100, (index) {
+      return Offset(
+        random.nextDouble() * 400,
+        random.nextDouble() * 600,
+      );
+    });
+  }
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.white.withOpacity(0.7)
+      ..style = PaintingStyle.fill;
+
+    for (final star in stars) {
+      final y = (star.dy + animationValue * 50) % size.height;
+      canvas.drawCircle(
+        Offset(star.dx, y),
+        math.Random(star.dx.toInt()).nextDouble() * 2 + 1,
+        paint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(StarfieldPainter oldDelegate) {
+    return oldDelegate.animationValue != animationValue;
+  }
+}
