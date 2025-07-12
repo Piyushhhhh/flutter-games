@@ -61,6 +61,16 @@ class _NeonRunnerScreenState extends State<NeonRunnerScreen>
     _initializeRetroAnimations();
     _initializeGame();
     _setupGameLoop();
+
+    // Set system UI overlay style for full screen
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
+        systemNavigationBarColor: Colors.transparent,
+        systemNavigationBarIconBrightness: Brightness.light,
+      ),
+    );
   }
 
   void _initializeRetroAnimations() {
@@ -230,73 +240,6 @@ class _NeonRunnerScreenState extends State<NeonRunnerScreen>
     }
   }
 
-  PreferredSizeWidget _buildRetroAppBar() {
-    return PreferredSize(
-      preferredSize: const Size.fromHeight(kToolbarHeight),
-      child: AnimatedBuilder(
-        animation: _neonGlowAnimation,
-        builder: (context, child) {
-          return AppBar(
-            backgroundColor: const Color(0xFF0D001A),
-            foregroundColor: const Color(0xFF00FFFF),
-            elevation: 0,
-            leading: IconButton(
-              icon: Icon(
-                Icons.arrow_back,
-                color: const Color(0xFF00FFFF)
-                    .withOpacity(_neonGlowAnimation.value),
-                size: 28,
-              ),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-            title: Text(
-              'NEON RUNNER',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: const Color(0xFF00FFFF)
-                    .withOpacity(_neonGlowAnimation.value),
-                shadows: [
-                  Shadow(
-                    color: const Color(0xFF00FFFF)
-                        .withOpacity(_neonGlowAnimation.value * 0.8),
-                    blurRadius: 10,
-                  ),
-                  Shadow(
-                    color: const Color(0xFF00FFFF)
-                        .withOpacity(_neonGlowAnimation.value * 0.4),
-                    blurRadius: 20,
-                  ),
-                ],
-              ),
-            ),
-            flexibleSpace: Container(
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Color(0xFF0D001A),
-                    Color(0xFF1A0033),
-                    Color(0xFF2D1B69),
-                  ],
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFF00FFFF)
-                        .withOpacity(_neonGlowAnimation.value * 0.3),
-                    blurRadius: 15,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
   Widget _buildScanlineOverlay(BoxConstraints constraints) {
     return AnimatedBuilder(
       animation: _scanlineAnimation,
@@ -315,11 +258,99 @@ class _NeonRunnerScreenState extends State<NeonRunnerScreen>
     );
   }
 
+  Widget _buildFloatingBackButton() {
+    return Positioned(
+      top: MediaQuery.of(context).padding.top + 16,
+      left: 16,
+      child: AnimatedBuilder(
+        animation: _neonGlowAnimation,
+        builder: (context, child) {
+          return GestureDetector(
+            onTap: () {
+              HapticFeedback.mediumImpact();
+              Navigator.of(context).pop();
+            },
+            child: Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    const Color(0xFF0D001A).withOpacity(0.95),
+                    const Color(0xFF2D1B69).withOpacity(0.85),
+                  ],
+                ),
+                border: Border.all(
+                  color: const Color(0xFF00FFFF)
+                      .withOpacity(_neonGlowAnimation.value * 0.8),
+                  width: 2.5,
+                ),
+                borderRadius: BorderRadius.circular(28),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF00FFFF)
+                        .withOpacity(_neonGlowAnimation.value * 0.4),
+                    blurRadius: 20,
+                    spreadRadius: 3,
+                  ),
+                  BoxShadow(
+                    color: const Color(0xFF00FFFF)
+                        .withOpacity(_neonGlowAnimation.value * 0.2),
+                    blurRadius: 35,
+                    spreadRadius: 5,
+                  ),
+                ],
+              ),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  // Inner glow effect
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF00FFFF)
+                          .withOpacity(_neonGlowAnimation.value * 0.1),
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                  ),
+                  // Icon with enhanced styling
+                  Icon(
+                    Icons.arrow_back_ios,
+                    color: const Color(0xFF00FFFF)
+                        .withOpacity(_neonGlowAnimation.value),
+                    size: 22,
+                  ),
+                  // Subtle highlight
+                  Positioned(
+                    top: 8,
+                    left: 8,
+                    child: Container(
+                      width: 16,
+                      height: 16,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFFFFFF)
+                            .withOpacity(_neonGlowAnimation.value * 0.2),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF000000),
-      appBar: _buildRetroAppBar(),
+      extendBodyBehindAppBar: true,
       body: Focus(
         autofocus: true,
         onKeyEvent: (node, event) {
@@ -379,6 +410,8 @@ class _NeonRunnerScreenState extends State<NeonRunnerScreen>
                 ),
                 // Retro scanline overlay
                 _buildScanlineOverlay(constraints),
+                // Floating back button
+                _buildFloatingBackButton(),
               ],
             );
           },
