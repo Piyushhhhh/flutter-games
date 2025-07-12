@@ -1,4 +1,5 @@
 /// Game-related data models and enums
+import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart'; // Added for Color
 
@@ -566,7 +567,9 @@ class Tile {
 
   /// Create a new tile with random value (2 or 4)
   factory Tile.random(Position position) {
-    final value = (DateTime.now().millisecondsSinceEpoch % 10 < 9) ? 2 : 4;
+    final random = Random();
+    final value =
+        (random.nextDouble() < 0.9) ? 2 : 4; // 90% chance for 2, 10% for 4
     return Tile(
       value: value,
       position: position,
@@ -775,13 +778,12 @@ class Game2048State {
   /// Generate initial tiles for new game
   static List<Tile> _generateInitialTiles() {
     final tiles = <Tile>[];
+    final random = Random();
     final positions = <Position>[];
 
     // Generate two random positions
     while (positions.length < 2) {
-      final position = Position.fromIndex(
-        DateTime.now().millisecondsSinceEpoch % 16,
-      );
+      final position = Position.fromIndex(random.nextInt(16));
       if (!positions.contains(position)) {
         positions.add(position);
       }

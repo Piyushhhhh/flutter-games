@@ -17,9 +17,12 @@ class _Game2048State extends State<Game2048> with TickerProviderStateMixin {
   late Game2048Controller _controller;
   late AnimationController _scaleController;
   late AnimationController _slideController;
+  late AnimationController _scoreController;
   late Animation<double> _scaleAnimation;
+  late Animation<double> _scoreAnimation;
 
   bool _isAnimating = false;
+  Offset? _panStartOffset;
 
   @override
   void initState() {
@@ -30,7 +33,7 @@ class _Game2048State extends State<Game2048> with TickerProviderStateMixin {
 
     // Animation controllers
     _scaleController = AnimationController(
-      duration: GameConstants.game2048ScaleDuration,
+      duration: const Duration(milliseconds: 200),
       vsync: this,
     );
 
@@ -39,12 +42,25 @@ class _Game2048State extends State<Game2048> with TickerProviderStateMixin {
       vsync: this,
     );
 
+    _scoreController = AnimationController(
+      duration: const Duration(milliseconds: 600),
+      vsync: this,
+    );
+
     _scaleAnimation = Tween<double>(
-      begin: 1.0,
-      end: GameConstants.game2048TileScaleAnimation,
+      begin: 0.0,
+      end: 1.0,
     ).animate(CurvedAnimation(
       parent: _scaleController,
       curve: Curves.elasticOut,
+    ));
+
+    _scoreAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _scoreController,
+      curve: Curves.easeOutBack,
     ));
   }
 
@@ -54,6 +70,7 @@ class _Game2048State extends State<Game2048> with TickerProviderStateMixin {
     _controller.dispose();
     _scaleController.dispose();
     _slideController.dispose();
+    _scoreController.dispose();
     super.dispose();
   }
 
@@ -64,44 +81,55 @@ class _Game2048State extends State<Game2048> with TickerProviderStateMixin {
       // Trigger animations for new tiles
       if (_controller.tiles.any((tile) => tile.isNew)) {
         _scaleController.forward().then((_) {
-          _scaleController.reverse();
+          _scaleController.reset();
         });
       }
+
+      // Trigger score animation when score changes
+      _scoreController.forward().then((_) {
+        _scoreController.reset();
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(GameConstants.game2048BackgroundColorValue),
-      appBar: AppBar(
-        title: const Text('2048'),
-        backgroundColor: AppTheme.primaryColor,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.info_outline),
-            onPressed: _showHowToPlay,
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color(0xFFF8F9FA),
+              Color(0xFFE9ECEF),
+            ],
           ),
-        ],
-      ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
+        ),
+        child: SafeArea(
           child: Column(
             children: [
-              _buildScoreSection(),
-              const SizedBox(height: 20),
-              _buildGameControls(),
-              const SizedBox(height: 20),
+              _buildAppBar(),
               Expanded(
-                child: Center(
-                  child: _buildGameBoard(),
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Column(
+                    children: [
+                      _buildScoreSection(),
+                      const SizedBox(height: 24),
+                      _buildGameControls(),
+                      const SizedBox(height: 32),
+                      Expanded(
+                        child: Center(
+                          child: _buildGameBoard(),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      _buildInstructions(),
+                    ],
+                  ),
                 ),
               ),
-              const SizedBox(height: 20),
-              _buildInstructions(),
             ],
           ),
         ),
@@ -109,19 +137,85 @@ class _Game2048State extends State<Game2048> with TickerProviderStateMixin {
     );
   }
 
+  Widget _buildAppBar() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Colors.deepPurple.shade600,
+            Colors.deepPurple.shade500,
+          ],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.deepPurple.withOpacity(0.3),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: IconButton(
+              icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ),
+          const Spacer(),
+          const Text(
+            '2048',
+            style: TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+              letterSpacing: 1.2,
+            ),
+          ),
+          const Spacer(),
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: IconButton(
+              icon: const Icon(Icons.help_outline, color: Colors.white),
+              onPressed: _showHowToPlay,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildScoreSection() {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        _buildScoreCard(
-          title: AppStrings.score,
-          value: _controller.score,
-          color: AppTheme.primaryColor,
+        Expanded(
+          child: _buildScoreCard(
+            title: 'SCORE',
+            value: _controller.score,
+            gradient: LinearGradient(
+              colors: [Colors.blue.shade400, Colors.blue.shade600],
+            ),
+            icon: Icons.star,
+          ),
         ),
-        _buildScoreCard(
-          title: AppStrings.bestScore,
-          value: _controller.bestScore,
-          color: AppTheme.secondaryColor,
+        const SizedBox(width: 16),
+        Expanded(
+          child: _buildScoreCard(
+            title: 'BEST',
+            value: _controller.bestScore,
+            gradient: LinearGradient(
+              colors: [Colors.amber.shade400, Colors.orange.shade600],
+            ),
+            icon: Icons.emoji_events,
+          ),
         ),
       ],
     );
@@ -130,60 +224,92 @@ class _Game2048State extends State<Game2048> with TickerProviderStateMixin {
   Widget _buildScoreCard({
     required String title,
     required int value,
-    required Color color,
+    required Gradient gradient,
+    required IconData icon,
   }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(AppConstants.radiusM),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Text(
-            title,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: AppConstants.fontM,
-              fontWeight: FontWeight.w600,
+    return AnimatedBuilder(
+      animation: _scoreAnimation,
+      builder: (context, child) {
+        return Transform.scale(
+          scale: 1.0 + (_scoreAnimation.value * 0.1),
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              gradient: gradient,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 20,
+                  offset: const Offset(0, 8),
+                ),
+                BoxShadow(
+                  color: Colors.white.withOpacity(0.1),
+                  blurRadius: 1,
+                  offset: const Offset(0, 1),
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(icon, color: Colors.white, size: 20),
+                    const SizedBox(width: 8),
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 1.0,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  value.toString(),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 4),
-          Text(
-            value.toString(),
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: AppConstants.fontXL,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
   Widget _buildGameControls() {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        _buildControlButton(
-          icon: Icons.refresh,
-          label: AppStrings.newGame,
-          onPressed: _newGame,
-          color: AppTheme.primaryColor,
+        Expanded(
+          child: _buildControlButton(
+            icon: Icons.refresh,
+            label: 'New Game',
+            onPressed: _newGame,
+            gradient: LinearGradient(
+              colors: [Colors.green.shade400, Colors.green.shade600],
+            ),
+          ),
         ),
-        _buildControlButton(
-          icon: Icons.undo,
-          label: AppStrings.undo,
-          onPressed: _controller.canUndo ? _undo : null,
-          color: AppTheme.secondaryColor,
+        const SizedBox(width: 16),
+        Expanded(
+          child: _buildControlButton(
+            icon: Icons.undo,
+            label: 'Undo',
+            onPressed: _controller.canUndo ? _undo : null,
+            gradient: LinearGradient(
+              colors: _controller.canUndo
+                  ? [Colors.purple.shade400, Colors.purple.shade600]
+                  : [Colors.grey.shade300, Colors.grey.shade400],
+            ),
+          ),
         ),
       ],
     );
@@ -193,18 +319,49 @@ class _Game2048State extends State<Game2048> with TickerProviderStateMixin {
     required IconData icon,
     required String label,
     required VoidCallback? onPressed,
-    required Color color,
+    required Gradient gradient,
   }) {
-    return ElevatedButton.icon(
-      onPressed: onPressed,
-      icon: Icon(icon, size: 20),
-      label: Text(label),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: color,
-        foregroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppConstants.radiusM),
+    return Container(
+      decoration: BoxDecoration(
+        gradient: gradient,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: onPressed != null
+            ? [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.2),
+                  blurRadius: 15,
+                  offset: const Offset(0, 6),
+                ),
+              ]
+            : null,
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onPressed,
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  icon,
+                  color: Colors.white,
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  label,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -215,14 +372,29 @@ class _Game2048State extends State<Game2048> with TickerProviderStateMixin {
       builder: (context, constraints) {
         final size = math.min(constraints.maxWidth, constraints.maxHeight);
         final boardSize = size * 0.9;
-        final tileSize = (boardSize - 40) / 4 - 8;
+        // Grid layout constants - ensure perfect alignment
+        const gridPadding = 20.0;
+        const spacing = 12.0;
+        final tileSize = (boardSize - (2 * gridPadding) - (3 * spacing)) / 4;
 
-        return Stack(
-          children: [
-            _buildGridBackground(boardSize, tileSize),
-            _buildTiles(boardSize, tileSize),
-            _buildGameOverlay(boardSize),
-          ],
+        return Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.15),
+                blurRadius: 30,
+                offset: const Offset(0, 15),
+              ),
+            ],
+          ),
+          child: Stack(
+            children: [
+              _buildGridBackground(boardSize, tileSize),
+              _buildTiles(boardSize, tileSize),
+              _buildGameOverlay(boardSize),
+            ],
+          ),
         );
       },
     );
@@ -230,28 +402,37 @@ class _Game2048State extends State<Game2048> with TickerProviderStateMixin {
 
   Widget _buildGridBackground(double boardSize, double tileSize) {
     return GestureDetector(
+      onPanUpdate: _handlePanUpdate,
       onPanEnd: _handlePanEnd,
       child: Container(
         width: boardSize,
         height: boardSize,
         decoration: BoxDecoration(
-          color: const Color(GameConstants.game2048GridColorValue),
-          borderRadius: BorderRadius.circular(AppConstants.radiusM),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              const Color(0xFFBBADA0),
+              const Color(0xFFA69B8F),
+            ],
+          ),
+          borderRadius: BorderRadius.circular(24),
         ),
         child: Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(20.0),
           child: GridView.builder(
+            physics: const NeverScrollableScrollPhysics(),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 4,
-              crossAxisSpacing: 8,
-              mainAxisSpacing: 8,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
             ),
             itemCount: 16,
             itemBuilder: (context, index) {
               return Container(
                 decoration: BoxDecoration(
-                  color: const Color(GameConstants.game2048EmptyTileColorValue),
-                  borderRadius: BorderRadius.circular(AppConstants.radiusS),
+                  color: const Color(0xFFCDC1B4).withOpacity(0.6),
+                  borderRadius: BorderRadius.circular(12),
                 ),
               );
             },
@@ -278,7 +459,7 @@ class _Game2048State extends State<Game2048> with TickerProviderStateMixin {
 
     return AnimatedPositioned(
       duration: GameConstants.game2048MoveDuration,
-      curve: Curves.easeInOut,
+      curve: Curves.easeOutCubic,
       left: position.dx,
       top: position.dy,
       child: AnimatedBuilder(
@@ -291,13 +472,18 @@ class _Game2048State extends State<Game2048> with TickerProviderStateMixin {
               width: tileSize,
               height: tileSize,
               decoration: BoxDecoration(
-                color: tile.color,
-                borderRadius: BorderRadius.circular(AppConstants.radiusS),
+                gradient: _getTileGradient(tile.value),
+                borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
+                    color: Colors.black.withOpacity(0.2),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                  BoxShadow(
+                    color: Colors.white.withOpacity(0.1),
+                    blurRadius: 1,
+                    offset: const Offset(0, 1),
                   ),
                 ],
               ),
@@ -306,8 +492,9 @@ class _Game2048State extends State<Game2048> with TickerProviderStateMixin {
                   tile.value.toString(),
                   style: TextStyle(
                     color: tile.textColor,
-                    fontSize: tile.fontSize * (tileSize / 80),
+                    fontSize: _getTileFontSize(tile.value, tileSize),
                     fontWeight: FontWeight.bold,
+                    letterSpacing: tile.value >= 1000 ? -0.5 : 0,
                   ),
                 ),
               ),
@@ -316,6 +503,67 @@ class _Game2048State extends State<Game2048> with TickerProviderStateMixin {
         },
       ),
     );
+  }
+
+  Gradient _getTileGradient(int value) {
+    switch (value) {
+      case 2:
+        return LinearGradient(
+          colors: [const Color(0xFFEEE4DA), const Color(0xFFE0D5C7)],
+        );
+      case 4:
+        return LinearGradient(
+          colors: [const Color(0xFFEDE0C8), const Color(0xFFE0D3B7)],
+        );
+      case 8:
+        return LinearGradient(
+          colors: [const Color(0xFFF2B179), const Color(0xFFEDA564)],
+        );
+      case 16:
+        return LinearGradient(
+          colors: [const Color(0xFFF59563), const Color(0xFFF08A5D)],
+        );
+      case 32:
+        return LinearGradient(
+          colors: [const Color(0xFFF67C5F), const Color(0xFFF36F5B)],
+        );
+      case 64:
+        return LinearGradient(
+          colors: [const Color(0xFFF65E3B), const Color(0xFFF44336)],
+        );
+      case 128:
+        return LinearGradient(
+          colors: [const Color(0xFFEDCF72), const Color(0xFFE6C066)],
+        );
+      case 256:
+        return LinearGradient(
+          colors: [const Color(0xFFEDCC61), const Color(0xFFE6BD55)],
+        );
+      case 512:
+        return LinearGradient(
+          colors: [const Color(0xFFEDC850), const Color(0xFFE6B944)],
+        );
+      case 1024:
+        return LinearGradient(
+          colors: [const Color(0xFFEDC53F), const Color(0xFFE6B633)],
+        );
+      case 2048:
+        return LinearGradient(
+          colors: [const Color(0xFFFFD700), const Color(0xFFFFC107)],
+        );
+      default:
+        return LinearGradient(
+          colors: [const Color(0xFF3C3A32), const Color(0xFF2C2A24)],
+        );
+    }
+  }
+
+  double _getTileFontSize(int value, double tileSize) {
+    final baseFontSize = tileSize * 0.35;
+    if (value < 100) return baseFontSize;
+    if (value < 1000) return baseFontSize * 0.85;
+    if (value < 10000) return baseFontSize * 0.7;
+    return baseFontSize * 0.6;
   }
 
   Widget _buildGameOverlay(double boardSize) {
@@ -327,47 +575,73 @@ class _Game2048State extends State<Game2048> with TickerProviderStateMixin {
       width: boardSize,
       height: boardSize,
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.8),
-        borderRadius: BorderRadius.circular(AppConstants.radiusM),
+        gradient: LinearGradient(
+          colors: [
+            Colors.black.withOpacity(0.8),
+            Colors.black.withOpacity(0.9),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(24),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            _controller.isWon ? Icons.emoji_events : Icons.dangerous,
-            size: 80,
-            color: _controller.isWon ? Colors.amber : Colors.red,
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: _controller.isWon ? Colors.amber : Colors.red,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: (_controller.isWon ? Colors.amber : Colors.red)
+                      .withOpacity(0.4),
+                  blurRadius: 20,
+                  spreadRadius: 5,
+                ),
+              ],
+            ),
+            child: Icon(
+              _controller.isWon
+                  ? Icons.emoji_events
+                  : Icons.sentiment_dissatisfied,
+              size: 40,
+              color: Colors.white,
+            ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 24),
           Text(
-            _controller.isWon ? AppStrings.youWin : AppStrings.gameOver,
+            _controller.isWon ? 'You Win!' : 'Game Over!',
             style: const TextStyle(
               color: Colors.white,
-              fontSize: AppConstants.fontXXXL,
+              fontSize: 32,
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
           Text(
             'Score: ${_controller.score}',
             style: const TextStyle(
               color: Colors.white70,
-              fontSize: AppConstants.fontXL,
+              fontSize: 18,
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 32),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              ElevatedButton(
-                onPressed: _newGame,
-                child: const Text(AppStrings.tryAgain),
+              _buildOverlayButton(
+                'Try Again',
+                Icons.refresh,
+                Colors.green,
+                _newGame,
               ),
               if (_controller.isWon) ...[
                 const SizedBox(width: 16),
-                ElevatedButton(
-                  onPressed: _continueGame,
-                  child: const Text(AppStrings.keepGoing),
+                _buildOverlayButton(
+                  'Continue',
+                  Icons.play_arrow,
+                  Colors.blue,
+                  _continueGame,
                 ),
               ],
             ],
@@ -377,36 +651,112 @@ class _Game2048State extends State<Game2048> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildInstructions() {
+  Widget _buildOverlayButton(
+    String text,
+    IconData icon,
+    Color color,
+    VoidCallback onPressed,
+  ) {
     return Container(
-      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.9),
-        borderRadius: BorderRadius.circular(AppConstants.radiusM),
+        gradient: LinearGradient(
+          colors: [
+            color,
+            Color.fromRGBO(
+              (color.red * 0.8).round().clamp(0, 255),
+              (color.green * 0.8).round().clamp(0, 255),
+              (color.blue * 0.8).round().clamp(0, 255),
+              1.0,
+            ),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
+            color: color.withOpacity(0.4),
+            blurRadius: 15,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onPressed,
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(icon, color: Colors.white, size: 20),
+                const SizedBox(width: 8),
+                Text(
+                  text,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInstructions() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Colors.white.withOpacity(0.9),
+            Colors.white.withOpacity(0.8),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.3),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
           ),
         ],
       ),
       child: Column(
         children: [
-          Text(
-            AppStrings.swipeToMove,
-            style: TextStyle(
-              fontSize: AppConstants.fontL,
-              fontWeight: FontWeight.w600,
-              color: AppTheme.textPrimaryColor,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.swipe,
+                color: Colors.grey.shade600,
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Swipe to move tiles',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey.shade800,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 8),
           Text(
-            AppStrings.joinNumbers,
+            'Join numbers to reach 2048!',
             style: TextStyle(
-              fontSize: AppConstants.fontM,
-              color: AppTheme.textSecondaryColor,
+              fontSize: 14,
+              color: Colors.grey.shade600,
             ),
           ),
         ],
@@ -416,30 +766,44 @@ class _Game2048State extends State<Game2048> with TickerProviderStateMixin {
 
   Offset _getTilePosition(
       Position position, double boardSize, double tileSize) {
-    final padding = 8.0;
-    final spacing = 8.0;
-    final x = padding + position.col * (tileSize + spacing);
-    final y = padding + position.row * (tileSize + spacing);
+    // Use same constants as grid layout for perfect alignment
+    const gridPadding = 20.0;
+    const spacing = 12.0;
+    final x = gridPadding + position.col * (tileSize + spacing);
+    final y = gridPadding + position.row * (tileSize + spacing);
     return Offset(x, y);
   }
 
+  void _handlePanUpdate(DragUpdateDetails details) {
+    _panStartOffset ??= details.globalPosition;
+  }
+
   void _handlePanEnd(DragEndDetails details) {
-    if (_isAnimating) return;
+    if (_isAnimating || _panStartOffset == null) return;
 
-    final velocity = details.velocity.pixelsPerSecond;
-    final dx = velocity.dx;
-    final dy = velocity.dy;
+    final delta = details.globalPosition - _panStartOffset!;
+    final dx = delta.dx;
+    final dy = delta.dy;
 
+    // Reset pan start offset
+    _panStartOffset = null;
+
+    // Check if the swipe distance is significant enough
+    if (dx.abs() < 20 && dy.abs() < 20) {
+      return;
+    }
+
+    // Determine direction based on the larger displacement
     if (dx.abs() > dy.abs()) {
-      if (dx > GameConstants.game2048SwipeVelocityThreshold) {
+      if (dx > 0) {
         _move(Direction.right);
-      } else if (dx < -GameConstants.game2048SwipeVelocityThreshold) {
+      } else {
         _move(Direction.left);
       }
     } else {
-      if (dy > GameConstants.game2048SwipeVelocityThreshold) {
+      if (dy > 0) {
         _move(Direction.down);
-      } else if (dy < -GameConstants.game2048SwipeVelocityThreshold) {
+      } else {
         _move(Direction.up);
       }
     }
@@ -476,28 +840,72 @@ class _Game2048State extends State<Game2048> with TickerProviderStateMixin {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text(AppStrings.howToPlay),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Colors.blue.shade400, Colors.blue.shade600],
+                ),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(Icons.help, color: Colors.white, size: 20),
+            ),
+            const SizedBox(width: 12),
+            const Text('How to Play'),
+          ],
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(AppStrings.game2048Instructions),
-            const SizedBox(height: 16),
-            const Text('• Swipe up, down, left, or right to move tiles'),
-            const SizedBox(height: 8),
-            const Text(
-                '• When two tiles with the same number touch, they merge into one'),
-            const SizedBox(height: 8),
-            const Text('• Try to create a tile with the number 2048 to win!'),
-            const SizedBox(height: 8),
-            const Text(
-                '• Keep playing after winning to get even higher scores'),
+            _buildInstructionItem('🎯', 'Swipe to move tiles in any direction'),
+            _buildInstructionItem(
+                '✨', 'When two tiles with the same number touch, they merge'),
+            _buildInstructionItem(
+                '🏆', 'Try to create a tile with 2048 to win'),
+            _buildInstructionItem(
+                '🚀', 'Keep playing after winning for higher scores'),
           ],
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Got it!'),
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.green.shade400, Colors.green.shade600],
+              ),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text(
+                'Got it!',
+                style:
+                    TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInstructionItem(String emoji, String text) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        children: [
+          Text(emoji, style: const TextStyle(fontSize: 20)),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              text,
+              style: const TextStyle(fontSize: 14),
+            ),
           ),
         ],
       ),

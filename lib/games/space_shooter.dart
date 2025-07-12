@@ -18,9 +18,9 @@ class _SpaceShooterGameState extends State<SpaceShooterGame>
     with TickerProviderStateMixin {
   late AnimationController _gameController;
   late SpaceShooterGameState _gameState;
-  late Timer _gameTimer;
-  late Timer _enemySpawnTimer;
-  late Timer _levelTimer;
+  Timer? _gameTimer;
+  Timer? _enemySpawnTimer;
+  Timer? _levelTimer;
 
   final GlobalKey _gameAreaKey = GlobalKey();
   Size _gameSize = const Size(400, 600);
@@ -36,7 +36,6 @@ class _SpaceShooterGameState extends State<SpaceShooterGame>
   static const double _bulletSpeed = 300.0;
   static const double _enemySpeed = 80.0;
   static const double _shootCooldown = 0.2; // seconds
-  static const int _enemiesPerWave = 5;
   static const Duration _gameTick = Duration(milliseconds: 16); // ~60 FPS
 
   @override
@@ -53,9 +52,9 @@ class _SpaceShooterGameState extends State<SpaceShooterGame>
   @override
   void dispose() {
     _gameController.dispose();
-    _gameTimer.cancel();
-    _enemySpawnTimer.cancel();
-    _levelTimer.cancel();
+    _gameTimer?.cancel();
+    _enemySpawnTimer?.cancel();
+    _levelTimer?.cancel();
     super.dispose();
   }
 
@@ -152,10 +151,14 @@ class _SpaceShooterGameState extends State<SpaceShooterGame>
       );
     }
 
-    _gameState = _gameState.copyWith(playerPosition: newPosition);
+    if (newPosition != _gameState.playerPosition) {
+      _gameState = _gameState.copyWith(playerPosition: newPosition);
+    }
   }
 
   void _updateBullets(double deltaTime) {
+    if (_gameState.bullets.isEmpty) return;
+
     final updatedBullets = _gameState.bullets.map((bullet) {
       return bullet.copyWith(
         position: Offset(
@@ -169,6 +172,8 @@ class _SpaceShooterGameState extends State<SpaceShooterGame>
   }
 
   void _updateEnemies(double deltaTime) {
+    if (_gameState.enemies.isEmpty) return;
+
     final updatedEnemies = _gameState.enemies.map((enemy) {
       return enemy.copyWith(
         position: Offset(
@@ -198,9 +203,11 @@ class _SpaceShooterGameState extends State<SpaceShooterGame>
       health: enemyType.health,
     );
 
-    _gameState = _gameState.copyWith(
-      enemies: [..._gameState.enemies, enemy],
-    );
+    setState(() {
+      _gameState = _gameState.copyWith(
+        enemies: [..._gameState.enemies, enemy],
+      );
+    });
   }
 
   void _shoot() {
@@ -215,9 +222,11 @@ class _SpaceShooterGameState extends State<SpaceShooterGame>
       velocity: const Offset(0, -1),
     );
 
-    _gameState = _gameState.copyWith(
-      bullets: [..._gameState.bullets, bullet],
-    );
+    setState(() {
+      _gameState = _gameState.copyWith(
+        bullets: [..._gameState.bullets, bullet],
+      );
+    });
 
     // Play sound effect (haptic feedback)
     HapticFeedback.lightImpact();
@@ -231,26 +240,27 @@ class _SpaceShooterGameState extends State<SpaceShooterGame>
   void _checkCollisions() {
     // Check bullet-enemy collisions
     final remainingBullets = <Bullet>[];
-    final remainingEnemies = <Enemy>[];
+    final remainingEnemies = List<Enemy>.from(_gameState.enemies);
     int points = 0;
 
     for (final bullet in _gameState.bullets) {
       bool bulletHit = false;
 
-      for (final enemy in _gameState.enemies) {
+      for (int i = 0; i < remainingEnemies.length; i++) {
+        final enemy = remainingEnemies[i];
         if (_isColliding(bullet.position, enemy.position, 20)) {
           bulletHit = true;
           final updatedEnemy = enemy.copyWith(health: enemy.health - 1);
 
           if (updatedEnemy.health <= 0) {
             points += enemy.type.points;
+            remainingEnemies.removeAt(i);
             // Enemy destroyed, add explosion effect
             HapticFeedback.mediumImpact();
           } else {
-            remainingEnemies.add(updatedEnemy);
+            remainingEnemies[i] = updatedEnemy;
           }
-        } else {
-          remainingEnemies.add(enemy);
+          break; // Exit the loop once a collision is found
         }
       }
 
@@ -268,23 +278,28 @@ class _SpaceShooterGameState extends State<SpaceShooterGame>
     }
 
     // Check if enemies reached bottom
+    final List<Enemy> finalEnemies = [];
     for (final enemy in remainingEnemies) {
       if (enemy.position.dy > _gameSize.height) {
-        _gameState = _gameState.copyWith(lives: _gameState.lives - 1);
+        setState(() {
+          _gameState = _gameState.copyWith(lives: _gameState.lives - 1);
+        });
         if (_gameState.lives <= 0) {
           _gameOver();
           return;
         }
+      } else {
+        finalEnemies.add(enemy);
       }
     }
 
-    _gameState = _gameState.copyWith(
-      bullets: remainingBullets,
-      enemies: remainingEnemies
-          .where((e) => e.position.dy <= _gameSize.height + 20)
-          .toList(),
-      score: _gameState.score + points,
-    );
+    setState(() {
+      _gameState = _gameState.copyWith(
+        bullets: remainingBullets,
+        enemies: finalEnemies,
+        score: _gameState.score + points,
+      );
+    });
   }
 
   bool _isColliding(Offset pos1, Offset pos2, double radius) {
@@ -297,11 +312,15 @@ class _SpaceShooterGameState extends State<SpaceShooterGame>
     final visibleBullets =
         _gameState.bullets.where((bullet) => bullet.position.dy > -10).toList();
 
-    _gameState = _gameState.copyWith(bullets: visibleBullets);
+    if (visibleBullets.length != _gameState.bullets.length) {
+      _gameState = _gameState.copyWith(bullets: visibleBullets);
+    }
   }
 
   void _nextLevel() {
-    _gameState = _gameState.copyWith(level: _gameState.level + 1);
+    setState(() {
+      _gameState = _gameState.copyWith(level: _gameState.level + 1);
+    });
     HapticFeedback.heavyImpact();
   }
 
@@ -312,9 +331,9 @@ class _SpaceShooterGameState extends State<SpaceShooterGame>
     });
 
     _gameController.stop();
-    _gameTimer.cancel();
-    _enemySpawnTimer.cancel();
-    _levelTimer.cancel();
+    _gameTimer?.cancel();
+    _enemySpawnTimer?.cancel();
+    _levelTimer?.cancel();
 
     HapticFeedback.heavyImpact();
   }
@@ -328,9 +347,9 @@ class _SpaceShooterGameState extends State<SpaceShooterGame>
     });
 
     _gameController.stop();
-    _gameTimer.cancel();
-    _enemySpawnTimer.cancel();
-    _levelTimer.cancel();
+    _gameTimer?.cancel();
+    _enemySpawnTimer?.cancel();
+    _levelTimer?.cancel();
   }
 
   @override
@@ -417,33 +436,38 @@ class _SpaceShooterGameState extends State<SpaceShooterGame>
         ),
         borderRadius: BorderRadius.circular(AppConstants.radiusM),
       ),
-      child: Stack(
-        children: [
-          // Background stars
-          AnimatedBuilder(
-            animation: _gameController,
-            builder: (context, child) {
-              return CustomPaint(
-                painter: StarfieldPainter(_gameController.value),
-                size: _gameSize,
-              );
-            },
-          ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(AppConstants.radiusM),
+        child: Stack(
+          children: [
+            // Background stars
+            Positioned.fill(
+              child: AnimatedBuilder(
+                animation: _gameController,
+                builder: (context, child) {
+                  return CustomPaint(
+                    painter: StarfieldPainter(_gameController.value),
+                  );
+                },
+              ),
+            ),
 
-          // Game canvas
-          CustomPaint(
-            painter: SpaceShooterPainter(_gameState),
-            size: _gameSize,
-          ),
+            // Game canvas
+            Positioned.fill(
+              child: CustomPaint(
+                painter: SpaceShooterPainter(_gameState),
+              ),
+            ),
 
-          // Game over overlay
-          if (_gameState.gameState == GameState.gameOver)
-            _buildGameOverOverlay(),
+            // Game over overlay
+            if (_gameState.gameState == GameState.gameOver)
+              _buildGameOverOverlay(),
 
-          // Start game overlay
-          if (_gameState.gameState == GameState.initial)
-            _buildStartGameOverlay(),
-        ],
+            // Start game overlay
+            if (_gameState.gameState == GameState.initial)
+              _buildStartGameOverlay(),
+          ],
+        ),
       ),
     );
   }
@@ -722,6 +746,11 @@ class SpaceShooterPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    // Don't paint if size is invalid
+    if (size.width <= 0 || size.height <= 0) {
+      return;
+    }
+
     // Draw player
     _drawPlayer(canvas, gameState.playerPosition);
 
@@ -810,23 +839,29 @@ class StarfieldPainter extends CustomPainter {
     final random = math.Random(42); // Fixed seed for consistent stars
     return List.generate(100, (index) {
       return Offset(
-        random.nextDouble() * 400,
-        random.nextDouble() * 600,
+        random.nextDouble(),
+        random.nextDouble(),
       );
     });
   }
 
   @override
   void paint(Canvas canvas, Size size) {
+    // Don't paint if size is invalid
+    if (size.width <= 0 || size.height <= 0) {
+      return;
+    }
+
     final paint = Paint()
       ..color = Colors.white.withOpacity(0.7)
       ..style = PaintingStyle.fill;
 
     for (final star in stars) {
-      final y = (star.dy + animationValue * 50) % size.height;
+      final x = star.dx * size.width;
+      final y = (star.dy * size.height + animationValue * 50) % size.height;
       canvas.drawCircle(
-        Offset(star.dx, y),
-        math.Random(star.dx.toInt()).nextDouble() * 2 + 1,
+        Offset(x, y),
+        math.Random((star.dx * 1000).toInt()).nextDouble() * 2 + 1,
         paint,
       );
     }
