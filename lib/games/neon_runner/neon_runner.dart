@@ -384,6 +384,15 @@ class _NeonRunnerScreenState extends State<NeonRunnerScreen>
                       TapDownDetails(globalPosition: details.globalPosition)),
                   onPanEnd: (details) => _handleTapUp(),
                   onPanCancel: _handleTapUp,
+                  // Add a GestureDetector to detect taps on the face area
+                  onTap: () {
+                    // Trigger an animation or change in the face's appearance
+                    setState(() {
+                      // Example: Toggle a boolean to change face expression
+                      _gameState = _gameState.copyWith(
+                          faceExpression: !_gameState.faceExpression);
+                    });
+                  },
                   child: Container(
                     width: double.infinity,
                     height: double.infinity,

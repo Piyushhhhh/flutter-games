@@ -419,10 +419,11 @@ class NeonRunnerPainter extends CustomPainter {
       highlightPaint,
     );
 
-    // Enhanced face
-    if (player.height > 35) {
-      _drawEnhancedFace(canvas, player);
-    }
+    // Draw face on the player
+    _drawFace(
+        canvas,
+        Offset(player.x + player.width / 2, player.y + player.height / 2),
+        player.width);
 
     // Enhanced running trail
     if (gameState.isPlaying) {
@@ -1390,6 +1391,55 @@ class NeonRunnerPainter extends CustomPainter {
       Offset(rect.right, rect.bottom - panel.brRadiusY),
       accentPaint,
     );
+  }
+
+  void _drawFace(Canvas canvas, Offset position, double size) {
+    final eyePaint = Paint()..color = Colors.black;
+    final eyeSize = size * 0.1;
+
+    // Change eye size based on faceExpression
+    final adjustedEyeSize = gameState.faceExpression ? eyeSize * 1.5 : eyeSize;
+
+    // Draw eyes
+    canvas.drawCircle(
+      Offset(position.dx - size * 0.2, position.dy - size * 0.2),
+      adjustedEyeSize,
+      eyePaint,
+    );
+    canvas.drawCircle(
+      Offset(position.dx + size * 0.2, position.dy - size * 0.2),
+      adjustedEyeSize,
+      eyePaint,
+    );
+
+    // Draw mouth
+    final mouthPaint = Paint()
+      ..color = Colors.black
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2;
+    final mouthWidth = size * 0.4;
+    final mouthPath = Path()
+      ..moveTo(position.dx - mouthWidth / 2, position.dy + size * 0.1)
+      ..quadraticBezierTo(
+        position.dx,
+        position.dy +
+            (gameState.faceExpression
+                ? size * 0.3
+                : size * 0.2), // Change mouth curve based on faceExpression
+        position.dx + mouthWidth / 2,
+        position.dy + size * 0.1,
+      );
+    canvas.drawPath(mouthPath, mouthPaint);
+  }
+
+  // Modify the existing drawing function to include the face
+  void _drawGreenBoxWithFace(Canvas canvas, Offset position, double size) {
+    final paint = Paint()..color = Colors.green;
+    canvas.drawRect(
+      Rect.fromCenter(center: position, width: size, height: size),
+      paint,
+    );
+    _drawFace(canvas, position, size);
   }
 
   @override

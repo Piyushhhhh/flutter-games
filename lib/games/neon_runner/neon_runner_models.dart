@@ -162,6 +162,7 @@ class NeonRunnerState {
   final double groundY;
   final double gameWidth;
   final double gameHeight;
+  final bool faceExpression; // Add this property to toggle face expressions
 
   const NeonRunnerState({
     required this.player,
@@ -174,6 +175,7 @@ class NeonRunnerState {
     required this.groundY,
     required this.gameWidth,
     required this.gameHeight,
+    this.faceExpression = false, // Initialize with default value
   });
 
   /// Create initial game state
@@ -205,6 +207,7 @@ class NeonRunnerState {
       groundY: groundY,
       gameWidth: gameWidth,
       gameHeight: gameHeight,
+      faceExpression: false, // Initialize with default value
     );
   }
 
@@ -220,6 +223,7 @@ class NeonRunnerState {
     double? groundY,
     double? gameWidth,
     double? gameHeight,
+    bool? faceExpression, // Add this parameter to copyWith
   }) {
     return NeonRunnerState(
       player: player ?? this.player,
@@ -232,6 +236,8 @@ class NeonRunnerState {
       groundY: groundY ?? this.groundY,
       gameWidth: gameWidth ?? this.gameWidth,
       gameHeight: gameHeight ?? this.gameHeight,
+      faceExpression:
+          faceExpression ?? this.faceExpression, // Copy the faceExpression
     );
   }
 
@@ -260,7 +266,9 @@ class NeonRunnerState {
         other.gameSpeed == gameSpeed &&
         other.groundY == groundY &&
         other.gameWidth == gameWidth &&
-        other.gameHeight == gameHeight;
+        other.gameHeight == gameHeight &&
+        other.faceExpression ==
+            faceExpression; // Add faceExpression to equality check
   }
 
   @override
@@ -274,5 +282,6 @@ class NeonRunnerState {
       gameSpeed.hashCode ^
       groundY.hashCode ^
       gameWidth.hashCode ^
-      gameHeight.hashCode;
+      gameHeight.hashCode ^
+      faceExpression.hashCode; // Add faceExpression to hashCode
 }
