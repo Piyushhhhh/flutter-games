@@ -456,40 +456,109 @@ class _SpaceInvadersScreenState extends State<SpaceInvadersScreen>
 
   Widget _buildGameStats() {
     return Container(
-      padding: const EdgeInsets.all(AppConstants.spacingM),
-      margin: const EdgeInsets.symmetric(horizontal: AppConstants.spacingM),
+      padding: const EdgeInsets.all(20),
+      margin: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.6),
-        borderRadius: BorderRadius.circular(AppConstants.radiusM),
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Colors.black.withOpacity(0.8),
+            Colors.black.withOpacity(0.6),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: const Color(0xFF00FFFF).withOpacity(0.5),
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF00FFFF).withOpacity(0.2),
+            blurRadius: 15,
+            spreadRadius: 1,
+          ),
+        ],
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      child: Stack(
         children: [
-          _buildStatItem('Score', _gameState.score.toString()),
-          _buildStatItem('Level', _gameState.level.toString()),
-          _buildStatItem('Lives', _gameState.lives.toString()),
+          // Scanlines overlay
+          CustomPaint(
+            size: Size(double.infinity, 80),
+            painter: ScanlinesPainter(),
+          ),
+          // Stats content
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _buildRetroStatItem('Score', _gameState.score.toString(),
+                  const Color(0xFF00FF00)),
+              _buildRetroStatItem('Level', _gameState.level.toString(),
+                  const Color(0xFF00FFFF)),
+              _buildRetroStatItem('Lives', _gameState.lives.toString(),
+                  const Color(0xFFFF0080)),
+            ],
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildStatItem(String label, String value) {
+  Widget _buildRetroStatItem(String label, String value, Color color) {
     return Column(
       children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: AppConstants.fontS,
-            color: Colors.white70,
-          ),
+        Stack(
+          children: [
+            // Glow effect for label
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 1.5,
+                foreground: Paint()
+                  ..color = color.withOpacity(0.6)
+                  ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4),
+              ),
+            ),
+            // Main label
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 1.5,
+                color: color,
+              ),
+            ),
+          ],
         ),
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: AppConstants.fontXL,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
+        const SizedBox(height: 8),
+        Stack(
+          children: [
+            // Glow effect for value
+            Text(
+              value,
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 1,
+                foreground: Paint()
+                  ..color = Colors.white.withOpacity(0.8)
+                  ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8),
+              ),
+            ),
+            // Main value
+            Text(
+              value,
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 1,
+                color: Colors.white,
+              ),
+            ),
+          ],
         ),
       ],
     );
@@ -505,10 +574,13 @@ class _SpaceInvadersScreenState extends State<SpaceInvadersScreen>
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            Color(0xFF0D1B2A),
-            Color(0xFF1B263B),
-            Color(0xFF2D3748),
+            Color(0xFF0A0A0A), // Deep black
+            Color(0xFF1A0033), // Dark purple
+            Color(0xFF2D1B69), // Electric purple
+            Color(0xFF0D001A), // Deep space purple
+            Color(0xFF000000), // Pure black
           ],
+          stops: [0.0, 0.3, 0.5, 0.8, 1.0],
         ),
       ),
       child: GestureDetector(
@@ -552,83 +624,531 @@ class _SpaceInvadersScreenState extends State<SpaceInvadersScreen>
 
   Widget _buildGameOverOverlay() {
     return Container(
-      color: Colors.black54,
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text(
-              'GAME OVER',
-              style: TextStyle(
-                fontSize: AppConstants.fontDisplay,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-            const SizedBox(height: AppConstants.spacingL),
-            Text(
-              'Final Score: ${_gameState.score}',
-              style: const TextStyle(
-                fontSize: AppConstants.fontXL,
-                color: Colors.white,
-              ),
-            ),
-            const SizedBox(height: AppConstants.spacingXL),
-            AnimatedGameButton(
-              text: 'Play Again',
-              icon: Icons.replay,
-              backgroundColor: AppTheme.primaryColor,
-              onPressed: () {
-                _resetGame();
-                _startGame();
-              },
-            ),
+      decoration: BoxDecoration(
+        gradient: RadialGradient(
+          center: Alignment.center,
+          radius: 1.0,
+          colors: [
+            Colors.black.withOpacity(0.8),
+            Colors.black.withOpacity(0.95),
           ],
         ),
       ),
+      child: Stack(
+        children: [
+          // Scanlines effect
+          Positioned.fill(
+            child: CustomPaint(
+              painter: ScanlinesPainter(),
+            ),
+          ),
+
+          // Main content
+          Center(
+            child: Container(
+              padding: const EdgeInsets.all(32),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.black.withOpacity(0.7),
+                    Colors.black.withOpacity(0.5),
+                  ],
+                ),
+                border: Border.all(
+                  color: const Color(0xFFFF0080).withOpacity(0.8),
+                  width: 2,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFFFF0080).withOpacity(0.3),
+                    blurRadius: 20,
+                    spreadRadius: 2,
+                  ),
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Flashing GAME OVER text
+                  AnimatedBuilder(
+                    animation: _gameController,
+                    builder: (context, child) {
+                      final flash =
+                          (math.sin(_gameController.value * 8 * math.pi) + 1) /
+                              2;
+                      return _buildGlowText(
+                        'GAME OVER',
+                        Color.lerp(const Color(0xFFFF0080),
+                            const Color(0xFFFF00FF), flash)!,
+                        48,
+                        FontWeight.w900,
+                        letterSpacing: 6,
+                      );
+                    },
+                  ),
+
+                  const SizedBox(height: 32),
+
+                  // Score display
+                  _buildGlowText(
+                    'FINAL SCORE',
+                    const Color(0xFF00FFFF),
+                    16,
+                    FontWeight.w600,
+                    letterSpacing: 2,
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // Animated score value
+                  AnimatedBuilder(
+                    animation: _gameController,
+                    builder: (context, child) {
+                      final pulse = 1.0 +
+                          math.sin(_gameController.value * 6 * math.pi) * 0.1;
+                      return Transform.scale(
+                        scale: pulse,
+                        child: _buildGlowText(
+                          '${_gameState.score}',
+                          const Color(0xFFFFFF00),
+                          36,
+                          FontWeight.w900,
+                          letterSpacing: 2,
+                        ),
+                      );
+                    },
+                  ),
+
+                  const SizedBox(height: 48),
+
+                  // Retro play again button
+                  _buildRetroPlayAgainButton(),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRetroPlayAgainButton() {
+    return AnimatedBuilder(
+      animation: _gameController,
+      builder: (context, child) {
+        final pulse =
+            1.0 + math.sin(_gameController.value * 4 * math.pi) * 0.08;
+        return Transform.scale(
+          scale: pulse,
+          child: GestureDetector(
+            onTap: () {
+              _resetGame();
+              _startGame();
+            },
+            child: Container(
+              width: 220,
+              height: 55,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    const Color(0xFF00FF00).withOpacity(0.8),
+                    const Color(0xFF00CC00).withOpacity(0.8),
+                  ],
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF00FF00).withOpacity(0.5),
+                    blurRadius: 20,
+                    spreadRadius: 2,
+                  ),
+                ],
+                border: Border.all(
+                  color: const Color(0xFF00FFFF).withOpacity(0.8),
+                  width: 2,
+                ),
+              ),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  // Button scanlines
+                  CustomPaint(
+                    size: const Size(220, 55),
+                    painter: ButtonScanlinesPainter(),
+                  ),
+                  // Button content
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.replay,
+                        color: Colors.black,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'PLAY AGAIN',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 2,
+                          color: Colors.black,
+                          shadows: [
+                            Shadow(
+                              color: const Color(0xFF00FF00).withOpacity(0.8),
+                              blurRadius: 8,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 
   Widget _buildStartGameOverlay() {
     return Container(
-      color: Colors.black54,
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(
-              Icons.rocket_launch,
-              size: AppConstants.iconXXXL,
-              color: Colors.white,
-            ),
-            const SizedBox(height: AppConstants.spacingL),
-            const Text(
-              'SPACE SHOOTER',
-              style: TextStyle(
-                fontSize: AppConstants.fontDisplay,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-            const SizedBox(height: AppConstants.spacingM),
-            const Text(
-              'Defend Earth from alien invasion!',
-              style: TextStyle(
-                fontSize: AppConstants.fontL,
-                color: Colors.white70,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: AppConstants.spacingXL),
-            AnimatedGameButton(
-              text: 'Start Game',
-              icon: Icons.play_arrow,
-              backgroundColor: AppTheme.primaryColor,
-              onPressed: _startGame,
-            ),
+      decoration: BoxDecoration(
+        gradient: RadialGradient(
+          center: Alignment.center,
+          radius: 1.5,
+          colors: [
+            Colors.black.withOpacity(0.7),
+            Colors.black.withOpacity(0.95),
           ],
         ),
       ),
+      child: Stack(
+        children: [
+          // Retro scanlines effect
+          Positioned.fill(
+            child: CustomPaint(
+              painter: ScanlinesPainter(),
+            ),
+          ),
+
+          // Main content
+          Center(
+            child: Container(
+              padding: const EdgeInsets.all(32),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Retro animated spaceship
+                  AnimatedBuilder(
+                    animation: _gameController,
+                    builder: (context, child) {
+                      return Transform.translate(
+                        offset: Offset(0,
+                            math.sin(_gameController.value * 2 * math.pi) * 8),
+                        child: _buildRetroSpaceship(),
+                      );
+                    },
+                  ),
+
+                  const SizedBox(height: 40),
+
+                  // Glowing title with retro effect
+                  _buildRetroTitle(),
+
+                  const SizedBox(height: 24),
+
+                  // Retro subtitle with typewriter effect
+                  _buildRetroSubtitle(),
+
+                  const SizedBox(height: 48),
+
+                  // Retro arcade button
+                  _buildRetroStartButton(),
+
+                  const SizedBox(height: 32),
+
+                  // Retro instructions
+                  _buildRetroInstructions(),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRetroSpaceship() {
+    return Container(
+      width: 120,
+      height: 120,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: RadialGradient(
+          colors: [
+            const Color(0xFF00FFFF).withOpacity(0.3),
+            Colors.transparent,
+          ],
+        ),
+      ),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          // Outer glow
+          Container(
+            width: 80,
+            height: 80,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF00FFFF).withOpacity(0.6),
+                  blurRadius: 20,
+                  spreadRadius: 5,
+                ),
+              ],
+            ),
+          ),
+          // Main spaceship
+          CustomPaint(
+            size: const Size(60, 60),
+            painter: RetroSpaceshipPainter(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRetroTitle() {
+    return AnimatedBuilder(
+      animation: _gameController,
+      builder: (context, child) {
+        final pulse = 1.0 + math.sin(_gameController.value * 4 * math.pi) * 0.1;
+        return Transform.scale(
+          scale: pulse,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              // Glow effect
+              Text(
+                'SPACE INVADERS',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 40,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 4,
+                  foreground: Paint()
+                    ..color = const Color(0xFF00FF00).withOpacity(0.8)
+                    ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 20),
+                ),
+              ),
+              // Main text
+              Text(
+                'SPACE INVADERS',
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 40,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 4,
+                  color: Color(0xFF00FF00),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildRetroSubtitle() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Column(
+        children: [
+          _buildGlowText(
+            'DEFEND EARTH FROM ALIEN INVASION!',
+            const Color(0xFF00FFFF),
+            16,
+            FontWeight.w600,
+            letterSpacing: 2,
+          ),
+          const SizedBox(height: 12),
+          _buildGlowText(
+            'CLASSIC ARCADE ACTION',
+            const Color(0xFFFF0080),
+            14,
+            FontWeight.w500,
+            letterSpacing: 1.5,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRetroStartButton() {
+    return AnimatedBuilder(
+      animation: _gameController,
+      builder: (context, child) {
+        final pulse =
+            1.0 + math.sin(_gameController.value * 3 * math.pi) * 0.05;
+        return Transform.scale(
+          scale: pulse,
+          child: GestureDetector(
+            onTap: _startGame,
+            child: Container(
+              width: 250,
+              height: 60,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    const Color(0xFF7C3AED).withOpacity(0.8),
+                    const Color(0xFF3B82F6).withOpacity(0.8),
+                  ],
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF7C3AED).withOpacity(0.5),
+                    blurRadius: 20,
+                    spreadRadius: 2,
+                  ),
+                ],
+                border: Border.all(
+                  color: const Color(0xFF00FFFF).withOpacity(0.8),
+                  width: 2,
+                ),
+              ),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  // Scanlines on button
+                  CustomPaint(
+                    size: const Size(250, 60),
+                    painter: ButtonScanlinesPainter(),
+                  ),
+                  // Button text
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.play_arrow,
+                        color: Colors.white,
+                        size: 24,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'START GAME',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 2,
+                          color: Colors.white,
+                          shadows: [
+                            Shadow(
+                              color: const Color(0xFF00FFFF).withOpacity(0.8),
+                              blurRadius: 10,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildRetroInstructions() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: const Color(0xFF00FFFF).withOpacity(0.3),
+          width: 1,
+        ),
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Colors.black.withOpacity(0.3),
+            Colors.black.withOpacity(0.1),
+          ],
+        ),
+      ),
+      child: Column(
+        children: [
+          _buildGlowText(
+            'CONTROLS',
+            const Color(0xFFFFFF00),
+            14,
+            FontWeight.w700,
+            letterSpacing: 2,
+          ),
+          const SizedBox(height: 12),
+          _buildGlowText(
+            'TAP TO MOVE • AUTO-FIRE ENABLED',
+            const Color(0xFF00FFFF),
+            12,
+            FontWeight.w500,
+            letterSpacing: 1,
+          ),
+          const SizedBox(height: 4),
+          _buildGlowText(
+            'SURVIVE THE ALIEN INVASION!',
+            const Color(0xFFFF0080),
+            12,
+            FontWeight.w500,
+            letterSpacing: 1,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGlowText(
+      String text, Color color, double fontSize, FontWeight fontWeight,
+      {double letterSpacing = 0}) {
+    return Stack(
+      children: [
+        // Glow effect
+        Text(
+          text,
+          style: TextStyle(
+            fontSize: fontSize,
+            fontWeight: fontWeight,
+            letterSpacing: letterSpacing,
+            foreground: Paint()
+              ..color = color.withOpacity(0.8)
+              ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8),
+          ),
+          textAlign: TextAlign.center,
+        ),
+        // Main text
+        Text(
+          text,
+          style: TextStyle(
+            fontSize: fontSize,
+            fontWeight: fontWeight,
+            letterSpacing: letterSpacing,
+            color: color,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ],
     );
   }
 }
@@ -878,4 +1398,110 @@ class StarfieldPainter extends CustomPainter {
   bool shouldRepaint(StarfieldPainter oldDelegate) {
     return oldDelegate.animationValue != animationValue;
   }
+}
+
+// Retro UI painters
+class ScanlinesPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = const Color(0xFF00FFFF).withOpacity(0.1)
+      ..strokeWidth = 1;
+
+    // Draw horizontal scanlines
+    for (double y = 0; y < size.height; y += 4) {
+      canvas.drawLine(
+        Offset(0, y),
+        Offset(size.width, y),
+        paint,
+      );
+    }
+
+    // Add vertical lines for CRT effect
+    final verticalPaint = Paint()
+      ..color = const Color(0xFF00FF00).withOpacity(0.05)
+      ..strokeWidth = 1;
+
+    for (double x = 0; x < size.width; x += 3) {
+      canvas.drawLine(
+        Offset(x, 0),
+        Offset(x, size.height),
+        verticalPaint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class RetroSpaceshipPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final centerX = size.width / 2;
+    final centerY = size.height / 2;
+
+    // Main body paint
+    final bodyPaint = Paint()
+      ..color = const Color(0xFF00FFFF)
+      ..style = PaintingStyle.fill;
+
+    final glowPaint = Paint()
+      ..color = const Color(0xFF00FFFF).withOpacity(0.3)
+      ..style = PaintingStyle.fill
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5);
+
+    // Draw spaceship body
+    final bodyPath = Path();
+    bodyPath.moveTo(centerX, centerY - 20);
+    bodyPath.lineTo(centerX - 12, centerY + 15);
+    bodyPath.lineTo(centerX - 6, centerY + 10);
+    bodyPath.lineTo(centerX + 6, centerY + 10);
+    bodyPath.lineTo(centerX + 12, centerY + 15);
+    bodyPath.close();
+
+    // Draw glow first
+    canvas.drawPath(bodyPath, glowPaint);
+    canvas.drawPath(bodyPath, bodyPaint);
+
+    // Draw engine flames
+    final flamePaint = Paint()
+      ..color = const Color(0xFFFF0080)
+      ..style = PaintingStyle.fill;
+
+    canvas.drawCircle(Offset(centerX, centerY + 18), 3, flamePaint);
+    canvas.drawCircle(Offset(centerX - 8, centerY + 16), 2, flamePaint);
+    canvas.drawCircle(Offset(centerX + 8, centerY + 16), 2, flamePaint);
+
+    // Draw cockpit
+    final cockpitPaint = Paint()
+      ..color = const Color(0xFF00FF00)
+      ..style = PaintingStyle.fill;
+
+    canvas.drawCircle(Offset(centerX, centerY - 5), 4, cockpitPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class ButtonScanlinesPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.white.withOpacity(0.1)
+      ..strokeWidth = 1;
+
+    // Draw horizontal scanlines on button
+    for (double y = 0; y < size.height; y += 3) {
+      canvas.drawLine(
+        Offset(0, y),
+        Offset(size.width, y),
+        paint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
