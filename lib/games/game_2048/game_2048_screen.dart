@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'dart:math' as math;
 import '../../models/game_models.dart';
 import '../../core/constants/app_constants.dart';
-import '../../core/theme/app_theme.dart';
+
 import 'game_2048_controller.dart';
 
 class Game2048Screen extends StatefulWidget {

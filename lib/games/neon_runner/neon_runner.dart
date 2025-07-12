@@ -25,7 +25,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/scheduler.dart';
 import 'dart:async';
-import '../../widgets/common_widgets.dart';
 import 'neon_runner_models.dart';
 import 'neon_runner_controller.dart';
 import 'neon_runner_painter.dart';
@@ -44,6 +43,12 @@ class _NeonRunnerScreenState extends State<NeonRunnerScreen>
   late Ticker _ticker;
   DateTime _lastFrameTime = DateTime.now();
 
+  // Retro animation controllers
+  late AnimationController _neonGlowController;
+  late AnimationController _scanlineController;
+  late Animation<double> _neonGlowAnimation;
+  late Animation<double> _scanlineAnimation;
+
   // Input handling
   bool _isPressed = false;
   bool _isDuckPressed = false;
@@ -52,13 +57,48 @@ class _NeonRunnerScreenState extends State<NeonRunnerScreen>
   void initState() {
     super.initState();
     _controller = NeonRunnerController();
+    _initializeRetroAnimations();
     _initializeGame();
     _setupGameLoop();
+  }
+
+  void _initializeRetroAnimations() {
+    // Neon glow pulse animation
+    _neonGlowController = AnimationController(
+      duration: const Duration(milliseconds: 2000),
+      vsync: this,
+    );
+    _neonGlowAnimation = Tween<double>(
+      begin: 0.5,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _neonGlowController,
+      curve: Curves.easeInOut,
+    ));
+
+    // Scanline animation
+    _scanlineController = AnimationController(
+      duration: const Duration(milliseconds: 3000),
+      vsync: this,
+    );
+    _scanlineAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _scanlineController,
+      curve: Curves.linear,
+    ));
+
+    // Start animations
+    _neonGlowController.repeat(reverse: true);
+    _scanlineController.repeat();
   }
 
   @override
   void dispose() {
     _ticker.dispose();
+    _neonGlowController.dispose();
+    _scanlineController.dispose();
     super.dispose();
   }
 
@@ -110,12 +150,6 @@ class _NeonRunnerScreenState extends State<NeonRunnerScreen>
     if (!_ticker.isActive) {
       _lastFrameTime = DateTime.now();
       _ticker.start();
-    }
-  }
-
-  void _stopGameLoop() {
-    if (_ticker.isActive) {
-      _ticker.stop();
     }
   }
 
@@ -195,15 +229,94 @@ class _NeonRunnerScreenState extends State<NeonRunnerScreen>
     }
   }
 
+  PreferredSizeWidget _buildRetroAppBar() {
+    return PreferredSize(
+      preferredSize: const Size.fromHeight(kToolbarHeight),
+      child: AnimatedBuilder(
+        animation: _neonGlowAnimation,
+        builder: (context, child) {
+          return AppBar(
+            backgroundColor: const Color(0xFF0D001A),
+            foregroundColor: const Color(0xFF00FFFF),
+            elevation: 0,
+            leading: IconButton(
+              icon: Icon(
+                Icons.arrow_back,
+                color: Color(0xFF00FFFF).withOpacity(_neonGlowAnimation.value),
+                size: 28,
+              ),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            title: Text(
+              'NEON RUNNER',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF00FFFF).withOpacity(_neonGlowAnimation.value),
+                shadows: [
+                  Shadow(
+                    color: Color(0xFF00FFFF)
+                        .withOpacity(_neonGlowAnimation.value * 0.8),
+                    blurRadius: 10,
+                  ),
+                  Shadow(
+                    color: Color(0xFF00FFFF)
+                        .withOpacity(_neonGlowAnimation.value * 0.4),
+                    blurRadius: 20,
+                  ),
+                ],
+              ),
+            ),
+            flexibleSpace: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    const Color(0xFF0D001A),
+                    const Color(0xFF1A0033),
+                    const Color(0xFF2D1B69),
+                  ],
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Color(0xFF00FFFF)
+                        .withOpacity(_neonGlowAnimation.value * 0.3),
+                    blurRadius: 15,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildScanlineOverlay(BoxConstraints constraints) {
+    return AnimatedBuilder(
+      animation: _scanlineAnimation,
+      builder: (context, child) {
+        return IgnorePointer(
+          child: SizedBox.expand(
+            child: CustomPaint(
+              painter: _RetroScanlinePainter(
+                progress: _scanlineAnimation.value,
+                glowIntensity: _neonGlowAnimation.value,
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0a0a0a),
-      appBar: GameAppBar(
-        title: 'Neon Runner',
-        backgroundColor: const Color(0xFF1a1a2e),
-        foregroundColor: const Color(0xFF00FFFF),
-      ),
+      backgroundColor: const Color(0xFF000000),
+      appBar: _buildRetroAppBar(),
       body: Focus(
         autofocus: true,
         onKeyEvent: (node, event) {
@@ -225,39 +338,109 @@ class _NeonRunnerScreenState extends State<NeonRunnerScreen>
               });
             }
 
-            return GestureDetector(
-              onTapDown: _handleTapDown,
-              onTapUp: (_) => _handleTapUp(),
-              onTapCancel: _handleTapUp,
-              // Add pan gestures for better touch response
-              onPanDown: (details) => _handleTapDown(
-                  TapDownDetails(globalPosition: details.globalPosition)),
-              onPanEnd: (details) => _handleTapUp(),
-              onPanCancel: _handleTapUp,
-              child: Container(
-                width: double.infinity,
-                height: double.infinity,
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Color(0xFF0a0a0a),
-                      Color(0xFF1a1a2e),
-                    ],
+            return Stack(
+              children: [
+                // Main game area
+                GestureDetector(
+                  onTapDown: _handleTapDown,
+                  onTapUp: (_) => _handleTapUp(),
+                  onTapCancel: _handleTapUp,
+                  // Add pan gestures for better touch response
+                  onPanDown: (details) => _handleTapDown(
+                      TapDownDetails(globalPosition: details.globalPosition)),
+                  onPanEnd: (details) => _handleTapUp(),
+                  onPanCancel: _handleTapUp,
+                  child: Container(
+                    width: double.infinity,
+                    height: double.infinity,
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Color(0xFF0D001A), // Deep purple night
+                          Color(0xFF1A0033), // Purple-black
+                          Color(0xFF2D1B69), // Electric purple
+                          Color(0xFF0F0F23), // Dark blue
+                        ],
+                        stops: [0.0, 0.3, 0.7, 1.0],
+                      ),
+                    ),
+                    child: RepaintBoundary(
+                      child: CustomPaint(
+                        painter: NeonRunnerPainter(gameState: _gameState),
+                        size: Size(constraints.maxWidth, constraints.maxHeight),
+                      ),
+                    ),
                   ),
                 ),
-                child: RepaintBoundary(
-                  child: CustomPaint(
-                    painter: NeonRunnerPainter(gameState: _gameState),
-                    size: Size(constraints.maxWidth, constraints.maxHeight),
-                  ),
-                ),
-              ),
+                // Retro scanline overlay
+                _buildScanlineOverlay(constraints),
+              ],
             );
           },
         ),
       ),
     );
+  }
+}
+
+// Retro scanline effect painter
+class _RetroScanlinePainter extends CustomPainter {
+  final double progress;
+  final double glowIntensity;
+
+  _RetroScanlinePainter({
+    required this.progress,
+    required this.glowIntensity,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // Draw horizontal scanlines across the screen
+    final scanlinePaint = Paint()
+      ..color = const Color(0xFF00FFFF).withOpacity(0.1 * glowIntensity)
+      ..style = PaintingStyle.fill;
+
+    // Static scanlines
+    for (double y = 0; y < size.height; y += 4) {
+      canvas.drawRect(
+        Rect.fromLTWH(0, y, size.width, 2),
+        scanlinePaint,
+      );
+    }
+
+    // Moving scanline
+    final movingScanlinePaint = Paint()
+      ..color = Color(0xFF00FFFF).withOpacity(0.3 * glowIntensity)
+      ..style = PaintingStyle.fill;
+
+    final scanlineY = size.height * progress;
+    canvas.drawRect(
+      Rect.fromLTWH(0, scanlineY - 1, size.width, 3),
+      movingScanlinePaint,
+    );
+
+    // Add subtle vignette effect for retro CRT feel
+    final vignettePaint = Paint()
+      ..shader = RadialGradient(
+        center: Alignment.center,
+        radius: 1.2,
+        colors: [
+          Colors.transparent,
+          Colors.black.withOpacity(0.3 * glowIntensity),
+        ],
+      ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
+
+    canvas.drawRect(
+      Rect.fromLTWH(0, 0, size.width, size.height),
+      vignettePaint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _RetroScanlinePainter oldDelegate) {
+    return progress != oldDelegate.progress ||
+        glowIntensity != oldDelegate.glowIntensity;
   }
 }

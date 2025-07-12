@@ -1,15 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'dart:math' as math;
-import '../core/constants/app_constants.dart';
-import '../core/theme/app_theme.dart';
-import '../widgets/common_widgets.dart';
-import '../models/game_models.dart';
 import '../games/tic_tac_toe/tic_tac_toe.dart';
 import '../games/game_2048/game_2048.dart';
 import '../games/space_invaders/space_invaders.dart';
 import '../games/neon_runner/neon_runner.dart';
-import '../games/cyber_quest/cyber_quest.dart';
 
 class GamesMenu extends StatefulWidget {
   const GamesMenu({super.key});
@@ -576,7 +570,7 @@ class _GamesMenuState extends State<GamesMenu> with TickerProviderStateMixin {
   }
 
   void _navigateToGame(String gameId) {
-    Widget? gameWidget;
+    late Widget gameWidget;
 
     switch (gameId) {
       case 'tic_tac_toe':
@@ -597,30 +591,28 @@ class _GamesMenuState extends State<GamesMenu> with TickerProviderStateMixin {
         return;
     }
 
-    if (gameWidget != null) {
-      Navigator.push(
-        context,
-        PageRouteBuilder(
-          pageBuilder: (context, animation, secondaryAnimation) => gameWidget!,
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            return SlideTransition(
-              position: Tween<Offset>(
-                begin: const Offset(1.0, 0.0),
-                end: Offset.zero,
-              ).animate(CurvedAnimation(
-                parent: animation,
-                curve: Curves.easeInOut,
-              )),
-              child: FadeTransition(
-                opacity: animation,
-                child: child,
-              ),
-            );
-          },
-          transitionDuration: const Duration(milliseconds: 600),
-        ),
-      );
-    }
+    Navigator.push(
+      context,
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => gameWidget,
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(1.0, 0.0),
+              end: Offset.zero,
+            ).animate(CurvedAnimation(
+              parent: animation,
+              curve: Curves.easeInOut,
+            )),
+            child: FadeTransition(
+              opacity: animation,
+              child: child,
+            ),
+          );
+        },
+        transitionDuration: const Duration(milliseconds: 600),
+      ),
+    );
   }
 
   void _showRetroComingSoonDialog(String gameName) {

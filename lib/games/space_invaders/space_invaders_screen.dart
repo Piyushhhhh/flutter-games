@@ -32,7 +32,6 @@ class _SpaceInvadersScreenState extends State<SpaceInvadersScreen>
   DateTime _lastShot = DateTime.now();
 
   // Game constants
-  static const double _playerSpeed = 200.0;
   static const double _bulletSpeed = 300.0;
   static const double _enemySpeed = 80.0;
   static const double _shootCooldown = 0.3; // seconds for auto-shooting

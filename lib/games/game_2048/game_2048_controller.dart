@@ -80,8 +80,7 @@ class Game2048Controller extends ChangeNotifier {
     int scoreGained = 0;
     bool moved = false;
 
-    // Get movement vectors
-    final (rowDirection, colDirection) = _getMovementVectors(direction);
+    // Movement vectors are handled internally by tile movement logic
 
     // Determine traversal order
     final traversals = _buildTraversals(direction);
