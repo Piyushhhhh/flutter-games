@@ -1004,12 +1004,12 @@ class _Game2048ScreenState extends State<Game2048Screen>
           ),
         ],
       ),
-      child: Column(
+      child: const Column(
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
+              Icon(
                 Icons.swipe,
                 color: Color(0xFF06B6D4),
                 size: 24,
@@ -1020,8 +1020,8 @@ class _Game2048ScreenState extends State<Game2048Screen>
                   ),
                 ],
               ),
-              const SizedBox(width: 12),
-              const Text(
+              SizedBox(width: 12),
+              Text(
                 'Swipe to move tiles',
                 style: TextStyle(
                   color: Color(0xFF06B6D4),
@@ -1038,8 +1038,8 @@ class _Game2048ScreenState extends State<Game2048Screen>
               ),
             ],
           ),
-          const SizedBox(height: 8),
-          const Text(
+          SizedBox(height: 8),
+          Text(
             'Join numbers to reach 2048!',
             style: TextStyle(
               color: Color(0xFFCCCCCC),
@@ -1220,11 +1220,11 @@ class _Game2048ScreenState extends State<Game2048Screen>
                       ),
                     ),
                     const SizedBox(width: 16),
-                    Expanded(
+                    const Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                          Text(
                             'Master 2048',
                             style: TextStyle(
                               color: Color(0xFF06B6D4),
@@ -1239,8 +1239,8 @@ class _Game2048ScreenState extends State<Game2048Screen>
                               ],
                             ),
                           ),
-                          const SizedBox(height: 4),
-                          const Text(
+                          SizedBox(height: 4),
+                          Text(
                             'Learn the rules & strategies',
                             style: TextStyle(
                               color: Color(0xFFB3B3B3),
@@ -1373,13 +1373,13 @@ class _Game2048ScreenState extends State<Game2048Screen>
                           child: InkWell(
                             onTap: () => Navigator.of(context).pop(),
                             borderRadius: BorderRadius.circular(16),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
+                            child: const Padding(
+                              padding: EdgeInsets.symmetric(
                                   horizontal: 24, vertical: 16),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  const Icon(
+                                  Icon(
                                     Icons.play_arrow,
                                     color: Colors.white,
                                     size: 24,
@@ -1390,8 +1390,8 @@ class _Game2048ScreenState extends State<Game2048Screen>
                                       ),
                                     ],
                                   ),
-                                  const SizedBox(width: 12),
-                                  const Text(
+                                  SizedBox(width: 12),
+                                  Text(
                                     'Start Playing!',
                                     style: TextStyle(
                                       color: Colors.white,

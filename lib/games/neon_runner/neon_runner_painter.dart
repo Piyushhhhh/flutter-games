@@ -132,7 +132,7 @@ class NeonRunnerPainter extends CustomPainter {
       final y = random.nextDouble() * size.height * 0.5;
       final brightness = random.nextDouble();
 
-      _starPaint.color = Color(0xFFFFFFFF).withOpacity(brightness * 0.8);
+      _starPaint.color = const Color(0xFFFFFFFF).withOpacity(brightness * 0.8);
       canvas.drawCircle(Offset(x, y), 1, _starPaint);
     }
   }
@@ -328,7 +328,7 @@ class NeonRunnerPainter extends CustomPainter {
         player.height,
       );
 
-      _trailPaint.color = Color(0xFF00FF00).withOpacity(0.3 / (i + 1));
+      _trailPaint.color = const Color(0xFF00FF00).withOpacity(0.3 / (i + 1));
       canvas.drawRRect(
         RRect.fromRectAndRadius(trailRect, const Radius.circular(8)),
         _trailPaint,
@@ -382,9 +382,9 @@ class NeonRunnerPainter extends CustomPainter {
   }
 
   void _drawGameOverMessage(Canvas canvas, Size size) {
-    final gameOverText = TextSpan(
+    const gameOverText = TextSpan(
       text: 'GAME OVER',
-      style: const TextStyle(
+      style: TextStyle(
         color: Color(0xFFFF0080),
         fontSize: 32,
         fontWeight: FontWeight.bold,
@@ -406,9 +406,9 @@ class NeonRunnerPainter extends CustomPainter {
     gameOverTextPainter.paint(canvas, offset);
 
     // Restart message
-    final restartText = TextSpan(
+    const restartText = TextSpan(
       text: 'TAP TO RESTART',
-      style: const TextStyle(
+      style: TextStyle(
         color: Color(0xFF00FFFF),
         fontSize: 16,
         fontWeight: FontWeight.bold,
@@ -431,9 +431,9 @@ class NeonRunnerPainter extends CustomPainter {
   }
 
   void _drawStartMessage(Canvas canvas, Size size) {
-    final startText = TextSpan(
+    const startText = TextSpan(
       text: 'NEON RUNNER',
-      style: const TextStyle(
+      style: TextStyle(
         color: Color(0xFF00FFFF),
         fontSize: 28,
         fontWeight: FontWeight.bold,
@@ -455,9 +455,9 @@ class NeonRunnerPainter extends CustomPainter {
     startTextPainter.paint(canvas, offset);
 
     // Instructions
-    final instructionsText = TextSpan(
+    const instructionsText = TextSpan(
       text: 'TAP TO JUMP • HOLD TO DUCK',
-      style: const TextStyle(
+      style: TextStyle(
         color: Color(0xFFFF0080),
         fontSize: 12,
         fontWeight: FontWeight.bold,
@@ -479,9 +479,9 @@ class NeonRunnerPainter extends CustomPainter {
     instructionsTextPainter.paint(canvas, instructionsOffset);
 
     // Start message
-    final tapText = TextSpan(
+    const tapText = TextSpan(
       text: 'TAP TO START',
-      style: const TextStyle(
+      style: TextStyle(
         color: Color(0xFF00FF00),
         fontSize: 16,
         fontWeight: FontWeight.bold,
