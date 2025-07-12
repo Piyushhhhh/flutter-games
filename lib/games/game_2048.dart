@@ -334,7 +334,7 @@ class _Game2048State extends State<Game2048> with TickerProviderStateMixin {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
-            _controller.isWon ? Icons.emoji_events : Icons.game_over,
+            _controller.isWon ? Icons.emoji_events : Icons.dangerous,
             size: 80,
             color: _controller.isWon ? Colors.amber : Colors.red,
           ),
