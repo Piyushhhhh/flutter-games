@@ -278,7 +278,7 @@ class TicTacToeBoard extends StatelessWidget {
       child: AspectRatio(
         aspectRatio: 1.0,
         child: GridView.builder(
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: TicTacToeConstants.boardSize,
             childAspectRatio: 1.0,
             crossAxisSpacing: TicTacToeConstants.gameGridSpacing,

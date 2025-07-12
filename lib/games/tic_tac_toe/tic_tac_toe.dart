@@ -17,6 +17,7 @@
 ///   MaterialPageRoute(builder: (context) => const TicTacToeScreen()),
 /// );
 /// ```
+library tic_tac_toe;
 
 // Export all public interfaces
 export 'tic_tac_toe_screen.dart';

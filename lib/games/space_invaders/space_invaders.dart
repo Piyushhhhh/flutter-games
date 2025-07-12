@@ -18,6 +18,7 @@
 ///   MaterialPageRoute(builder: (context) => const SpaceInvadersScreen()),
 /// );
 /// ```
+library space_invaders;
 
 /// Space Invaders Game Module
 ///

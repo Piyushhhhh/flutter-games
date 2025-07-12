@@ -1,4 +1,6 @@
 /// Game-related data models and enums
+library game_models;
+
 import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart'; // Added for Color
@@ -306,7 +308,7 @@ class TicTacToeGameState {
       gameMode: gameMode,
       state: GameState.initial,
       result: GameResult.ongoing,
-      moveHistory: [],
+      moveHistory: const [],
       difficulty: difficulty,
       isComputerThinking: false,
       gameDuration: Duration.zero,
@@ -771,7 +773,7 @@ class Game2048State {
       moves: 0,
       gameDuration: Duration.zero,
       state: GameState.playing,
-      history: [],
+      history: const [],
     );
   }
 

@@ -101,16 +101,16 @@ class NeonRunnerPainter extends CustomPainter {
 
   void _drawBackground(Canvas canvas, Size size) {
     // Use cached gradient
-    final gradient = LinearGradient(
+    const gradient = LinearGradient(
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
       colors: [
-        const Color(0xFF0a0a0a), // Dark night
-        const Color(0xFF1a1a2e), // Deep purple
-        const Color(0xFF16213e), // Dark blue
-        const Color(0xFF0f3460), // Darker blue
+        Color(0xFF0a0a0a), // Dark night
+        Color(0xFF1a1a2e), // Deep purple
+        Color(0xFF16213e), // Dark blue
+        Color(0xFF0f3460), // Darker blue
       ],
-      stops: const [0.0, 0.3, 0.7, 1.0],
+      stops: [0.0, 0.3, 0.7, 1.0],
     );
 
     _backgroundPaint.shader = gradient.createShader(

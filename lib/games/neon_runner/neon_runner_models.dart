@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 
 /// Enum for game state
 enum NeonRunnerGameState {
@@ -184,8 +183,8 @@ class NeonRunnerState {
     int highScore = 0,
   }) {
     final groundY = gameHeight * 0.8;
-    final playerWidth = 40.0;
-    final playerHeight = 60.0;
+    const playerWidth = 40.0;
+    const playerHeight = 60.0;
 
     return NeonRunnerState(
       player: Player(
@@ -197,8 +196,8 @@ class NeonRunnerState {
         isJumping: false,
         isDucking: false,
       ),
-      obstacles: [],
-      clouds: [],
+      obstacles: const [],
+      clouds: const [],
       gameState: NeonRunnerGameState.waiting,
       score: 0,
       highScore: highScore,

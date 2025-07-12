@@ -1009,28 +1009,28 @@ class _Game2048ScreenState extends State<Game2048Screen>
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
+              const Icon(
                 Icons.swipe,
-                color: const Color(0xFF06B6D4),
+                color: Color(0xFF06B6D4),
                 size: 24,
                 shadows: [
                   Shadow(
-                    color: const Color(0xFF06B6D4),
+                    color: Color(0xFF06B6D4),
                     blurRadius: 10,
                   ),
                 ],
               ),
               const SizedBox(width: 12),
-              Text(
+              const Text(
                 'Swipe to move tiles',
                 style: TextStyle(
-                  color: const Color(0xFF06B6D4),
+                  color: Color(0xFF06B6D4),
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                   letterSpacing: 1.0,
                   shadows: [
                     Shadow(
-                      color: const Color(0xFF06B6D4),
+                      color: Color(0xFF06B6D4),
                       blurRadius: 10,
                     ),
                   ],
@@ -1039,15 +1039,15 @@ class _Game2048ScreenState extends State<Game2048Screen>
             ],
           ),
           const SizedBox(height: 8),
-          Text(
+          const Text(
             'Join numbers to reach 2048!',
             style: TextStyle(
-              color: Colors.white.withOpacity(0.8),
+              color: Color(0xFFCCCCCC),
               fontSize: 14,
               fontWeight: FontWeight.w500,
               shadows: [
                 Shadow(
-                  color: const Color(0xFF00FFFF).withOpacity(0.5),
+                  color: Color(0x8000FFFF),
                   blurRadius: 5,
                 ),
               ],
@@ -1123,11 +1123,6 @@ class _Game2048ScreenState extends State<Game2048Screen>
   void _undo() {
     HapticFeedback.lightImpact();
     _controller.undo();
-  }
-
-  void _continueGame() {
-    HapticFeedback.lightImpact();
-    _controller.continueGame();
   }
 
   void _showHowToPlay() {
@@ -1229,26 +1224,26 @@ class _Game2048ScreenState extends State<Game2048Screen>
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
+                          const Text(
                             'Master 2048',
                             style: TextStyle(
-                              color: const Color(0xFF06B6D4),
+                              color: Color(0xFF06B6D4),
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
                               letterSpacing: 0.5,
                               shadows: [
                                 Shadow(
-                                  color: const Color(0xFF06B6D4),
+                                  color: Color(0xFF06B6D4),
                                   blurRadius: 15,
                                 ),
                               ],
                             ),
                           ),
                           const SizedBox(height: 4),
-                          Text(
+                          const Text(
                             'Learn the rules & strategies',
                             style: TextStyle(
-                              color: Colors.white.withOpacity(0.7),
+                              color: Color(0xFFB3B3B3),
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
                             ),
@@ -1396,7 +1391,7 @@ class _Game2048ScreenState extends State<Game2048Screen>
                                     ],
                                   ),
                                   const SizedBox(width: 12),
-                                  Text(
+                                  const Text(
                                     'Start Playing!',
                                     style: TextStyle(
                                       color: Colors.white,
@@ -1405,7 +1400,7 @@ class _Game2048ScreenState extends State<Game2048Screen>
                                       letterSpacing: 0.5,
                                       shadows: [
                                         Shadow(
-                                          color: const Color(0xFF10B981),
+                                          color: Color(0xFF10B981),
                                           blurRadius: 10,
                                         ),
                                       ],
@@ -1573,9 +1568,9 @@ class _Game2048ScreenState extends State<Game2048Screen>
                     const SizedBox(height: 4),
                     Text(
                       description,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 14,
-                        color: Colors.white.withOpacity(0.9),
+                        color: Color(0xFFE6E6E6),
                         fontWeight: FontWeight.w500,
                         height: 1.4,
                       ),
@@ -1612,9 +1607,9 @@ class _Game2048ScreenState extends State<Game2048Screen>
                 Expanded(
                   child: Text(
                     tip,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 12,
-                      color: Colors.white.withOpacity(0.7),
+                      color: Color(0xFFB3B3B3),
                       fontWeight: FontWeight.w500,
                       fontStyle: FontStyle.italic,
                       height: 1.3,

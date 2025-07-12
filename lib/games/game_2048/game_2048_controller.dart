@@ -142,20 +142,6 @@ class Game2048Controller extends ChangeNotifier {
     );
   }
 
-  /// Get movement vectors for direction
-  (int, int) _getMovementVectors(Direction direction) {
-    switch (direction) {
-      case Direction.up:
-        return (-1, 0);
-      case Direction.down:
-        return (1, 0);
-      case Direction.left:
-        return (0, -1);
-      case Direction.right:
-        return (0, 1);
-    }
-  }
-
   /// Build traversal orders for efficient movement
   ({List<int> rows, List<int> cols}) _buildTraversals(Direction direction) {
     final rows = List.generate(4, (i) => i);
@@ -279,7 +265,7 @@ class Game2048Controller extends ChangeNotifier {
 
   /// Get tile position as offset for animations
   Offset getTileOffset(Position position, double gridSize, double tileSize) {
-    final spacing = GameConstants.game2048GridSpacing;
+    const spacing = GameConstants.game2048GridSpacing;
     final x = position.col * (tileSize + spacing) + spacing;
     final y = position.row * (tileSize + spacing) + spacing;
     return Offset(x, y);
@@ -316,9 +302,4 @@ class Game2048Controller extends ChangeNotifier {
 
   /// Get game status message
   String get statusMessage => _state.statusMessage;
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
 }

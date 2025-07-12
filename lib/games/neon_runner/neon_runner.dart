@@ -20,6 +20,7 @@
 ///   MaterialPageRoute(builder: (context) => const NeonRunnerScreen()),
 /// );
 /// ```
+library neon_runner;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -242,7 +243,8 @@ class _NeonRunnerScreenState extends State<NeonRunnerScreen>
             leading: IconButton(
               icon: Icon(
                 Icons.arrow_back,
-                color: Color(0xFF00FFFF).withOpacity(_neonGlowAnimation.value),
+                color: const Color(0xFF00FFFF)
+                    .withOpacity(_neonGlowAnimation.value),
                 size: 28,
               ),
               onPressed: () => Navigator.of(context).pop(),
@@ -252,15 +254,16 @@ class _NeonRunnerScreenState extends State<NeonRunnerScreen>
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF00FFFF).withOpacity(_neonGlowAnimation.value),
+                color: const Color(0xFF00FFFF)
+                    .withOpacity(_neonGlowAnimation.value),
                 shadows: [
                   Shadow(
-                    color: Color(0xFF00FFFF)
+                    color: const Color(0xFF00FFFF)
                         .withOpacity(_neonGlowAnimation.value * 0.8),
                     blurRadius: 10,
                   ),
                   Shadow(
-                    color: Color(0xFF00FFFF)
+                    color: const Color(0xFF00FFFF)
                         .withOpacity(_neonGlowAnimation.value * 0.4),
                     blurRadius: 20,
                   ),
@@ -269,18 +272,18 @@ class _NeonRunnerScreenState extends State<NeonRunnerScreen>
             ),
             flexibleSpace: Container(
               decoration: BoxDecoration(
-                gradient: LinearGradient(
+                gradient: const LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    const Color(0xFF0D001A),
-                    const Color(0xFF1A0033),
-                    const Color(0xFF2D1B69),
+                    Color(0xFF0D001A),
+                    Color(0xFF1A0033),
+                    Color(0xFF2D1B69),
                   ],
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Color(0xFF00FFFF)
+                    color: const Color(0xFF00FFFF)
                         .withOpacity(_neonGlowAnimation.value * 0.3),
                     blurRadius: 15,
                     offset: const Offset(0, 2),
@@ -412,7 +415,7 @@ class _RetroScanlinePainter extends CustomPainter {
 
     // Moving scanline
     final movingScanlinePaint = Paint()
-      ..color = Color(0xFF00FFFF).withOpacity(0.3 * glowIntensity)
+      ..color = const Color(0xFF00FFFF).withOpacity(0.3 * glowIntensity)
       ..style = PaintingStyle.fill;
 
     final scanlineY = size.height * progress;

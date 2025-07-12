@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../core/constants/app_constants.dart';
 import 'tic_tac_toe_models.dart';
 import 'tic_tac_toe_constants.dart';
 import 'tic_tac_toe_game.dart';
@@ -611,9 +610,9 @@ class _TicTacToeScreenState extends State<TicTacToeScreen>
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
+                const Icon(
                   Icons.play_arrow,
-                  color: const Color(0xFF00FFFF),
+                  color: Color(0xFF00FFFF),
                   size: 24,
                 ),
                 const SizedBox(width: 8),
@@ -692,16 +691,16 @@ class _TicTacToeScreenState extends State<TicTacToeScreen>
       child: Column(
         children: [
           // Status header
-          Row(
+          const Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
+              Icon(
                 Icons.info_outline,
                 color: Color(0xFF00FFFF),
                 size: 18,
               ),
-              const SizedBox(width: 8),
-              const Text(
+              SizedBox(width: 8),
+              Text(
                 'GAME STATUS',
                 style: TextStyle(
                   fontSize: 12,
@@ -1116,39 +1115,6 @@ class _TicTacToeScreenState extends State<TicTacToeScreen>
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildGameStats() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        _buildStatItem('Moves', gameState.moveHistory.length.toString()),
-        _buildStatItem('X Wins', gameState.playerXScore.toString()),
-        _buildStatItem('O Wins', gameState.playerOScore.toString()),
-        _buildStatItem('Draws', gameState.drawCount.toString()),
-      ],
-    );
-  }
-
-  Widget _buildStatItem(String label, String value) {
-    return Column(
-      children: [
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: AppConstants.fontXL,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: AppConstants.fontM,
-            color: Colors.grey,
-          ),
-        ),
-      ],
     );
   }
 
@@ -1660,19 +1626,6 @@ class _TicTacToeScreenState extends State<TicTacToeScreen>
         ],
       ),
     );
-  }
-
-  Color? _getStatusColor() {
-    if (gameState.result == GameResult.playerXWins) {
-      return Theme.of(context).colorScheme.primary;
-    } else if (gameState.result == GameResult.playerOWins) {
-      return gameState.gameMode == GameMode.humanVsComputer
-          ? Theme.of(context).colorScheme.error
-          : Theme.of(context).colorScheme.primary;
-    } else if (gameState.result == GameResult.draw) {
-      return Theme.of(context).colorScheme.tertiary;
-    }
-    return null;
   }
 
   Color _getRetroStatusColor() {

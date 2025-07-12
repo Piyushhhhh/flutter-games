@@ -303,7 +303,7 @@ class TicTacToeGameState {
       gameMode: gameMode,
       state: GameState.initial,
       result: GameResult.ongoing,
-      moveHistory: [],
+      moveHistory: const [],
       difficulty: difficulty,
       isComputerThinking: false,
       gameDuration: Duration.zero,

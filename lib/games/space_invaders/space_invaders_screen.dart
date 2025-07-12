@@ -233,7 +233,7 @@ class _SpaceInvadersScreenState extends State<SpaceInvadersScreen>
     if (!_isGameActive || !_isPanning) return;
 
     final double deltaX = details.delta.dx;
-    final double sensitivity = 4.0;
+    const double sensitivity = 4.0;
 
     // Update velocity for smoother movement
     _panVelocity = deltaX * sensitivity;

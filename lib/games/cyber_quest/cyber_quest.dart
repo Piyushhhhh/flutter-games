@@ -18,6 +18,7 @@
 ///   MaterialPageRoute(builder: (context) => const CyberQuestScreen()),
 /// );
 /// ```
+library cyber_quest;
 
 import 'package:flutter/material.dart';
 import '../../widgets/common_widgets.dart';
@@ -32,11 +33,11 @@ class CyberQuestScreen extends StatefulWidget {
 class _CyberQuestScreenState extends State<CyberQuestScreen> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return const Scaffold(
       appBar: GameAppBar(
         title: 'Cyber Quest',
       ),
-      body: const Center(
+      body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [

@@ -68,29 +68,29 @@ class _RetroGameHubState extends State<RetroGameHub>
   int _currentPage = 0;
 
   final List<RetroPageData> _pages = [
-    RetroPageData(
+    const RetroPageData(
       title: 'GAMES',
       icon: Icons.videogame_asset,
-      color: const Color(0xFF00FFFF),
-      content: const GamesMenu(),
+      color: Color(0xFF00FFFF),
+      content: GamesMenu(),
     ),
-    RetroPageData(
+    const RetroPageData(
       title: 'STATS',
       icon: Icons.analytics,
-      color: const Color(0xFF00FF00),
-      content: const RetroStatsPage(),
+      color: Color(0xFF00FF00),
+      content: RetroStatsPage(),
     ),
-    RetroPageData(
+    const RetroPageData(
       title: 'PROFILE',
       icon: Icons.person,
-      color: const Color(0xFFFF0080),
-      content: const RetroProfilePage(),
+      color: Color(0xFFFF0080),
+      content: RetroProfilePage(),
     ),
-    RetroPageData(
+    const RetroPageData(
       title: 'CONFIG',
       icon: Icons.settings,
-      color: const Color(0xFFFFFF00),
-      content: const RetroSettingsPage(),
+      color: Color(0xFFFFFF00),
+      content: RetroSettingsPage(),
     ),
   ];
 
