@@ -92,11 +92,14 @@ class AppStrings {
   static const String computerThinking = 'Computer is thinking...';
 
   // Game Names
+  static const String spaceShooter = 'Space Shooter';
   static const String snakeGame = 'Snake Game';
   static const String game2048 = '2048';
   static const String memoryMatch = 'Memory Match';
 
   // Game Descriptions
+  static const String spaceShooterDescription =
+      'Defend Earth from alien invasion';
   static const String snakeDescription = 'Classic snake game';
   static const String game2048Description = 'Slide to combine numbers';
   static const String memoryDescription = 'Match the cards';

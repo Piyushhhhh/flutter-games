@@ -167,6 +167,8 @@ class GamesMenu extends StatelessWidget {
     switch (iconName) {
       case 'grid_3x3':
         return Icons.grid_3x3;
+      case 'rocket_launch':
+        return Icons.rocket_launch;
       case 'games':
         return Icons.games;
       case 'apps':
@@ -182,6 +184,8 @@ class GamesMenu extends StatelessWidget {
     switch (gameId) {
       case 'tic_tac_toe':
         return AppTheme.primaryColor;
+      case 'space_shooter':
+        return AppTheme.accentColor;
       case 'snake':
         return AppTheme.successColor;
       case '2048':
