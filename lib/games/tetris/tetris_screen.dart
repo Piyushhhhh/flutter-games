@@ -98,23 +98,30 @@ class _TetrisScreenState extends State<TetrisScreen>
             children: [
               _buildAppBar(),
               Expanded(
-                child: Row(
+                child: Stack(
                   children: [
-                    // Left panel - Hold and stats
-                    Expanded(
-                      flex: 2,
-                      child: _buildLeftPanel(),
+                    Row(
+                      children: [
+                        // Left panel - Hold and stats
+                        Expanded(
+                          flex: 2,
+                          child: _buildLeftPanel(),
+                        ),
+                        // Center - Game board
+                        Expanded(
+                          flex: 4,
+                          child: _buildGameBoard(),
+                        ),
+                        // Right panel - Next pieces and controls
+                        Expanded(
+                          flex: 2,
+                          child: _buildRightPanel(),
+                        ),
+                      ],
                     ),
-                    // Center - Game board
-                    Expanded(
-                      flex: 4,
-                      child: _buildGameBoard(),
-                    ),
-                    // Right panel - Next pieces and controls
-                    Expanded(
-                      flex: 2,
-                      child: _buildRightPanel(),
-                    ),
+                    // Game over overlay at higher level
+                    if (_controller.isGameOver) _buildGameOverlay(),
+                    if (_controller.isPaused) _buildPauseOverlay(),
                   ],
                 ),
               ),
@@ -350,7 +357,7 @@ class _TetrisScreenState extends State<TetrisScreen>
   Widget _buildStatCard(
       String label, String value, Color color, IconData icon) {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
@@ -376,15 +383,15 @@ class _TetrisScreenState extends State<TetrisScreen>
           Icon(
             icon,
             color: color,
-            size: 20,
+            size: 16,
             shadows: [
               Shadow(
                 color: color,
-                blurRadius: 10,
+                blurRadius: 8,
               ),
             ],
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 6),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -392,16 +399,17 @@ class _TetrisScreenState extends State<TetrisScreen>
                 Text(
                   label,
                   style: TextStyle(
-                    fontSize: 10,
+                    fontSize: 8,
                     fontWeight: FontWeight.w600,
                     color: color,
-                    letterSpacing: 1.0,
+                    letterSpacing: 0.8,
                   ),
                 ),
+                const SizedBox(height: 2),
                 Text(
                   value,
                   style: const TextStyle(
-                    fontSize: 16,
+                    fontSize: 14,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
                   ),
@@ -450,13 +458,7 @@ class _TetrisScreenState extends State<TetrisScreen>
             ),
           ],
         ),
-        child: Stack(
-          children: [
-            _buildBoard(),
-            if (_controller.isGameOver) _buildGameOverlay(),
-            if (_controller.isPaused) _buildPauseOverlay(),
-          ],
-        ),
+        child: _buildBoard(),
       ),
     );
   }
@@ -818,114 +820,519 @@ class _TetrisScreenState extends State<TetrisScreen>
     return AnimatedBuilder(
       animation: _pulseAnimation,
       builder: (context, child) {
-        return Transform.scale(
-          scale: _pulseAnimation.value,
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Colors.black.withOpacity(0.9),
-                  const Color(0xFF1A0A1A).withOpacity(0.95),
-                ],
-              ),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: const Color(0xFFFF0066).withOpacity(0.7),
-                width: 2,
-              ),
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFFFF0066), Color(0xFFFF0033)],
-                    ),
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFFFF0066).withOpacity(0.5),
-                        blurRadius: 30,
-                        spreadRadius: 10,
-                      ),
-                    ],
-                  ),
-                  child: const Icon(
-                    Icons.gamepad,
-                    size: 60,
-                    color: Colors.white,
-                    shadows: [
-                      Shadow(
-                        color: Color(0xFFFF0066),
-                        blurRadius: 20,
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 24),
-                const Text(
-                  'GAME OVER',
-                  style: TextStyle(
-                    color: Color(0xFFFF0066),
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 2.0,
-                    shadows: [
-                      Shadow(
-                        color: Color(0xFFFF0066),
-                        blurRadius: 20,
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'Score: ${_controller.stats.score}',
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.9),
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    shadows: const [
-                      Shadow(
-                        color: Color(0xFFFF0066),
-                        blurRadius: 10,
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 32),
-                ElevatedButton(
-                  onPressed: _controller.newGame,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFFF0066),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 32, vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  ),
-                  child: const Text(
-                    'PLAY AGAIN',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                      letterSpacing: 1.0,
-                    ),
-                  ),
-                ),
+        return Container(
+          margin: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.black.withOpacity(0.98),
+                const Color(0xFF0A0A0A).withOpacity(0.95),
+                const Color(0xFF1A0619).withOpacity(0.98),
+                Colors.black.withOpacity(0.98),
               ],
             ),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color: const Color(0xFFFF0066).withOpacity(0.6),
+              width: 2,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFFFF0066).withOpacity(0.4),
+                blurRadius: 50,
+                spreadRadius: 10,
+              ),
+              BoxShadow(
+                color: const Color(0xFF00FFFF).withOpacity(0.2),
+                blurRadius: 30,
+                spreadRadius: 5,
+              ),
+            ],
+          ),
+          child: Stack(
+            children: [
+              // Retro scanlines effect
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(22),
+                  color: Colors.black.withOpacity(0.1),
+                  backgroundBlendMode: BlendMode.overlay,
+                ),
+                child: CustomPaint(
+                  painter: RetroScanlinesPainter(),
+                  size: Size.infinite,
+                ),
+              ),
+
+              // Main content
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // Retro "GAME OVER" title
+                    AnimatedBuilder(
+                      animation: _pulseAnimation,
+                      builder: (context, child) {
+                        return Container(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 16, horizontal: 24),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                const Color(0xFFFF0066).withOpacity(0.2),
+                                const Color(0xFFFF0033).withOpacity(0.1),
+                                const Color(0xFFFF0066).withOpacity(0.2),
+                              ],
+                            ),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: const Color(0xFFFF0066).withOpacity(0.8),
+                              width: 2,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFFFF0066).withOpacity(0.3),
+                                blurRadius: 20,
+                                spreadRadius: 3,
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            children: [
+                              // "GAME OVER" text with retro effect
+                              Transform.scale(
+                                scale: _pulseAnimation.value,
+                                child: ShaderMask(
+                                  shaderCallback: (bounds) => LinearGradient(
+                                    colors: [
+                                      const Color(0xFFFF0066),
+                                      const Color(0xFFFF3399),
+                                      const Color(0xFFFF0066),
+                                    ],
+                                  ).createShader(bounds),
+                                  child: Text(
+                                    'GAME OVER',
+                                    style: TextStyle(
+                                      fontSize: 28,
+                                      fontWeight: FontWeight.w900,
+                                      color: Colors.white,
+                                      letterSpacing: 3.0,
+                                      shadows: [
+                                        Shadow(
+                                          color: const Color(0xFFFF0066),
+                                          blurRadius: 15,
+                                          offset: Offset(0, 2),
+                                        ),
+                                        Shadow(
+                                          color: const Color(0xFFFF0066)
+                                              .withOpacity(0.5),
+                                          blurRadius: 25,
+                                          offset: Offset(0, 4),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+
+                              const SizedBox(height: 8),
+
+                              // Retro subtitle
+                              Text(
+                                'SYSTEM FAILURE',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color:
+                                      const Color(0xFFFF0066).withOpacity(0.8),
+                                  letterSpacing: 2.0,
+                                  shadows: [
+                                    Shadow(
+                                      color: const Color(0xFFFF0066)
+                                          .withOpacity(0.5),
+                                      blurRadius: 8,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    // Score display with retro CRT effect
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            const Color(0xFF0A0A0A).withOpacity(0.9),
+                            const Color(0xFF1A1A1A).withOpacity(0.8),
+                            const Color(0xFF0A0A0A).withOpacity(0.9),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: const Color(0xFF00FFFF).withOpacity(0.5),
+                          width: 1,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF00FFFF).withOpacity(0.3),
+                            blurRadius: 15,
+                            spreadRadius: 2,
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        children: [
+                          // Score
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.stars,
+                                size: 20,
+                                color: const Color(0xFF00FFFF),
+                                shadows: [
+                                  Shadow(
+                                    color: const Color(0xFF00FFFF),
+                                    blurRadius: 10,
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'FINAL SCORE',
+                                style: TextStyle(
+                                  color: const Color(0xFF00FFFF),
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  letterSpacing: 1.5,
+                                  shadows: [
+                                    Shadow(
+                                      color: const Color(0xFF00FFFF),
+                                      blurRadius: 8,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+
+                          // Animated score
+                          AnimatedBuilder(
+                            animation: _pulseAnimation,
+                            builder: (context, child) {
+                              return Transform.scale(
+                                scale:
+                                    1.0 + (_pulseAnimation.value - 1.0) * 0.3,
+                                child: ShaderMask(
+                                  shaderCallback: (bounds) => LinearGradient(
+                                    colors: [
+                                      const Color(0xFF00FFFF),
+                                      const Color(0xFF00CCFF),
+                                      const Color(0xFF00FFFF),
+                                    ],
+                                  ).createShader(bounds),
+                                  child: Text(
+                                    '${_controller.stats.score}',
+                                    style: TextStyle(
+                                      fontSize: 36,
+                                      fontWeight: FontWeight.w900,
+                                      color: Colors.white,
+                                      letterSpacing: 2.0,
+                                      shadows: [
+                                        Shadow(
+                                          color: const Color(0xFF00FFFF),
+                                          blurRadius: 20,
+                                          offset: Offset(0, 2),
+                                        ),
+                                        Shadow(
+                                          color: const Color(0xFF00FFFF)
+                                              .withOpacity(0.5),
+                                          blurRadius: 30,
+                                          offset: Offset(0, 4),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+
+                          const SizedBox(height: 16),
+
+                          // Stats grid
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              _buildRetroStat(
+                                  'LVL',
+                                  '${_controller.stats.level}',
+                                  const Color(0xFF00FF00)),
+                              _buildRetroStat(
+                                  'LINES',
+                                  '${_controller.stats.lines}',
+                                  const Color(0xFFFF8000)),
+                              _buildRetroStat(
+                                  'BLOCKS',
+                                  '${_controller.stats.pieces}',
+                                  const Color(0xFF8B5CF6)),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    // Retro action buttons
+                    Column(
+                      children: [
+                        // NEW GAME button
+                        Container(
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                const Color(0xFFFF0066),
+                                const Color(0xFFFF0033),
+                                const Color(0xFFFF0066),
+                              ],
+                            ),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: const Color(0xFFFF0066).withOpacity(0.8),
+                              width: 2,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFFFF0066).withOpacity(0.5),
+                                blurRadius: 25,
+                                spreadRadius: 3,
+                              ),
+                              BoxShadow(
+                                color: const Color(0xFFFF0066).withOpacity(0.3),
+                                blurRadius: 40,
+                                spreadRadius: 6,
+                              ),
+                            ],
+                          ),
+                          child: Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              onTap: _controller.newGame,
+                              borderRadius: BorderRadius.circular(14),
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 16),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.refresh,
+                                      size: 20,
+                                      color: Colors.white,
+                                      shadows: [
+                                        Shadow(
+                                          color: const Color(0xFFFF0066),
+                                          blurRadius: 12,
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Text(
+                                      'NEW GAME',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w800,
+                                        letterSpacing: 2.0,
+                                        shadows: [
+                                          Shadow(
+                                            color: const Color(0xFFFF0066),
+                                            blurRadius: 15,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 12),
+
+                        // EXIT button
+                        Container(
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                const Color(0xFF333333).withOpacity(0.8),
+                                const Color(0xFF1A1A1A).withOpacity(0.9),
+                                const Color(0xFF333333).withOpacity(0.8),
+                              ],
+                            ),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: const Color(0xFF666666).withOpacity(0.6),
+                              width: 1,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFF666666).withOpacity(0.2),
+                                blurRadius: 15,
+                                spreadRadius: 2,
+                              ),
+                            ],
+                          ),
+                          child: Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              onTap: () => Navigator.of(context).pop(),
+                              borderRadius: BorderRadius.circular(14),
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 14),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.exit_to_app,
+                                      size: 18,
+                                      color: const Color(0xFF999999),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'EXIT TO MENU',
+                                      style: TextStyle(
+                                        color: const Color(0xFF999999),
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                        letterSpacing: 1.5,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         );
       },
     );
   }
 
+  Widget _buildStatItem(String label, String value, Color color) {
+    return Column(
+      children: [
+        Text(
+          label.toUpperCase(),
+          style: TextStyle(
+            color: color.withOpacity(0.7),
+            fontSize: 10,
+            fontWeight: FontWeight.w500,
+            letterSpacing: 0.8,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            shadows: [
+              Shadow(
+                color: color.withOpacity(0.3),
+                blurRadius: 6,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildRetroStat(String label, String value, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            color.withOpacity(0.1),
+            color.withOpacity(0.05),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: color.withOpacity(0.3),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              color: color.withOpacity(0.8),
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 1.0,
+              shadows: [
+                Shadow(
+                  color: color.withOpacity(0.5),
+                  blurRadius: 5,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            value,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 14,
+              fontWeight: FontWeight.w800,
+              shadows: [
+                Shadow(
+                  color: color.withOpacity(0.5),
+                  blurRadius: 8,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildPauseOverlay() {
     return Container(
+      margin: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
@@ -1036,4 +1443,46 @@ class _TetrisScreenState extends State<TetrisScreen>
       }
     }
   }
+}
+
+class RetroScanlinesPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.black.withOpacity(0.1)
+      ..strokeWidth = 1.0
+      ..style = PaintingStyle.stroke;
+
+    // Draw horizontal scanlines
+    for (double y = 0; y < size.height; y += 3) {
+      canvas.drawLine(
+        Offset(0, y),
+        Offset(size.width, y),
+        paint,
+      );
+    }
+
+    // Add some retro CRT curvature effect
+    final curvePaint = Paint()
+      ..color = Colors.black.withOpacity(0.05)
+      ..style = PaintingStyle.fill;
+
+    // Subtle vignette effect
+    final vignetteGradient = RadialGradient(
+      colors: [
+        Colors.transparent,
+        Colors.black.withOpacity(0.1),
+      ],
+      stops: const [0.5, 1.0],
+    );
+
+    final vignetteRect = Rect.fromLTWH(0, 0, size.width, size.height);
+    final vignettePaint = Paint()
+      ..shader = vignetteGradient.createShader(vignetteRect);
+
+    canvas.drawRect(vignetteRect, vignettePaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
