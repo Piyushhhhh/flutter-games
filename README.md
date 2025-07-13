@@ -48,6 +48,44 @@ A modern collection of classic games built with Flutter, featuring retro-inspire
   - Retro pixel art style
   - Touch and keyboard controls
 
+### 🧩 **Tetris**
+- **Genre**: Puzzle
+- **Features**:
+  - Classic falling blocks gameplay
+  - Line clearing mechanics
+  - Progressive speed increase
+  - Score tracking
+  - Modern neon styling
+
+### 🧠 **Cyber Quest**
+- **Genre**: RPG
+- **Features**:
+  - Character creation system
+  - Multiple character classes (Hacker, Netrunner, Techie, Corporate)
+  - Cyberpunk themed adventure
+  - Stats and progression system
+
+## 📸 Screenshots
+
+### 🏠 Main Menu
+<img src="assets/Simulator Screenshot - iPhone 15 - 2025-07-13 at 19.06.09.png" alt="Main Menu" width="300"/>
+
+### 🏃‍♂️ Neon Runner
+<img src="assets/endless_runner.png" alt="Neon Runner Game" width="300"/>
+
+### ❌⭕ Tic Tac Toe
+<img src="assets/tic_tac_toe.png" alt="Tic Tac Toe Game" width="300"/>
+
+### 🔢 2048
+<img src="assets/2048.png" alt="2048 Game" width="300"/>
+
+### 🧩 Tetris
+<img src="assets/tetris.png" alt="Tetris Game" width="300"/>
+
+### 🚀 Space Invaders
+<img src="assets/space_inavde_start_menu.png" alt="Space Invaders Menu" width="300"/>
+<img src="assets/space_invade_play.png" alt="Space Invaders Gameplay" width="300"/>
+
 ## ✨ Key Features
 
 ### 🎨 **Visual Design**
