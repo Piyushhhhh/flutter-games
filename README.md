@@ -1,10 +1,87 @@
-# 🎮 Flutter Games Collection
+```
+╔═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
+║                                                                                                                           ║
+║   ███████╗██╗     ██╗   ██╗████████╗████████╗███████╗██████╗      ██████╗  █████╗ ███╗   ███╗███████╗███████╗           ║
+║   ██╔════╝██║     ██║   ██║╚══██╔══╝╚══██╔══╝██╔════╝██╔══██╗    ██╔════╝ ██╔══██╗████╗ ████║██╔════╝██╔════╝           ║
+║   █████╗  ██║     ██║   ██║   ██║      ██║   █████╗  ██████╔╝    ██║  ███╗███████║██╔████╔██║█████╗  ███████╗           ║
+║   ██╔══╝  ██║     ██║   ██║   ██║      ██║   ██╔══╝  ██╔══██╗    ██║   ██║██╔══██║██║╚██╔╝██║██╔══╝  ╚════██║           ║
+║   ██║     ███████╗╚██████╔╝   ██║      ██║   ███████╗██║  ██║    ╚██████╔╝██║  ██║██║ ╚═╝ ██║███████╗███████║           ║
+║   ╚═╝     ╚══════╝ ╚═════╝    ╚═╝      ╚═╝   ╚══════╝╚═╝  ╚═╝     ╚═════╝ ╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝╚══════╝           ║
+║                                                                                                                           ║
+║                            > A RETRO-FUTURISTIC GAMING COLLECTION FOR THE DIGITAL AGE <                                ║
+║                                                                                                                           ║
+╚═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+```
 
-A modern collection of classic games built with Flutter, featuring retro-inspired neon aesthetics and smooth cross-platform gameplay.
+**⚡ CYBER-ENHANCED FLUTTER GAMES ⚡**  
+*Enter the neon-lit world of classic arcade action with modern Flutter technology*
 
-## 🕹️ Games Included
+---
 
-### 🏃‍♂️ **Neon Runner** ⭐ *Latest*
+## 📱 **VISUAL INTERFACE PREVIEW**
+
+<div align="center">
+  <table>
+    <tr>
+      <td align="center">
+        <img src="assets/Simulator Screenshot - iPhone 15 - 2025-07-13 at 19.06.09.png" alt="Main Menu" width="200"/>
+        <br/>
+        <sub><b>🏠 MAIN TERMINAL</b></sub>
+      </td>
+      <td align="center">
+        <img src="assets/endless_runner.png" alt="Neon Runner" width="200"/>
+        <br/>
+        <sub><b>🏃‍♂️ NEON RUNNER</b></sub>
+      </td>
+      <td align="center">
+        <img src="assets/tic_tac_toe.png" alt="Tic Tac Toe" width="200"/>
+        <br/>
+        <sub><b>❌⭕ TIC-TAC-TOE</b></sub>
+      </td>
+    </tr>
+    <tr>
+      <td align="center">
+        <img src="assets/2048.png" alt="2048" width="200"/>
+        <br/>
+        <sub><b>🔢 2048 MATRIX</b></sub>
+      </td>
+      <td align="center">
+        <img src="assets/tetris.png" alt="Tetris" width="200"/>
+        <br/>
+        <sub><b>🧩 TETRIS PROTOCOL</b></sub>
+      </td>
+      <td align="center">
+        <img src="assets/space_invade_play.png" alt="Space Invaders" width="200"/>
+        <br/>
+        <sub><b>🚀 SPACE INVADERS</b></sub>
+      </td>
+    </tr>
+  </table>
+</div>
+
+---
+
+```
+████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
+█                                                                                                                          █
+█  ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄  █
+█  █                                    >> GAME MODULES LOADED <<                                    █  █
+█  ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀  █
+█                                                                                                                          █
+████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
+```
+
+## 🕹️ **AVAILABLE GAME MODULES**
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                                                                                                             │
+│                                            ⚡ ACTIVE GAMING PROTOCOLS ⚡                                                │
+│                                                                                                                             │
+└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+### 🏃‍♂️ **[NEON_RUNNER.EXE]** ⭐ *LATEST_BUILD*
 - **Genre**: Endless Runner
 - **Style**: Chrome Dinosaur-inspired
 - **Features**: 
@@ -18,175 +95,189 @@ A modern collection of classic games built with Flutter, featuring retro-inspire
   - **Mobile**: Tap to jump, hold to duck
   - **Desktop**: Space/Up Arrow to jump, Down Arrow to duck
 
-### ❌⭕ **Tic Tac Toe**
-- **Genre**: Strategy/Puzzle
-- **Features**:
-  - Human vs Human mode
-  - Human vs AI mode
-  - Multiple difficulty levels
-  - Move history tracking
-  - Statistics and win counters
-  - Retro neon styling
+### ❌⭕ **[TIC_TAC_TOE.EXE]**
+- **PROTOCOL**: Strategic Combat Simulation
+- **FEATURES**:
+  - `Human vs Human` combat mode
+  - `Human vs AI` neural network opponent
+  - Multi-tier difficulty algorithms
+  - Combat history data logging
+  - Victory statistics database
+  - Retro terminal interface
 
-### 🔢 **2048**
-- **Genre**: Puzzle
-- **Features**:
-  - Classic 2048 gameplay
-  - Smooth tile animations
-  - Score tracking with best score
-  - Undo functionality
-  - Modern UI with neon accents
-  - Responsive grid layout
+### 🔢 **[MATRIX_2048.EXE]**
+- **PROTOCOL**: Numerical Puzzle Matrix
+- **FEATURES**:
+  - Classic 2048 algorithm implementation
+  - Fluid tile transition animations
+  - High-score persistence system
+  - Temporal undo functionality
+  - Neon-enhanced UI rendering
+  - Adaptive grid architecture
 
-### 🚀 **Space Invaders**
-- **Genre**: Arcade Shooter
-- **Features**:
-  - Classic space shooter mechanics
-  - Wave-based enemy spawning
-  - Bullet physics
-  - Progressive difficulty
-  - Retro pixel art style
-  - Touch and keyboard controls
+### 🚀 **[SPACE_INVADERS.EXE]**
+- **PROTOCOL**: Arcade Combat Simulation
+- **FEATURES**:
+  - Classic space warfare mechanics
+  - Wave-based enemy AI spawning
+  - Ballistic physics engine
+  - Adaptive difficulty scaling
+  - Retro pixel art rendering
+  - Cross-platform input systems
 
-### 🧩 **Tetris**
-- **Genre**: Puzzle
-- **Features**:
-  - Classic falling blocks gameplay
-  - Line clearing mechanics
-  - Progressive speed increase
-  - Score tracking
-  - Modern neon styling
+### 🧩 **[TETRIS_PROTOCOL.EXE]**
+- **PROTOCOL**: Block Assembly Puzzle
+- **FEATURES**:
+  - Classic falling geometry mechanics
+  - Line completion algorithms
+  - Progressive velocity increase
+  - Score tracking database
+  - Neon aesthetic framework
 
-### 🧠 **Cyber Quest**
-- **Genre**: RPG
-- **Features**:
-  - Character creation system
-  - Multiple character classes (Hacker, Netrunner, Techie, Corporate)
-  - Cyberpunk themed adventure
-  - Stats and progression system
+### 🧠 **[CYBER_QUEST.EXE]**
+- **PROTOCOL**: Role-Playing Adventure
+- **FEATURES**:
+  - Character genesis system
+  - Multi-class specializations (Hacker, Netrunner, Techie, Corporate)
+  - Cyberpunk narrative engine
+  - Progressive stat evolution
 
-## 📸 Screenshots
-
-### 🏠 Main Menu
-<img src="assets/Simulator Screenshot - iPhone 15 - 2025-07-13 at 19.06.09.png" alt="Main Menu" width="300"/>
-
-### 🏃‍♂️ Neon Runner
-<img src="assets/endless_runner.png" alt="Neon Runner Game" width="300"/>
-
-### ❌⭕ Tic Tac Toe
-<img src="assets/tic_tac_toe.png" alt="Tic Tac Toe Game" width="300"/>
-
-### 🔢 2048
-<img src="assets/2048.png" alt="2048 Game" width="300"/>
-
-### 🧩 Tetris
-<img src="assets/tetris.png" alt="Tetris Game" width="300"/>
-
-### 🚀 Space Invaders
-<img src="assets/space_inavde_start_menu.png" alt="Space Invaders Menu" width="300"/>
-<img src="assets/space_invade_play.png" alt="Space Invaders Gameplay" width="300"/>
-
-## ✨ Key Features
-
-### 🎨 **Visual Design**
-- **Retro-futuristic neon aesthetic** with glowing effects
-- **Consistent UI theme** across all games
-- **Smooth animations** and transitions
-- **Responsive design** for multiple screen sizes
-- **Dark theme** with cyan, magenta, and yellow accents
-
-### ⚡ **Performance**
-- **60fps gameplay** with optimized rendering
-- **Smooth animations** using Flutter's animation framework
-- **Efficient state management** with immutable game states
-- **Cross-platform compatibility** (iOS, Android, Web, Desktop)
-
-### 🎮 **Gameplay**
-- **Intuitive controls** optimized for touch and keyboard
-- **Progressive difficulty** in arcade-style games
-- **Score persistence** and statistics tracking
-- **Haptic feedback** for better user experience
-- **Responsive touch controls** with proper gesture handling
-
-## 🚀 Getting Started
-
-### Prerequisites
-- **Flutter SDK** (3.0.0 or higher)
-- **Dart SDK** (2.17.0 or higher)
-- **Android Studio** / **Xcode** (for mobile development)
-- **Chrome** (for web development)
-
-### Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/Piyushhhhh/flutter-games.git
-   cd flutter-games
-   ```
-
-2. **Install dependencies**
-   ```bash
-   flutter pub get
-   ```
-
-3. **Run the app**
-   ```bash
-   # For mobile/desktop
-   flutter run
-   
-   # For web
-   flutter run -d chrome
-   ```
-
-### Build for Production
-
-```bash
-# Android APK
-flutter build apk --release
-
-# iOS (requires macOS and Xcode)
-flutter build ios --release
-
-# Web
-flutter build web --release
-
-# Desktop (Windows/macOS/Linux)
-flutter build windows --release
-flutter build macos --release
-flutter build linux --release
+```
+┌─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                                                                                                             │
+│                                           ⚡ SYSTEM SPECIFICATIONS ⚡                                                    │
+│                                                                                                                             │
+└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-## 🎯 Controls Guide
+## ✨ **CORE FEATURES**
 
-### 🏃‍♂️ Neon Runner
-- **Jump**: Tap screen / Space / Up Arrow
-- **Duck**: Hold screen / Down Arrow
-- **Start/Restart**: Tap when game is stopped
+### 🎨 **[VISUAL_RENDERING.SYS]**
+- **Retro-futuristic neon rendering engine** with phosphor-glow effects
+- **Unified UI architecture** across all game modules
+- **Fluid transition matrices** and temporal animations
+- **Adaptive viewport scaling** for multi-resolution displays
+- **Terminal-dark theme** with cyan, magenta, and yellow phosphor accents
 
-### ❌⭕ Tic Tac Toe
-- **Place Mark**: Tap on empty cell
-- **Game Modes**: Select from main menu
-- **Reset**: Use reset button in game
+### ⚡ **[PERFORMANCE.SYS]**
+- **60fps locked framerate** with optimized rendering pipeline
+- **Smooth animation engine** using Flutter's native framework
+- **Efficient state-machine management** with immutable data structures
+- **Cross-platform compilation** (iOS, Android, Web, Desktop)
 
-### 🔢 2048
-- **Move Tiles**: Swipe in any direction
-- **Undo**: Tap undo button
-- **New Game**: Tap new game button
+### 🎮 **[GAMEPLAY.SYS]**
+- **Intuitive input mapping** optimized for touch and keyboard interfaces
+- **Adaptive difficulty algorithms** in arcade-style protocols
+- **Persistent score databases** and statistical analysis
+- **Haptic feedback systems** for enhanced user experience
+- **Responsive gesture recognition** with proper input handling
 
-### 🚀 Space Invaders
-- **Move**: Arrow keys / Drag on mobile
-- **Shoot**: Space / Tap on mobile
-- **Pause**: Escape key
+```
+┌─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                                                                                                             │
+│                                            ⚡ SYSTEM INITIALIZATION ⚡                                                   │
+│                                                                                                                             │
+└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+```
 
-## 🛠️ Technologies Used
+## 🚀 **SYSTEM BOOT SEQUENCE**
 
-- **Flutter** 3.0+ - UI framework
-- **Dart** 2.17+ - Programming language
-- **Custom Painters** - For game graphics and effects
-- **Animation Controllers** - For smooth animations
-- **State Management** - Using StatefulWidget and custom controllers
-- **Ticker** - For 60fps game loops
-- **Haptic Feedback** - For tactile user experience
+### **[DEPENDENCIES.REQ]**
+- **Flutter SDK** `v3.0.0+` (Core framework)
+- **Dart SDK** `v2.17.0+` (Language runtime)
+- **Android Studio** / **Xcode** (Mobile compilation)
+- **Chrome Browser** (Web deployment)
+
+### **[INSTALLATION.BAT]**
+
+1. **Repository Clone Protocol**
+   ```terminal
+   > git clone https://github.com/Piyushhhhh/flutter-games.git
+   > cd flutter-games
+   [STATUS: REPOSITORY CLONED]
+   ```
+
+2. **Dependency Installation**
+   ```terminal
+   > flutter pub get
+   [STATUS: PACKAGES INSTALLED]
+   ```
+
+3. **System Launch**
+   ```terminal
+   # Mobile/Desktop Target
+   > flutter run
+   
+   # Web Browser Target
+   > flutter run -d chrome
+   [STATUS: APPLICATION LAUNCHED]
+   ```
+
+### **[PRODUCTION_BUILD.BAT]**
+
+```terminal
+# Android Binary
+> flutter build apk --release
+
+# iOS Binary (macOS + Xcode required)
+> flutter build ios --release
+
+# Web Deployment
+> flutter build web --release
+
+# Desktop Binaries
+> flutter build windows --release
+> flutter build macos --release
+> flutter build linux --release
+```
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                                                                                                             │
+│                                            ⚡ INPUT PROTOCOLS ⚡                                                         │
+│                                                                                                                             │
+└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+## 🎯 **CONTROL INTERFACE MAPPING**
+
+### 🏃‍♂️ **[NEON_RUNNER.EXE]**
+- **JUMP**: `[TOUCH_SCREEN]` / `[SPACE]` / `[UP_ARROW]`
+- **DUCK**: `[HOLD_SCREEN]` / `[DOWN_ARROW]`
+- **SYSTEM_RESTART**: `[TOUCH]` when protocol halted
+
+### ❌⭕ **[TIC_TAC_TOE.EXE]**
+- **PLACE_MARKER**: `[TOUCH]` on empty grid cell
+- **MODE_SELECT**: Access via main terminal
+- **RESET_GRID**: Use reset command in game
+
+### 🔢 **[MATRIX_2048.EXE]**
+- **MOVE_MATRIX**: `[SWIPE]` in directional vectors
+- **UNDO_COMMAND**: Tap undo protocol
+- **NEW_GAME**: Initialize new matrix
+
+### 🚀 **[SPACE_INVADERS.EXE]**
+- **MOVEMENT**: `[ARROW_KEYS]` / `[DRAG]` on mobile
+- **FIRE_WEAPON**: `[SPACE]` / `[TOUCH]` on mobile
+- **PAUSE_PROTOCOL**: `[ESC]` key
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                                                                                                             │
+│                                            ⚡ TECHNOLOGY STACK ⚡                                                        │
+│                                                                                                                             │
+└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+## 🛠️ **CORE SYSTEM COMPONENTS**
+
+- **Flutter Framework** `v3.0+` - Primary UI rendering engine
+- **Dart Language** `v2.17+` - Core programming architecture
+- **Custom Painters** - Advanced graphics rendering subsystem
+- **Animation Controllers** - Fluid motion computation engine
+- **State Management** - StatefulWidget and custom controller architecture
+- **Ticker Engine** - 60fps game loop synchronization
+- **Haptic Feedback** - Tactile response interface system
 
 ## 📁 Project Structure
 
@@ -285,17 +376,44 @@ To add a new game to the collection:
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🙏 Acknowledgments
+## 🙏 **ACKNOWLEDGMENTS**
 
-- Inspired by classic arcade games and modern mobile gaming
-- Flutter community for excellent documentation and examples
-- Contributors and testers who helped improve the games
-- Retro gaming aesthetic inspired by 80s arcade culture
+---
 
-## 📞 Contact
+```
+╔═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
+║                                                                                                                           ║
+║                                              ⚡ END OF TRANSMISSION ⚡                                                ║
+║                                                                                                                           ║
+║                                          >> FLUTTER GAMES COLLECTION <<                                                ║
+║                                            Built with ❤️ and neon dreams                                               ║
+║                                                                                                                           ║
+║                                              [SYSTEM: OPERATIONAL]                                                      ║
+║                                              [STATUS: GAMES LOADED]                                                     ║
+║                                              [READY: FOR PLAYERS]                                                       ║
+║                                                                                                                           ║
+╚═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+```
 
-- **GitHub**: [Piyushhhhh](https://github.com/Piyushhhhh)
-- **Issues**: [Report bugs here](https://github.com/Piyushhhhh/flutter-games/issues)
+---
+
+*> Happy Gaming, Cyber Warrior! <*
+
+- **INSPIRATION**: Classic arcade terminals and modern mobile gaming protocols
+- **COMMUNITY**: Flutter developers for exceptional documentation and code samples
+- **CONTRIBUTORS**: Beta testers and code warriors who enhanced the gaming experience
+- **AESTHETIC**: Retro gaming visual language inspired by 80s arcade culture
+
+## 📞 **COMMUNICATION CHANNELS**
+
+- **GITHUB_TERMINAL**: [Piyushhhhh](https://github.com/Piyushhhhh)
+- **BUG_REPORTS**: [Issue Tracker](https://github.com/Piyushhhhh/flutter-games/issues)
+
+```
+> TRANSMISSION COMPLETE
+> CONNECTION TERMINATED
+> HAVE A GREAT DAY, USER!
+```
 
 ---
 
