@@ -60,6 +60,8 @@ class _CyberQuestScreenState extends State<CyberQuestScreen> {
         return _buildPausedScreen();
       case CyberQuestGameState.gameOver:
         return _buildGameOverScreen();
+      default:
+        return _buildInitialScreen();
     }
   }
 
@@ -191,7 +193,7 @@ class _CyberQuestScreenState extends State<CyberQuestScreen> {
                 ),
               ),
             );
-          }).toList(),
+          }),
         ],
       ),
     );
@@ -355,6 +357,8 @@ class _CyberQuestScreenState extends State<CyberQuestScreen> {
         return Icons.build;
       case CharacterClass.corporate:
         return Icons.business;
+      default:
+        return Icons.person;
     }
   }
 
@@ -368,6 +372,8 @@ class _CyberQuestScreenState extends State<CyberQuestScreen> {
         return Colors.orange;
       case CharacterClass.corporate:
         return Colors.blue;
+      default:
+        return Colors.grey;
     }
   }
 
