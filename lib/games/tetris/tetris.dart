@@ -1,6 +1,13 @@
 // Tetris Game - Professional Retro Implementation
 //
 // A classic Tetris game with modern Flutter features and retro cyberpunk aesthetics.
+// Structured using MVC (Model-View-Controller) pattern for clean architecture.
+//
+// MVC Architecture:
+// - Models: Data structures and game entities (tetris_models.dart)
+// - Controllers: Business logic and state management (tetris_controller.dart)
+// - Views: UI components and presentation layer (tetris_screen.dart)
+//
 // Features include:
 // - 7 standard tetromino pieces with proper rotation
 // - Ghost piece preview showing landing position
@@ -11,6 +18,7 @@
 // - Professional scoring system
 // - Retro neon visual design matching other games
 
-export 'tetris_screen.dart';
-export 'tetris_controller.dart';
-export 'tetris_models.dart';
+// Export MVC components following proper architecture
+export 'models/tetris_models.dart';
+export 'controllers/tetris_controller.dart';
+export 'views/tetris_screen.dart';

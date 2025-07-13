@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:math' as math;
-import 'tetris_controller.dart';
-import 'tetris_models.dart';
+import '../controllers/tetris_controller.dart';
+import '../models/tetris_models.dart';
 
+/// TetrisScreen is the main view for the Tetris game
+/// Following MVC pattern, this handles only UI presentation and user input
 class TetrisScreen extends StatefulWidget {
   const TetrisScreen({super.key});
 
@@ -22,10 +24,19 @@ class _TetrisScreenState extends State<TetrisScreen>
   @override
   void initState() {
     super.initState();
+    _initializeController();
+    _initializeAnimations();
+  }
+
+  /// Initialize the game controller
+  void _initializeController() {
     _controller = TetrisController();
     _controller.initialize();
     _controller.addListener(_onGameStateChanged);
+  }
 
+  /// Initialize UI animations
+  void _initializeAnimations() {
     // Pulse animation for game over
     _pulseController = AnimationController(
       duration: const Duration(milliseconds: 1000),
@@ -66,6 +77,7 @@ class _TetrisScreenState extends State<TetrisScreen>
     super.dispose();
   }
 
+  /// Handle game state changes for UI updates
   void _onGameStateChanged() {
     if (_controller.isGameOver) {
       _pulseController.repeat(reverse: true);
@@ -133,6 +145,7 @@ class _TetrisScreenState extends State<TetrisScreen>
     );
   }
 
+  /// Build the app bar with title and controls
   Widget _buildAppBar() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -256,6 +269,7 @@ class _TetrisScreenState extends State<TetrisScreen>
     );
   }
 
+  /// Build the left panel with hold section and statistics
   Widget _buildLeftPanel() {
     return Padding(
       padding: const EdgeInsets.all(12),
@@ -270,6 +284,7 @@ class _TetrisScreenState extends State<TetrisScreen>
     );
   }
 
+  /// Build the hold section UI
   Widget _buildHoldSection() {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -336,6 +351,7 @@ class _TetrisScreenState extends State<TetrisScreen>
     );
   }
 
+  /// Build the statistics section UI
   Widget _buildStatsSection() {
     return Column(
       children: [
@@ -354,6 +370,7 @@ class _TetrisScreenState extends State<TetrisScreen>
     );
   }
 
+  /// Build individual stat card
   Widget _buildStatCard(
       String label, String value, Color color, IconData icon) {
     return Container(
@@ -422,6 +439,7 @@ class _TetrisScreenState extends State<TetrisScreen>
     );
   }
 
+  /// Build the game board container
   Widget _buildGameBoard() {
     return GestureDetector(
       onPanUpdate: _handlePanUpdate,
@@ -463,6 +481,7 @@ class _TetrisScreenState extends State<TetrisScreen>
     );
   }
 
+  /// Build the actual tetris board grid
   Widget _buildBoard() {
     return AspectRatio(
       aspectRatio: TetrisConstants.boardWidth / TetrisConstants.visibleHeight,
@@ -514,6 +533,7 @@ class _TetrisScreenState extends State<TetrisScreen>
     );
   }
 
+  /// Build the right panel with next pieces and controls
   Widget _buildRightPanel() {
     return Padding(
       padding: const EdgeInsets.all(12),
@@ -528,6 +548,7 @@ class _TetrisScreenState extends State<TetrisScreen>
     );
   }
 
+  /// Build the next pieces preview section
   Widget _buildNextSection() {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -598,6 +619,7 @@ class _TetrisScreenState extends State<TetrisScreen>
     );
   }
 
+  /// Build mini piece preview
   Widget _buildMiniPiece(Tetromino tetromino) {
     final shape = tetromino.getShape(0);
     return Padding(
@@ -634,6 +656,7 @@ class _TetrisScreenState extends State<TetrisScreen>
     );
   }
 
+  /// Build control buttons section
   Widget _buildControlButtons() {
     return Column(
       children: [
@@ -672,6 +695,7 @@ class _TetrisScreenState extends State<TetrisScreen>
     );
   }
 
+  /// Build individual control button
   Widget _buildControlButton(
     String label,
     IconData icon,
@@ -758,6 +782,7 @@ class _TetrisScreenState extends State<TetrisScreen>
     );
   }
 
+  /// Build bottom direction controls
   Widget _buildBottomControls() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -775,6 +800,7 @@ class _TetrisScreenState extends State<TetrisScreen>
     );
   }
 
+  /// Build individual direction button
   Widget _buildDirectionButton(IconData icon, VoidCallback onPressed) {
     return Container(
       width: 56,
@@ -816,6 +842,7 @@ class _TetrisScreenState extends State<TetrisScreen>
     );
   }
 
+  /// Build game over overlay
   Widget _buildGameOverlay() {
     return AnimatedBuilder(
       animation: _pulseAnimation,
@@ -1246,37 +1273,7 @@ class _TetrisScreenState extends State<TetrisScreen>
     );
   }
 
-  Widget _buildStatItem(String label, String value, Color color) {
-    return Column(
-      children: [
-        Text(
-          label.toUpperCase(),
-          style: TextStyle(
-            color: color.withOpacity(0.7),
-            fontSize: 10,
-            fontWeight: FontWeight.w500,
-            letterSpacing: 0.8,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            shadows: [
-              Shadow(
-                color: color.withOpacity(0.3),
-                blurRadius: 6,
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
+  /// Build retro stat display for game over screen
   Widget _buildRetroStat(String label, String value, Color color) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -1330,6 +1327,7 @@ class _TetrisScreenState extends State<TetrisScreen>
     );
   }
 
+  /// Build pause overlay
   Widget _buildPauseOverlay() {
     return Container(
       margin: const EdgeInsets.all(20),
@@ -1392,50 +1390,42 @@ class _TetrisScreenState extends State<TetrisScreen>
               ],
             ),
           ),
-          const SizedBox(height: 16),
-          const Text(
-            'Tap Play to Resume',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
         ],
       ),
     );
   }
 
-  // Touch gesture handling
-  Offset? _panStartOffset;
+  // Touch gesture handlers
+  double? _panStartX;
+  double? _panStartY;
 
+  /// Handle pan update for touch gestures
   void _handlePanUpdate(DragUpdateDetails details) {
-    _panStartOffset ??= details.globalPosition;
+    _panStartX ??= details.localPosition.dx;
+    _panStartY ??= details.localPosition.dy;
   }
 
+  /// Handle pan end for touch gestures
   void _handlePanEnd(DragEndDetails details) {
-    if (_panStartOffset == null) return;
+    if (_panStartX == null || _panStartY == null) return;
 
-    final delta = details.globalPosition - _panStartOffset!;
-    final dx = delta.dx;
-    final dy = delta.dy;
+    final dx = details.localPosition.dx - _panStartX!;
+    final dy = details.localPosition.dy - _panStartY!;
 
-    // Reset pan start offset
-    _panStartOffset = null;
+    // Reset pan coordinates
+    _panStartX = null;
+    _panStartY = null;
 
-    // Check if the swipe distance is significant enough
-    if (dx.abs() < 20 && dy.abs() < 20) {
-      return;
-    }
-
-    // Determine direction based on the larger displacement
+    // Determine gesture direction
     if (dx.abs() > dy.abs()) {
+      // Horizontal swipe
       if (dx > 0) {
         _controller.moveRight();
       } else {
         _controller.moveLeft();
       }
     } else {
+      // Vertical swipe
       if (dy > 0) {
         _controller.moveDown();
       } else {
@@ -1445,6 +1435,7 @@ class _TetrisScreenState extends State<TetrisScreen>
   }
 }
 
+/// Custom painter for retro scanlines effect
 class RetroScanlinesPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
