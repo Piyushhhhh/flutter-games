@@ -1,15 +1,5 @@
 import 'package:flutter/foundation.dart';
 
-/// Neon Runner Models - Data Structures
-///
-/// This file contains all the data models for the Neon Runner game.
-/// These models represent the game state and entities without any business logic.
-///
-/// **MVC Architecture:**
-/// - Models: Game state and entity data structures (this file)
-/// - Views: User interface and presentation logic (views/)
-/// - Controllers: Game logic and state management (controllers/)
-
 /// Enum for game state
 enum NeonRunnerGameState {
   waiting,
@@ -115,63 +105,6 @@ class Cloud {
       speed: speed ?? this.speed,
     );
   }
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    return other is Cloud &&
-        other.x == x &&
-        other.y == y &&
-        other.size == size &&
-        other.speed == speed;
-  }
-
-  @override
-  int get hashCode => x.hashCode ^ y.hashCode ^ size.hashCode ^ speed.hashCode;
-}
-
-/// Represents a star in the background
-@immutable
-class Star {
-  final double x;
-  final double y;
-  final double size;
-  final double brightness;
-
-  const Star({
-    required this.x,
-    required this.y,
-    required this.size,
-    required this.brightness,
-  });
-
-  Star copyWith({
-    double? x,
-    double? y,
-    double? size,
-    double? brightness,
-  }) {
-    return Star(
-      x: x ?? this.x,
-      y: y ?? this.y,
-      size: size ?? this.size,
-      brightness: brightness ?? this.brightness,
-    );
-  }
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    return other is Star &&
-        other.x == x &&
-        other.y == y &&
-        other.size == size &&
-        other.brightness == brightness;
-  }
-
-  @override
-  int get hashCode =>
-      x.hashCode ^ y.hashCode ^ size.hashCode ^ brightness.hashCode;
 }
 
 /// Represents the player character
@@ -184,7 +117,6 @@ class Player {
   final double velocityY;
   final bool isJumping;
   final bool isDucking;
-  final bool isRunning;
 
   const Player({
     required this.x,
@@ -194,7 +126,6 @@ class Player {
     required this.velocityY,
     required this.isJumping,
     required this.isDucking,
-    required this.isRunning,
   });
 
   Player copyWith({
@@ -205,7 +136,6 @@ class Player {
     double? velocityY,
     bool? isJumping,
     bool? isDucking,
-    bool? isRunning,
   }) {
     return Player(
       x: x ?? this.x,
@@ -215,190 +145,143 @@ class Player {
       velocityY: velocityY ?? this.velocityY,
       isJumping: isJumping ?? this.isJumping,
       isDucking: isDucking ?? this.isDucking,
-      isRunning: isRunning ?? this.isRunning,
     );
   }
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    return other is Player &&
-        other.x == x &&
-        other.y == y &&
-        other.width == width &&
-        other.height == height &&
-        other.velocityY == velocityY &&
-        other.isJumping == isJumping &&
-        other.isDucking == isDucking &&
-        other.isRunning == isRunning;
-  }
-
-  @override
-  int get hashCode => Object.hash(
-        x,
-        y,
-        width,
-        height,
-        velocityY,
-        isJumping,
-        isDucking,
-        isRunning,
-      );
 }
 
-/// Represents the complete state of the Neon Runner game
+/// Main game state for the endless runner
 @immutable
 class NeonRunnerState {
-  final NeonRunnerGameState gameState;
   final Player player;
   final List<Obstacle> obstacles;
   final List<Cloud> clouds;
-  final List<Star> stars;
-  final double gameSpeed;
-  final double gameWidth;
-  final double gameHeight;
-  final double groundY;
+  final NeonRunnerGameState gameState;
   final int score;
   final int highScore;
-  final double distance;
-  final bool isPlaying;
-  final bool isGameOver;
-  final bool isWaiting;
+  final double gameSpeed;
+  final double groundY;
+  final double gameWidth;
+  final double gameHeight;
+  final bool faceExpression; // Add this property to toggle face expressions
 
   const NeonRunnerState({
-    required this.gameState,
     required this.player,
     required this.obstacles,
     required this.clouds,
-    required this.stars,
-    required this.gameSpeed,
-    required this.gameWidth,
-    required this.gameHeight,
-    required this.groundY,
+    required this.gameState,
     required this.score,
     required this.highScore,
-    required this.distance,
-    required this.isPlaying,
-    required this.isGameOver,
-    required this.isWaiting,
+    required this.gameSpeed,
+    required this.groundY,
+    required this.gameWidth,
+    required this.gameHeight,
+    this.faceExpression = false, // Initialize with default value
   });
 
   /// Create initial game state
   factory NeonRunnerState.initial({
     required double gameWidth,
     required double gameHeight,
+    int highScore = 0,
   }) {
     final groundY = gameHeight * 0.8;
-    const playerHeight = 40.0;
-    const playerWidth = 30.0;
-    final playerX = gameWidth * 0.15;
-    final playerY = groundY - playerHeight;
+    const playerWidth = 40.0;
+    const playerHeight = 60.0;
 
     return NeonRunnerState(
-      gameState: NeonRunnerGameState.waiting,
       player: Player(
-        x: playerX,
-        y: playerY,
+        x: gameWidth * 0.1,
+        y: groundY - playerHeight,
         width: playerWidth,
         height: playerHeight,
-        velocityY: 0.0,
+        velocityY: 0,
         isJumping: false,
         isDucking: false,
-        isRunning: false,
       ),
       obstacles: const [],
       clouds: const [],
-      stars: const [],
+      gameState: NeonRunnerGameState.waiting,
+      score: 0,
+      highScore: highScore,
       gameSpeed: 200.0,
+      groundY: groundY,
       gameWidth: gameWidth,
       gameHeight: gameHeight,
-      groundY: groundY,
-      score: 0,
-      highScore: 0,
-      distance: 0.0,
-      isPlaying: false,
-      isGameOver: false,
-      isWaiting: true,
+      faceExpression: false, // Initialize with default value
     );
   }
 
   /// Create a copy with modified values
   NeonRunnerState copyWith({
-    NeonRunnerGameState? gameState,
     Player? player,
     List<Obstacle>? obstacles,
     List<Cloud>? clouds,
-    List<Star>? stars,
-    double? gameSpeed,
-    double? gameWidth,
-    double? gameHeight,
-    double? groundY,
+    NeonRunnerGameState? gameState,
     int? score,
     int? highScore,
-    double? distance,
-    bool? isPlaying,
-    bool? isGameOver,
-    bool? isWaiting,
+    double? gameSpeed,
+    double? groundY,
+    double? gameWidth,
+    double? gameHeight,
+    bool? faceExpression, // Add this parameter to copyWith
   }) {
     return NeonRunnerState(
-      gameState: gameState ?? this.gameState,
       player: player ?? this.player,
       obstacles: obstacles ?? this.obstacles,
       clouds: clouds ?? this.clouds,
-      stars: stars ?? this.stars,
-      gameSpeed: gameSpeed ?? this.gameSpeed,
-      gameWidth: gameWidth ?? this.gameWidth,
-      gameHeight: gameHeight ?? this.gameHeight,
-      groundY: groundY ?? this.groundY,
+      gameState: gameState ?? this.gameState,
       score: score ?? this.score,
       highScore: highScore ?? this.highScore,
-      distance: distance ?? this.distance,
-      isPlaying: isPlaying ?? this.isPlaying,
-      isGameOver: isGameOver ?? this.isGameOver,
-      isWaiting: isWaiting ?? this.isWaiting,
+      gameSpeed: gameSpeed ?? this.gameSpeed,
+      groundY: groundY ?? this.groundY,
+      gameWidth: gameWidth ?? this.gameWidth,
+      gameHeight: gameHeight ?? this.gameHeight,
+      faceExpression:
+          faceExpression ?? this.faceExpression, // Copy the faceExpression
     );
   }
+
+  /// Check if player is on ground
+  bool get isPlayerOnGround => player.y >= groundY - player.height;
+
+  /// Check if game is over
+  bool get isGameOver => gameState == NeonRunnerGameState.gameOver;
+
+  /// Check if game is playing
+  bool get isPlaying => gameState == NeonRunnerGameState.playing;
+
+  /// Check if game is waiting to start
+  bool get isWaiting => gameState == NeonRunnerGameState.waiting;
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     return other is NeonRunnerState &&
-        other.gameState == gameState &&
         other.player == player &&
         listEquals(other.obstacles, obstacles) &&
         listEquals(other.clouds, clouds) &&
-        listEquals(other.stars, stars) &&
-        other.gameSpeed == gameSpeed &&
-        other.gameWidth == gameWidth &&
-        other.gameHeight == gameHeight &&
-        other.groundY == groundY &&
+        other.gameState == gameState &&
         other.score == score &&
         other.highScore == highScore &&
-        other.distance == distance &&
-        other.isPlaying == isPlaying &&
-        other.isGameOver == isGameOver &&
-        other.isWaiting == isWaiting;
+        other.gameSpeed == gameSpeed &&
+        other.groundY == groundY &&
+        other.gameWidth == gameWidth &&
+        other.gameHeight == gameHeight &&
+        other.faceExpression ==
+            faceExpression; // Add faceExpression to equality check
   }
 
   @override
-  int get hashCode => Object.hash(
-        gameState,
-        player,
-        obstacles,
-        clouds,
-        stars,
-        gameSpeed,
-        gameWidth,
-        gameHeight,
-        groundY,
-        score,
-        highScore,
-        distance,
-        isPlaying,
-        isGameOver,
-        isWaiting,
-      );
-
-  @override
-  String toString() => 'NeonRunnerState(score: $score, gameState: $gameState)';
+  int get hashCode =>
+      player.hashCode ^
+      obstacles.hashCode ^
+      clouds.hashCode ^
+      gameState.hashCode ^
+      score.hashCode ^
+      highScore.hashCode ^
+      gameSpeed.hashCode ^
+      groundY.hashCode ^
+      gameWidth.hashCode ^
+      gameHeight.hashCode ^
+      faceExpression.hashCode; // Add faceExpression to hashCode
 }

@@ -1,5 +1,5 @@
 import 'dart:math' as math;
-import 'neon_runner_models.dart';
+import '../models/neon_runner_models.dart';
 
 class NeonRunnerController {
   static const double gravity = 1200.0; // Increased for snappier feel

@@ -26,8 +26,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/scheduler.dart';
 import 'dart:async';
-import 'neon_runner_models.dart';
-import 'neon_runner_controller.dart';
+import '../models/neon_runner_models.dart';
+import '../controllers/neon_runner_controller.dart';
 import 'neon_runner_painter.dart';
 
 class NeonRunnerScreen extends StatefulWidget {

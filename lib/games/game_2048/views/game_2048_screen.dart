@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:math' as math;
-import '../../models/game_models.dart';
-import '../../core/constants/app_constants.dart';
+import '../../../models/game_models.dart';
+import '../../../core/constants/app_constants.dart';
 
-import 'game_2048_controller.dart';
+import '../controllers/game_2048_controller.dart';
 
 class Game2048Screen extends StatefulWidget {
   const Game2048Screen({super.key});

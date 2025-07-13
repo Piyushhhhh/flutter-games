@@ -21,5 +21,5 @@
 library game_2048;
 
 // Export all public interfaces
-export 'game_2048_screen.dart';
-export 'game_2048_controller.dart';
+export 'views/game_2048_screen.dart';
+export 'controllers/game_2048_controller.dart';

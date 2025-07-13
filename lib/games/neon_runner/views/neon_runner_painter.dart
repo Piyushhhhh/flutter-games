@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
-import 'neon_runner_models.dart';
+import '../models/neon_runner_models.dart';
 
 class NeonRunnerPainter extends CustomPainter {
   final NeonRunnerState gameState;

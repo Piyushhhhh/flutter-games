@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import '../games/tic_tac_toe/tic_tac_toe.dart';
 import '../games/game_2048/game_2048.dart';
 import '../games/space_invaders/space_invaders.dart';
-import '../games/neon_runner/neon_runner.dart';
+import '../games/neon_runner/views/neon_runner.dart';
 import '../games/tetris/tetris.dart';
 
 class GamesMenu extends StatefulWidget {
