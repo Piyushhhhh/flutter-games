@@ -4,6 +4,7 @@ import '../games/tic_tac_toe/tic_tac_toe.dart';
 import '../games/game_2048/game_2048.dart';
 import '../games/space_invaders/space_invaders.dart';
 import '../games/neon_runner/neon_runner.dart';
+import '../games/tetris/tetris.dart';
 
 class GamesMenu extends StatefulWidget {
   const GamesMenu({super.key});
@@ -359,6 +360,15 @@ class _GamesMenuState extends State<GamesMenu> with TickerProviderStateMixin {
                 ),
                 const SizedBox(height: 16),
                 _buildRetroGameCard(
+                  'TETRIS',
+                  'PUZZLE CLASSIC',
+                  const Color(0xFF8B5CF6),
+                  const Color(0xFF00FFFF),
+                  true,
+                  'tetris',
+                ),
+                const SizedBox(height: 16),
+                _buildRetroGameCard(
                   '2048',
                   'PUZZLE FUSION',
                   const Color(0xFF00FF00),
@@ -562,6 +572,8 @@ class _GamesMenuState extends State<GamesMenu> with TickerProviderStateMixin {
         return Icons.rocket_launch;
       case 'neon_runner':
         return Icons.directions_run;
+      case 'tetris':
+        return Icons.view_module;
       case 'cyber_quest':
         return Icons.psychology;
       default:
@@ -584,6 +596,9 @@ class _GamesMenuState extends State<GamesMenu> with TickerProviderStateMixin {
         break;
       case 'neon_runner':
         gameWidget = const NeonRunnerScreen();
+        break;
+      case 'tetris':
+        gameWidget = const TetrisScreen();
         break;
       case 'cyber_quest':
       default:
