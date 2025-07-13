@@ -24,9 +24,9 @@
   <table>
     <tr>
       <td align="center">
-        <img src="assets/Simulator Screenshot - iPhone 15 - 2025-07-13 at 19.06.09.png" alt="Main Menu" width="200"/>
+        <img src="assets/home.png" alt="Home Screen" width="200"/>
         <br/>
-        <sub><b>🏠 MAIN TERMINAL</b></sub>
+        <sub><b>🏠 HOME TERMINAL</b></sub>
       </td>
       <td align="center">
         <img src="assets/endless_runner.png" alt="Neon Runner" width="200"/>
