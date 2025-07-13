@@ -2,6 +2,12 @@
 
 A collection of classic arcade games built with Flutter, demonstrating advanced UI techniques and game development patterns.
 
+## Demo Video
+
+[![Flutter Games Collection Demo](https://img.youtube.com/vi/TteFxaHuaSI/maxresdefault.jpg)](https://www.youtube.com/watch?v=TteFxaHuaSI)
+
+[Watch the full demo video](https://www.youtube.com/watch?v=TteFxaHuaSI)
+
 ## Screenshots
 
 <div align="center">
