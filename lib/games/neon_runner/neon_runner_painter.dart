@@ -501,9 +501,9 @@ class NeonRunnerPainter extends CustomPainter {
   void _drawEnhancedScore(Canvas canvas, Size size) {
     // Professional dual-panel score display
     final panelWidth = size.width - 120; // Reduced width to avoid back button
-    final panelHeight = 90.0;
-    final safeAreaTop = 60.0; // Account for notch/status bar
-    final panelLeft = 100.0; // Start after back button (56px + margin)
+    const panelHeight = 90.0;
+    const safeAreaTop = 60.0; // Account for notch/status bar
+    const panelLeft = 100.0; // Start after back button (56px + margin)
 
     // Main score panel
     final scorePanel = RRect.fromRectAndRadius(
@@ -658,7 +658,7 @@ class NeonRunnerPainter extends CustomPainter {
     // Modern compact dialog with better padding
     final dialogWidth =
         size.width * 0.8; // Reduced from 0.85 for better margins
-    final dialogHeight = 320.0; // Increased height for better spacing
+    const dialogHeight = 320.0; // Increased height for better spacing
     final dialogRect = RRect.fromRectAndRadius(
       Rect.fromLTWH(
         (size.width - dialogWidth) / 2,
@@ -965,8 +965,8 @@ class NeonRunnerPainter extends CustomPainter {
   void _drawActionButton(
       Canvas canvas, Offset center, String text, Color color) {
     // Button background
-    final buttonWidth = 200.0;
-    final buttonHeight = 50.0;
+    const buttonWidth = 200.0;
+    const buttonHeight = 50.0;
     final buttonRect = RRect.fromRectAndRadius(
       Rect.fromLTWH(
         center.dx - buttonWidth / 2,
@@ -1226,8 +1226,8 @@ class NeonRunnerPainter extends CustomPainter {
     final glowIntensity = (math.sin(pulseTime * math.pi * 2) + 1) / 2;
 
     // Button background
-    final buttonWidth = 200.0;
-    final buttonHeight = 50.0;
+    const buttonWidth = 200.0;
+    const buttonHeight = 50.0;
     final buttonRect = RRect.fromRectAndRadius(
       Rect.fromLTWH(
         center.dx - buttonWidth / 2,
@@ -1301,7 +1301,7 @@ class NeonRunnerPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4);
 
-    final cornerLength = 15.0;
+    const cornerLength = 15.0;
     final rect = panel.outerRect;
 
     // Top-left corner

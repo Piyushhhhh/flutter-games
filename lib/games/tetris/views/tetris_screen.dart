@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'dart:math' as math;
 import '../controllers/tetris_controller.dart';
 import '../models/tetris_models.dart';
@@ -310,16 +309,16 @@ class _TetrisScreenState extends State<TetrisScreen>
       ),
       child: Column(
         children: [
-          Text(
+          const Text(
             'HOLD',
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,
-              color: const Color(0xFF8B5CF6),
+              color: Color(0xFF8B5CF6),
               letterSpacing: 1.5,
               shadows: [
                 Shadow(
-                  color: const Color(0xFF8B5CF6),
+                  color: Color(0xFF8B5CF6),
                   blurRadius: 10,
                 ),
               ],
@@ -574,16 +573,16 @@ class _TetrisScreenState extends State<TetrisScreen>
       ),
       child: Column(
         children: [
-          Text(
+          const Text(
             'NEXT',
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,
-              color: const Color(0xFF00FF00),
+              color: Color(0xFF00FF00),
               letterSpacing: 1.5,
               shadows: [
                 Shadow(
-                  color: const Color(0xFF00FF00),
+                  color: Color(0xFF00FF00),
                   blurRadius: 10,
                 ),
               ],
@@ -935,11 +934,12 @@ class _TetrisScreenState extends State<TetrisScreen>
                               Transform.scale(
                                 scale: _pulseAnimation.value,
                                 child: ShaderMask(
-                                  shaderCallback: (bounds) => LinearGradient(
+                                  shaderCallback: (bounds) =>
+                                      const LinearGradient(
                                     colors: [
-                                      const Color(0xFFFF0066),
-                                      const Color(0xFFFF3399),
-                                      const Color(0xFFFF0066),
+                                      Color(0xFFFF0066),
+                                      Color(0xFFFF3399),
+                                      Color(0xFFFF0066),
                                     ],
                                   ).createShader(bounds),
                                   child: Text(
@@ -950,8 +950,8 @@ class _TetrisScreenState extends State<TetrisScreen>
                                       color: Colors.white,
                                       letterSpacing: 3.0,
                                       shadows: [
-                                        Shadow(
-                                          color: const Color(0xFFFF0066),
+                                        const Shadow(
+                                          color: Color(0xFFFF0066),
                                           blurRadius: 15,
                                           offset: Offset(0, 2),
                                         ),
@@ -959,7 +959,7 @@ class _TetrisScreenState extends State<TetrisScreen>
                                           color: const Color(0xFFFF0066)
                                               .withOpacity(0.5),
                                           blurRadius: 25,
-                                          offset: Offset(0, 4),
+                                          offset: const Offset(0, 4),
                                         ),
                                       ],
                                     ),
@@ -1022,31 +1022,31 @@ class _TetrisScreenState extends State<TetrisScreen>
                       child: Column(
                         children: [
                           // Score
-                          Row(
+                          const Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Icon(
                                 Icons.stars,
                                 size: 20,
-                                color: const Color(0xFF00FFFF),
+                                color: Color(0xFF00FFFF),
                                 shadows: [
                                   Shadow(
-                                    color: const Color(0xFF00FFFF),
+                                    color: Color(0xFF00FFFF),
                                     blurRadius: 10,
                                   ),
                                 ],
                               ),
-                              const SizedBox(width: 8),
+                              SizedBox(width: 8),
                               Text(
                                 'FINAL SCORE',
                                 style: TextStyle(
-                                  color: const Color(0xFF00FFFF),
+                                  color: Color(0xFF00FFFF),
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
                                   letterSpacing: 1.5,
                                   shadows: [
                                     Shadow(
-                                      color: const Color(0xFF00FFFF),
+                                      color: Color(0xFF00FFFF),
                                       blurRadius: 8,
                                     ),
                                   ],
@@ -1064,11 +1064,12 @@ class _TetrisScreenState extends State<TetrisScreen>
                                 scale:
                                     1.0 + (_pulseAnimation.value - 1.0) * 0.3,
                                 child: ShaderMask(
-                                  shaderCallback: (bounds) => LinearGradient(
+                                  shaderCallback: (bounds) =>
+                                      const LinearGradient(
                                     colors: [
-                                      const Color(0xFF00FFFF),
-                                      const Color(0xFF00CCFF),
-                                      const Color(0xFF00FFFF),
+                                      Color(0xFF00FFFF),
+                                      Color(0xFF00CCFF),
+                                      Color(0xFF00FFFF),
                                     ],
                                   ).createShader(bounds),
                                   child: Text(
@@ -1079,8 +1080,8 @@ class _TetrisScreenState extends State<TetrisScreen>
                                       color: Colors.white,
                                       letterSpacing: 2.0,
                                       shadows: [
-                                        Shadow(
-                                          color: const Color(0xFF00FFFF),
+                                        const Shadow(
+                                          color: Color(0xFF00FFFF),
                                           blurRadius: 20,
                                           offset: Offset(0, 2),
                                         ),
@@ -1088,7 +1089,7 @@ class _TetrisScreenState extends State<TetrisScreen>
                                           color: const Color(0xFF00FFFF)
                                               .withOpacity(0.5),
                                           blurRadius: 30,
-                                          offset: Offset(0, 4),
+                                          offset: const Offset(0, 4),
                                         ),
                                       ],
                                     ),
@@ -1131,13 +1132,13 @@ class _TetrisScreenState extends State<TetrisScreen>
                         Container(
                           width: double.infinity,
                           decoration: BoxDecoration(
-                            gradient: LinearGradient(
+                            gradient: const LinearGradient(
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                               colors: [
-                                const Color(0xFFFF0066),
-                                const Color(0xFFFF0033),
-                                const Color(0xFFFF0066),
+                                Color(0xFFFF0066),
+                                Color(0xFFFF0033),
+                                Color(0xFFFF0066),
                               ],
                             ),
                             borderRadius: BorderRadius.circular(16),
@@ -1163,9 +1164,8 @@ class _TetrisScreenState extends State<TetrisScreen>
                             child: InkWell(
                               onTap: _controller.newGame,
                               borderRadius: BorderRadius.circular(14),
-                              child: Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 16),
+                              child: const Padding(
+                                padding: EdgeInsets.symmetric(vertical: 16),
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
@@ -1175,12 +1175,12 @@ class _TetrisScreenState extends State<TetrisScreen>
                                       color: Colors.white,
                                       shadows: [
                                         Shadow(
-                                          color: const Color(0xFFFF0066),
+                                          color: Color(0xFFFF0066),
                                           blurRadius: 12,
                                         ),
                                       ],
                                     ),
-                                    const SizedBox(width: 12),
+                                    SizedBox(width: 12),
                                     Text(
                                       'NEW GAME',
                                       style: TextStyle(
@@ -1190,7 +1190,7 @@ class _TetrisScreenState extends State<TetrisScreen>
                                         letterSpacing: 2.0,
                                         shadows: [
                                           Shadow(
-                                            color: const Color(0xFFFF0066),
+                                            color: Color(0xFFFF0066),
                                             blurRadius: 15,
                                           ),
                                         ],
@@ -1234,22 +1234,21 @@ class _TetrisScreenState extends State<TetrisScreen>
                             child: InkWell(
                               onTap: () => Navigator.of(context).pop(),
                               borderRadius: BorderRadius.circular(14),
-                              child: Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 14),
+                              child: const Padding(
+                                padding: EdgeInsets.symmetric(vertical: 14),
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Icon(
                                       Icons.exit_to_app,
                                       size: 18,
-                                      color: const Color(0xFF999999),
+                                      color: Color(0xFF999999),
                                     ),
-                                    const SizedBox(width: 8),
+                                    SizedBox(width: 8),
                                     Text(
                                       'EXIT TO MENU',
                                       style: TextStyle(
-                                        color: const Color(0xFF999999),
+                                        color: Color(0xFF999999),
                                         fontSize: 14,
                                         fontWeight: FontWeight.w600,
                                         letterSpacing: 1.5,

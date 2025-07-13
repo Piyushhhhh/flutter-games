@@ -484,7 +484,7 @@ class _SpaceInvadersScreenState extends State<SpaceInvadersScreen>
         children: [
           // Scanlines overlay
           CustomPaint(
-            size: Size(double.infinity, 80),
+            size: const Size(double.infinity, 80),
             painter: ScanlinesPainter(),
           ),
           // Stats content
@@ -785,7 +785,7 @@ class _SpaceInvadersScreenState extends State<SpaceInvadersScreen>
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.replay,
                         color: Colors.black,
                         size: 20,
@@ -950,10 +950,10 @@ class _SpaceInvadersScreenState extends State<SpaceInvadersScreen>
                 ),
               ),
               // Main text
-              Text(
+              const Text(
                 'SPACE INVADERS',
                 textAlign: TextAlign.center,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 40,
                   fontWeight: FontWeight.w900,
                   letterSpacing: 4,
@@ -1039,7 +1039,7 @@ class _SpaceInvadersScreenState extends State<SpaceInvadersScreen>
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.play_arrow,
                         color: Colors.white,
                         size: 24,
@@ -1637,9 +1637,9 @@ class GalaxyBackgroundPainter extends CustomPainter {
 
   void _drawDistantGalaxies(Canvas canvas, Size size) {
     final galaxies = [
-      {'x': 0.1, 'y': 0.2, 'size': 15.0, 'color': Color(0xFF9C27B0)},
-      {'x': 0.8, 'y': 0.15, 'size': 12.0, 'color': Color(0xFF3F51B5)},
-      {'x': 0.3, 'y': 0.8, 'size': 10.0, 'color': Color(0xFF00BCD4)},
+      {'x': 0.1, 'y': 0.2, 'size': 15.0, 'color': const Color(0xFF9C27B0)},
+      {'x': 0.8, 'y': 0.15, 'size': 12.0, 'color': const Color(0xFF3F51B5)},
+      {'x': 0.3, 'y': 0.8, 'size': 10.0, 'color': const Color(0xFF00BCD4)},
     ];
 
     for (final galaxy in galaxies) {
