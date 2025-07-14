@@ -1,5 +1,7 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_games/games/pacman/views/pacman_screen.dart';
 import '../games/tic_tac_toe/tic_tac_toe.dart';
 import '../games/game_2048/game_2048.dart';
 import '../games/space_invaders/space_invaders.dart';
@@ -387,6 +389,15 @@ class _GamesMenuState extends State<GamesMenu> with TickerProviderStateMixin {
                 ),
                 const SizedBox(height: 16),
                 _buildRetroGameCard(
+                  'PACMAN',
+                  'CLASSIC MAZE CHASE',
+                  const Color(0xFFFFD700), // Yellow
+                  const Color(0xFFFF4500), // Orange-Red
+                  true, // set to true when implemented
+                  'pacman',
+                ),
+                const SizedBox(height: 16),
+                _buildRetroGameCard(
                   'CYBER QUEST',
                   'RPG ADVENTURE',
                   const Color(0xFF8A2BE2),
@@ -452,11 +463,16 @@ class _GamesMenuState extends State<GamesMenu> with TickerProviderStateMixin {
                   width: 2,
                 ),
               ),
-              child: Icon(
-                _getGameIcon(gameId),
-                size: 30,
-                color: isAvailable ? primaryColor : const Color(0xFF666666),
-              ),
+              child: gameId == 'pacman'
+                  ? _PacmanIcon(
+                      color:
+                          isAvailable ? primaryColor : const Color(0xFF666666))
+                  : Icon(
+                      _getGameIcon(gameId),
+                      size: 30,
+                      color:
+                          isAvailable ? primaryColor : const Color(0xFF666666),
+                    ),
             ),
             const SizedBox(width: 16),
             // Game info
@@ -600,6 +616,10 @@ class _GamesMenuState extends State<GamesMenu> with TickerProviderStateMixin {
       case 'tetris':
         gameWidget = const TetrisScreen();
         break;
+      case 'pacman':
+        gameWidget = const PacmanScreen();
+        break;
+
       case 'cyber_quest':
       default:
         _showRetroComingSoonDialog(gameId);
@@ -728,6 +748,45 @@ class _GamesMenuState extends State<GamesMenu> with TickerProviderStateMixin {
       ),
     );
   }
+}
+
+class _PacmanIcon extends StatelessWidget {
+  final Color color;
+  const _PacmanIcon({required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Transform.scale(
+      scale: 0.5,
+      child: CustomPaint(
+        size: const Size(10, 10),
+        painter: _PacmanPainter(color: color),
+      ),
+    );
+  }
+}
+
+class _PacmanPainter extends CustomPainter {
+  final Color color;
+  _PacmanPainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..color = color;
+    final r = size.width / 2;
+    const mouthAngle = pi / 4;
+
+    canvas.drawArc(
+      Rect.fromCircle(center: Offset(r, r), radius: r),
+      mouthAngle,
+      2 * pi - (2 * mouthAngle),
+      true,
+      paint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 class RetroGridPainter extends CustomPainter {
