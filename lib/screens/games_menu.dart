@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_games/games/pacman/views/pacman_screen.dart';
 import '../games/tic_tac_toe/tic_tac_toe.dart';
 import '../games/game_2048/game_2048.dart';
 import '../games/space_invaders/space_invaders.dart';
@@ -387,6 +388,15 @@ class _GamesMenuState extends State<GamesMenu> with TickerProviderStateMixin {
                 ),
                 const SizedBox(height: 16),
                 _buildRetroGameCard(
+                  'PACMAN',
+                  'CLASSIC MAZE CHASE',
+                  const Color(0xFFFFD700), // Yellow
+                  const Color(0xFFFF4500), // Orange-Red
+                  true, // set to true when implemented
+                  'pacman',
+                ),
+                const SizedBox(height: 16),
+                _buildRetroGameCard(
                   'CYBER QUEST',
                   'RPG ADVENTURE',
                   const Color(0xFF8A2BE2),
@@ -600,6 +610,10 @@ class _GamesMenuState extends State<GamesMenu> with TickerProviderStateMixin {
       case 'tetris':
         gameWidget = const TetrisScreen();
         break;
+      case 'pacman':
+        gameWidget = const PacmanScreen();
+        break;
+
       case 'cyber_quest':
       default:
         _showRetroComingSoonDialog(gameId);
