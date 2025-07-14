@@ -16,6 +16,7 @@ class _PacmanScreenState extends State<PacmanScreen>
   late AnimationController _mouthController;
   late Animation<double> _mouthAnimation;
   late AnimationController _dotPulseController;
+  late AnimationController _blinkingGhostController;
 
   late AnimationController _gameOverController;
   late Animation<double> _gameOverAnimation;
@@ -41,6 +42,9 @@ class _PacmanScreenState extends State<PacmanScreen>
     _dotPulseController = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 500));
 
+    _blinkingGhostController = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 250));
+
 
     _gameOverController = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 800));
@@ -48,6 +52,7 @@ class _PacmanScreenState extends State<PacmanScreen>
         CurvedAnimation(parent: _gameOverController, curve: Curves.elasticOut);
 
     _dotPulseController.repeat(reverse: true);
+    _blinkingGhostController.repeat(reverse: true);
     _mouthController.forward();
     _showReadyAndStart();
   }
@@ -266,13 +271,46 @@ class _PacmanScreenState extends State<PacmanScreen>
     );
   }
 
-  Widget _buildGhost(Ghost g, double cw, double ch) => Positioned(
-        left: g.position.x * cw,
-        top: g.position.y * ch,
-        width: cw,
-        height: ch,
-        child: Image.asset(g.imageAsset, fit: BoxFit.contain),
-      );
+  Widget _buildGhost(Ghost g, double cw, double ch) {
+    Widget ghostImage;
+    switch (g.state) {
+      case GhostState.normal:
+        ghostImage = Image.asset(g.imageAsset, fit: BoxFit.contain);
+        break;
+      case GhostState.frightened:
+        ghostImage = AnimatedBuilder(
+          animation: _blinkingGhostController,
+          builder: (context, child) {
+            final baseImage = Image.asset('assets/frightened_ghost.png', fit: BoxFit.contain);
+
+            if (_controller.isBlinking) {
+              // Rapidly change color for a blinking effect
+              final isBlinkingOff = _blinkingGhostController.value < 0.5;
+              return ColorFiltered(
+                colorFilter: ColorFilter.mode(
+                  isBlinkingOff ? Colors.white : Colors.blue.shade300,
+                  BlendMode.modulate,
+                ),
+                child: baseImage,
+              );
+            }
+            return baseImage;
+          },
+        );
+        break;
+      case GhostState.eaten:
+        ghostImage = Image.asset('assets/eaten_ghost.png', fit: BoxFit.contain);
+        break;
+    }
+
+    return Positioned(
+      left: g.position.x * cw,
+      top: g.position.y * ch,
+      width: cw,
+      height: ch,
+      child: ghostImage,
+    );
+  }
 
   Widget _buildCherry(Point p, double cw, double ch) {
     return Positioned(
@@ -323,6 +361,7 @@ class _PacmanScreenState extends State<PacmanScreen>
     _controller.removeListener(_onGameStateChanged);
     _mouthController.dispose();
     _dotPulseController.dispose();
+    _blinkingGhostController.dispose();
     _gameOverController.dispose();
     _controller.dispose();
     super.dispose();

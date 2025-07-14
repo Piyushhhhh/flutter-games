@@ -20,6 +20,9 @@ class PacmanGameController extends ChangeNotifier {
   bool isGameOver = false;
   bool isGameWon = false;
   Point? cherryPosition;
+  Timer? _frightenedTimer;
+  bool _isBlinking = false;
+  bool get isBlinking => _isBlinking;
 
   Timer? _timer;
 
@@ -104,8 +107,8 @@ class PacmanGameController extends ChangeNotifier {
       score++;
     }
     if (powerPellets.remove(player.position)) {
-      score += 5;
-      // TODO: Add frighten ghosts logic
+      score += 50;
+      _frightenGhosts();
     }
 
     // Collect cherry
@@ -120,12 +123,24 @@ class PacmanGameController extends ChangeNotifier {
     }
 
     // Check for collisions
-    if (ghosts.any((g) => g.position == player.position)) {
-      isGameOver = true;
-      _timer?.cancel();
-    } else if (dots.isEmpty) {
-      isGameOver = true;
+    for (final ghost in ghosts) {
+      if (ghost.position == player.position) {
+        if (ghost.state == GhostState.frightened) {
+          score += 200; // Bonus for eating a ghost
+          ghost.state = GhostState.eaten;
+        } else if (ghost.state == GhostState.normal) {
+          isGameOver = true;
+          _timer?.cancel();
+          notifyListeners();
+          return; // End step immediately
+        }
+      }
+    }
+
+    // Check for win condition
+    if (dots.isEmpty) {
       isGameWon = true;
+      isGameOver = true;
       _timer?.cancel();
     }
 
@@ -156,8 +171,22 @@ class PacmanGameController extends ChangeNotifier {
         bestDirection = Direction.up; // Then exit
       }
     } else {
-      // When outside the pen, chase Pac-Man
-      bestDirection = _getChaseDirection(ghost.position, player.position, ghost.direction);
+      switch (ghost.state) {
+        case GhostState.normal:
+          bestDirection = _getChaseDirection(ghost.position, player.position, ghost.direction);
+          break;
+        case GhostState.frightened:
+          bestDirection = _getFrightenedDirection(ghost.position, player.position, ghost.direction);
+          break;
+        case GhostState.eaten:
+          // Logic to return to the pen
+          const penEntrance = Point(9, 8);
+          bestDirection = _getChaseDirection(ghost.position, penEntrance, ghost.direction);
+          if (ghost.position == penEntrance) {
+            ghost.state = GhostState.normal; // Respawned
+          }
+          break;
+      }
     }
 
     print('$ghostName | In Pen: $isInPen, Best Direction: $bestDirection');
@@ -177,35 +206,118 @@ class PacmanGameController extends ChangeNotifier {
   }
 
   Direction _getChaseDirection(Point from, Point to, Direction currentDirection) {
-    Direction bestDirection = currentDirection;
-    double minDistance = double.infinity;
-    final random = Random();
+    final dx = to.x - from.x;
+    final dy = to.y - from.y;
 
-    final directions = Direction.values.toList()..shuffle(random);
+    final preferredDirections = <Direction>[];
+    if (dx.abs() > dy.abs()) {
+      preferredDirections.add(dx > 0 ? Direction.right : Direction.left);
+      preferredDirections.add(dy > 0 ? Direction.down : Direction.up);
+    } else {
+      preferredDirections.add(dy > 0 ? Direction.down : Direction.up);
+      preferredDirections.add(dx > 0 ? Direction.right : Direction.left);
+    }
 
-    for (final direction in directions) {
-      // Prevent ghosts from reversing direction immediately
+    // Add other directions as fallback, shuffled
+    final otherDirections = Direction.values.toList()..shuffle();
+    for (final dir in otherDirections) {
+      if (!preferredDirections.contains(dir)) {
+        preferredDirections.add(dir);
+      }
+    }
+
+    for (final direction in preferredDirections) {
+      // Prevent ghosts from reversing direction
       if (direction.index == (currentDirection.index + 2) % 4) continue;
+
+      // Special rule: If at the pen exit, don't move back down into it.
+      final isAtPenExit = from == const Point(9, 7);
+      if (isAtPenExit && direction == Direction.down) continue;
 
       final nextPos = _getNextPosition(from, direction);
       if (!walls.contains(nextPos) || ghostDoor.contains(nextPos)) {
-        final distance = pow(nextPos.x - to.x, 2) + pow(nextPos.y - to.y, 2);
-        if (distance < minDistance) {
-          minDistance = distance.toDouble();
-          bestDirection = direction;
+        return direction;
+      }
+    }
+
+    return currentDirection; // Should not happen if there's a valid move
+  }
+
+  Point _getNextPosition(Point current, Direction direction) {
+    switch (direction) {
+      case Direction.up:
+        return Point(current.x, current.y - 1);
+      case Direction.down:
+        return Point(current.x, current.y + 1);
+      case Direction.left:
+        return Point(current.x - 1, current.y);
+      case Direction.right:
+        return Point(current.x + 1, current.y);
+    }
+  }
+
+  void _releaseGhost(Ghost ghost) {
+    ghost.isReleased = true;
+    notifyListeners();
+  }
+
+  void _spawnCherry() {
+    final random = Random();
+    cherryPosition = Point(
+      random.nextInt(colCount - 2) + 1,
+      random.nextInt(rowCount - 2) + 1,
+    );
+    while (walls.contains(cherryPosition)) {
+      cherryPosition = Point(
+        random.nextInt(colCount - 2) + 1,
+        random.nextInt(rowCount - 2) + 1,
+      );
+    }
+    Timer(const Duration(seconds: 10), () {
+      cherryPosition = null;
+      notifyListeners();
+    });
+    notifyListeners();
+  }
+
+  void _frightenGhosts() {
+    _frightenedTimer?.cancel();
+    _isBlinking = false;
+    for (final ghost in ghosts) {
+      if (ghost.state != GhostState.eaten) {
+        ghost.state = GhostState.frightened;
+      }
+    }
+    _frightenedTimer = Timer(const Duration(seconds: 8), _unfrightenGhosts);
+    Timer(const Duration(seconds: 5), () {
+      _isBlinking = true;
+      notifyListeners();
+    });
+    notifyListeners();
+  }
+
+  void _unfrightenGhosts() {
+    _frightenedTimer?.cancel();
+    _isBlinking = false;
+    for (final ghost in ghosts) {
+      if (ghost.state == GhostState.frightened) {
+        ghost.state = GhostState.normal;
+      }
+    }
+    notifyListeners();
+  }
+
+  Direction _getFrightenedDirection(Point from, Point to, Direction currentDirection) {
+    final directions = Direction.values.toList()..shuffle();
+    for (final direction in directions) {
+      if (direction.index != (currentDirection.index + 2) % 4) {
+        final nextPos = _getNextPosition(from, direction);
+        if (!walls.contains(nextPos) || ghostDoor.contains(nextPos)) {
+          return direction;
         }
       }
     }
-    return bestDirection;
-  }
-
-  Point _getNextPosition(Point p, Direction d) {
-    switch (d) {
-      case Direction.left: return Point((p.x - 1 + colCount) % colCount, p.y);
-      case Direction.right: return Point((p.x + 1) % colCount, p.y);
-      case Direction.up: return Point(p.x, (p.y - 1 + rowCount) % rowCount);
-      case Direction.down: return Point(p.x, (p.y + 1) % rowCount);
-    }
+    return currentDirection;
   }
 
   void onSwipe(DragUpdateDetails d) {
@@ -215,11 +327,13 @@ class PacmanGameController extends ChangeNotifier {
     } else {
       player.direction = d.delta.dy < 0 ? Direction.up : Direction.down;
     }
+    notifyListeners();
   }
 
   @override
   void dispose() {
     _timer?.cancel();
+    _frightenedTimer?.cancel();
     super.dispose();
   }
 

@@ -21,16 +21,20 @@ class Player {
 }
 
 // Represents a ghost.
+enum GhostState { normal, frightened, eaten }
+
 class Ghost {
   Point position;
+  String imageAsset;
   Direction direction;
-  final String imageAsset;
   bool isReleased;
+  GhostState state;
 
   Ghost({
     required this.position,
-    this.direction = Direction.up,
     required this.imageAsset,
+    this.direction = Direction.up,
     this.isReleased = false,
+    this.state = GhostState.normal,
   });
 }
