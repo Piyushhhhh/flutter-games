@@ -8,6 +8,17 @@ A collection of classic arcade games built with Flutter, demonstrating advanced 
 
 [Watch the full demo video](https://www.youtube.com/watch?v=TteFxaHuaSI)
 
+## Live Demo
+
+Try the games directly in your browser:
+[Play Flutter Games Collection](https://piyushhhhh.github.io/flutter-games/)
+
+The web version is optimized for desktop and mobile browsers, featuring:
+- Responsive layout adaptation
+- Keyboard and touch controls
+- Progressive Web App (PWA) support
+- Offline gameplay capability
+
 ## Screenshots
 
 <div align="center">
