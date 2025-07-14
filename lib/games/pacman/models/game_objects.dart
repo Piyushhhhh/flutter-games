@@ -23,12 +23,14 @@ class Player {
 // Represents a ghost.
 class Ghost {
   Point position;
-  final String imageAsset;
   Direction direction;
+  final String imageAsset;
+  bool isReleased;
 
   Ghost({
     required this.position,
+    this.direction = Direction.up,
     required this.imageAsset,
-    this.direction = Direction.left,
+    this.isReleased = false,
   });
 }

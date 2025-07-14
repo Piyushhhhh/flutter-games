@@ -10,20 +10,61 @@ class PacmanScreen extends StatefulWidget {
   State<PacmanScreen> createState() => _PacmanScreenState();
 }
 
-class _PacmanScreenState extends State<PacmanScreen> {
+class _PacmanScreenState extends State<PacmanScreen>
+    with TickerProviderStateMixin {
   final _controller = PacmanGameController();
+  late AnimationController _mouthController;
+  late Animation<double> _mouthAnimation;
+  late AnimationController _dotPulseController;
+
+  late AnimationController _gameOverController;
+  late Animation<double> _gameOverAnimation;
+  bool _isGameReady = false;
 
   @override
   void initState() {
     super.initState();
     _controller.addListener(_onGameStateChanged);
-    _controller.startGame();
+
+    _mouthController = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 200));
+    _mouthAnimation = Tween<double>(begin: 0.0, end: 0.25).animate(
+      CurvedAnimation(parent: _mouthController, curve: Curves.easeInOut),
+    )..addStatusListener((status) {
+        if (status == AnimationStatus.completed) {
+          _mouthController.reverse();
+        } else if (status == AnimationStatus.dismissed) {
+          _mouthController.forward();
+        }
+      });
+
+    _dotPulseController = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 500));
+
+
+    _gameOverController = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 800));
+    _gameOverAnimation =
+        CurvedAnimation(parent: _gameOverController, curve: Curves.elasticOut);
+
+    _dotPulseController.repeat(reverse: true);
+    _mouthController.forward();
+    _showReadyAndStart();
   }
 
   void _onGameStateChanged() {
-    if (mounted) {
-      setState(() {});
+    if (!mounted) return;
+    if (_controller.isGameOver) {
+      _gameOverController.forward(from: 0.0);
     }
+    setState(() {});
+  }
+
+  void _showReadyAndStart() async {
+    setState(() => _isGameReady = true);
+    await Future.delayed(const Duration(seconds: 2));
+    setState(() => _isGameReady = false);
+    _controller.startGame();
   }
 
   @override
@@ -31,50 +72,65 @@ class _PacmanScreenState extends State<PacmanScreen> {
     return Scaffold(
       backgroundColor: Colors.black,
       body: SafeArea(
-        child: GestureDetector(
-          onHorizontalDragUpdate: _controller.onSwipe,
-          onVerticalDragUpdate: _controller.onSwipe,
-          child: Column(
-            children: [
-              _buildHeader(),
-              Expanded(child: _buildGameBoard()),
-              _buildFooter(),
-            ],
-          ),
+        child: Stack(
+          children: [
+            GestureDetector(
+              onHorizontalDragUpdate: _controller.onSwipe,
+              onVerticalDragUpdate: _controller.onSwipe,
+              child: Column(
+                children: [
+                  _buildHeader(),
+                  Expanded(child: _buildGameBoard()),
+                  _buildFooter(),
+                ],
+              ),
+            ),
+            Positioned(
+              top: 8,
+              left: 8,
+              child: TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text(
+                  '< BACK',
+                  style: TextStyle(
+                    color: Colors.yellow,
+                    fontFamily: 'monospace',
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
   Widget _buildHeader() {
-    String message;
-    if (_controller.isGameOver) {
-      message = _controller.isGameWon ? 'YOU WIN!' : 'GAME OVER';
-    } else {
-      message = 'PAC-MAN';
-    }
+    const textStyle = TextStyle(
+      color: Colors.white,
+      fontSize: 16,
+      fontFamily: 'monospace',
+    );
+    const scoreStyle = TextStyle(
+      color: Colors.white,
+      fontSize: 16,
+      fontFamily: 'monospace',
+      fontWeight: FontWeight.bold,
+    );
+
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
-      child: Stack(
-        alignment: Alignment.center,
+      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Align(
-            alignment: Alignment.centerLeft,
-            child: IconButton(
-              icon: const Icon(Icons.arrow_back_ios, color: Colors.yellowAccent),
-              onPressed: () => Navigator.of(context).pop(),
-              tooltip: 'Back to Menu',
-            ),
-          ),
-          Text(
-            message,
-            style: const TextStyle(
-              fontFamily: 'monospace',
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
-              color: Colors.yellowAccent,
-              shadows: [Shadow(color: Colors.yellow, blurRadius: 10)],
-            ),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('HIGH SCORE', style: textStyle),
+              const SizedBox(height: 4),
+              Text(_controller.score.toString(), style: scoreStyle),
+            ],
           ),
         ],
       ),
@@ -85,27 +141,35 @@ class _PacmanScreenState extends State<PacmanScreen> {
     return Center(
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final cellWidth = constraints.maxWidth / PacmanGameController.colCount;
-          final cellHeight = constraints.maxHeight / PacmanGameController.rowCount;
+          final cellWidth =
+              constraints.maxWidth / PacmanGameController.colCount;
+          final cellHeight =
+              constraints.maxHeight / PacmanGameController.rowCount;
 
           return Container(
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.blue.shade800, width: 3),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.blue.withOpacity(0.4),
-                  blurRadius: 12,
-                  spreadRadius: 2,
-                )
-              ],
-            ),
+            color: Colors.black,
             child: Stack(
               children: [
-                CustomPaint(size: Size.infinite, painter: _GridPainter()),
-                ..._controller.walls.map((p) => _buildWall(p, cellWidth, cellHeight)),
-                ..._controller.dots.map((p) => _buildDot(p, cellWidth, cellHeight)),
-                ..._controller.ghosts.map((g) => _buildGhost(g, cellWidth, cellHeight)),
+                CustomPaint(
+                  size: Size.infinite,
+                  painter: _MazePainter(
+                    walls: _controller.walls,
+                    cellWidth: cellWidth,
+                    cellHeight: cellHeight,
+                  ),
+                ),
+                ..._controller.dots
+                    .map((p) => _buildDot(p, cellWidth, cellHeight)),
+                ..._controller.powerPellets
+                    .map((p) => _buildPowerPellet(p, cellWidth, cellHeight)),
+                _buildGhostDoor(cellWidth, cellHeight),
+                ..._controller.ghosts
+                    .map((g) => _buildGhost(g, cellWidth, cellHeight)),
                 _buildPlayer(_controller.player, cellWidth, cellHeight),
+                if (_controller.cherryPosition != null) _buildCherry(_controller.cherryPosition!, cellWidth, cellHeight),
+                if (_isGameReady) _buildReadyOverlay(),
+                if (_controller.isGameOver) _buildGameOverOverlay(),
+                _buildBottomUI(cellWidth, cellHeight),
               ],
             ),
           );
@@ -115,103 +179,334 @@ class _PacmanScreenState extends State<PacmanScreen> {
   }
 
   Widget _buildFooter() {
+    // The original game didn't have a play button on this screen,
+    // but we need one to restart the game.
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 24.0),
+      padding: const EdgeInsets.all(8.0),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text('SCORE: ${_controller.score}',
-              style: const TextStyle(
-                color: Colors.white,
-                fontFamily: 'monospace',
-                fontSize: 18,
-              )),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.yellowAccent,
-              foregroundColor: Colors.black,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          if (_controller.isGameOver)
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.yellow,
+                foregroundColor: Colors.black,
+              ),
+              onPressed: () {
+                _gameOverController.reset();
+                _showReadyAndStart();
+              },
+              child: const Text('PLAY AGAIN',
+                  style: TextStyle(fontFamily: 'monospace')),
             ),
-            onPressed: _controller.startGame,
-            child: const Text('PLAY', style: TextStyle(fontFamily: 'monospace', fontSize: 18, fontWeight: FontWeight.bold)),
-          ),
         ],
       ),
     );
   }
 
-  Widget _buildWall(Point p, double cw, double ch) => Positioned(
-        left: p.x * cw, top: p.y * ch, width: cw, height: ch,
-        child: Container(color: Colors.blue.shade900.withOpacity(0.8)),
-      );
-
-  Widget _buildDot(Point p, double cw, double ch) => Positioned(
-        left: p.x * cw + cw * 0.4, top: p.y * ch + ch * 0.4,
+  Widget _buildDot(Point p, double cw, double ch) {
+    return Positioned(
+      left: p.x * cw,
+      top: p.y * ch,
+      width: cw,
+      height: ch,
+      child: Center(
         child: Container(
-          width: cw * 0.2, height: ch * 0.2,
-          decoration: const BoxDecoration(color: Colors.yellow, shape: BoxShape.circle),
+          width: cw * 0.15, // Made smaller
+          height: ch * 0.15, // Made smaller
+          decoration: BoxDecoration(
+            color: const Color(0xFFFBC4A1),
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFFFBC4A1).withOpacity(0.4),
+                blurRadius: 3.0,
+                spreadRadius: 1.0,
+              ),
+            ],
+          ),
         ),
-      );
+      ),
+    );
+  }
+
+  Widget _buildPowerPellet(Point p, double cw, double ch) {
+    return Positioned(
+      left: p.x * cw,
+      top: p.y * ch,
+      width: cw,
+      height: ch,
+      child: Center(
+        child: AnimatedBuilder(
+          animation: _dotPulseController, // Use controller for flicker
+          builder: (context, child) {
+            // Create a flicker effect by varying opacity
+            final flicker = sin(_dotPulseController.value * pi * 4).abs();
+            return Opacity(
+              opacity: 0.5 + (flicker * 0.5),
+              child: Container(
+                width: cw * 0.6,
+                height: ch * 0.6,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFFBC4A1),
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Color(0xFFFBC4A1),
+                      blurRadius: 8.0,
+                      spreadRadius: 2.0,
+                    )
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
 
   Widget _buildGhost(Ghost g, double cw, double ch) => Positioned(
-        left: g.position.x * cw, top: g.position.y * ch, width: cw, height: ch,
+        left: g.position.x * cw,
+        top: g.position.y * ch,
+        width: cw,
+        height: ch,
         child: Image.asset(g.imageAsset, fit: BoxFit.contain),
       );
 
-  Widget _buildPlayer(Player p, double cw, double ch) => Positioned(
-        left: p.position.x * cw, top: p.position.y * ch, width: cw, height: ch,
-        child: Transform.rotate(
-          angle: _getPacmanAngle(p.direction),
-          child: ClipPath(clipper: _PacmanClipper(), child: Container(color: Colors.yellow)),
+  Widget _buildCherry(Point p, double cw, double ch) {
+    return Positioned(
+      left: p.x * cw,
+      top: p.y * ch,
+      width: cw,
+      height: ch,
+      child: Image.asset('assets/cherry.png', fit: BoxFit.contain),
+    );
+  }
+
+  Widget _buildPlayer(Player p, double cw, double ch) {
+    return Positioned(
+      left: p.position.x * cw,
+      top: p.position.y * ch,
+      width: cw,
+      height: ch,
+      child: Transform.rotate(
+        angle: _getPacmanAngle(p.direction),
+        child: AnimatedBuilder(
+          animation: _mouthAnimation,
+          builder: (context, child) {
+            return ClipPath(
+              clipper: _PacmanClipper(mouthExtent: _mouthAnimation.value),
+              child: Container(color: Colors.yellow),
+            );
+          },
         ),
-      );
+      ),
+    );
+  }
 
   double _getPacmanAngle(Direction dir) {
     switch (dir) {
-      case Direction.right: return 0.0;
-      case Direction.down: return pi / 2;
-      case Direction.left: return pi;
-      case Direction.up: return 3 * pi / 2;
+      case Direction.right:
+        return 0.0;
+      case Direction.down:
+        return pi / 2;
+      case Direction.left:
+        return pi;
+      case Direction.up:
+        return 3 * pi / 2;
     }
   }
 
   @override
   void dispose() {
     _controller.removeListener(_onGameStateChanged);
+    _mouthController.dispose();
+    _dotPulseController.dispose();
+    _gameOverController.dispose();
     _controller.dispose();
     super.dispose();
   }
+
+  Widget _buildGameOverOverlay() {
+    return Center(
+      child: ScaleTransition(
+        scale: _gameOverAnimation,
+        child: FadeTransition(
+          opacity: _gameOverAnimation,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.8),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.red.shade700, width: 4),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.red.withOpacity(0.7),
+                  blurRadius: 20,
+                  spreadRadius: 5,
+                )
+              ],
+            ),
+            child: Text(
+              _controller.isGameWon ? 'YOU WIN!' : 'GAME OVER',
+              style: TextStyle(
+                fontFamily: 'monospace',
+                fontSize: 36,
+                fontWeight: FontWeight.bold,
+                color: _controller.isGameWon
+                    ? Colors.greenAccent
+                    : Colors.redAccent,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildReadyOverlay() {
+    return const Center(
+      child: Text(
+        'READY!',
+        style: TextStyle(
+          fontFamily: 'monospace',
+          fontSize: 24,
+          fontWeight: FontWeight.bold,
+          color: Colors.yellow,
+          shadows: [
+            Shadow(
+              blurRadius: 10.0,
+              color: Colors.yellowAccent,
+              offset: Offset(0, 0),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGhostDoor(double cw, double ch) {
+    return Positioned(
+      top: 13 * ch - 1,
+      left: 13 * cw,
+      child: Container(
+        width: 2 * cw,
+        height: 2,
+        color: Colors.pinkAccent,
+      ),
+    );
+  }
+
+  Widget _buildBottomUI(double cellWidth, double cellHeight) {
+    return Positioned(
+      bottom: cellHeight * 1.5, // Adjust position as needed
+      left: cellWidth * 2,
+      right: cellWidth * 2,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: List.generate(
+                2,
+                (i) => Padding(
+                      padding: const EdgeInsets.only(right: 4.0),
+                      child: Transform.rotate(
+                        angle: pi, // Facing left
+                        child: SizedBox(
+                          width: cellWidth * 1.5,
+                          height: cellHeight * 1.5,
+                          child: ClipPath(
+                            clipper: _PacmanClipper(mouthExtent: 0.0),
+                            child: Container(color: Colors.yellow),
+                          ),
+                        ),
+                      ),
+                    )),
+          ),
+          // TODO: Implement fruit logic
+          SizedBox(
+            width: cellWidth * 1.5,
+            height: cellHeight * 1.5,
+            child: Image.asset('assets/cherry.png', fit: BoxFit.contain),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
-class _GridPainter extends CustomPainter {
+class _MazePainter extends CustomPainter {
+  final Set<Point> walls;
+  final double cellWidth;
+  final double cellHeight;
+
+  _MazePainter(
+      {required this.walls, required this.cellWidth, required this.cellHeight});
+
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = Colors.blue.withOpacity(0.2)..strokeWidth = 1;
-    final dx = size.width / PacmanGameController.colCount;
-    final dy = size.height / PacmanGameController.rowCount;
-    for (double x = 0; x <= size.width; x += dx) {
-      canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
+    final paint = Paint()
+      ..color = const Color(0xFF2121DE) // Classic Pac-Man Blue
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.5
+      ..strokeCap = StrokeCap.round;
+
+    final path = Path();
+
+    for (final wall in walls) {
+      final double x = wall.x * cellWidth;
+      final double y = wall.y * cellHeight;
+      final center = Offset(x + cellWidth / 2, y + cellHeight / 2);
+
+      // Check for neighbors
+      final hasLeft = walls.contains(Point(wall.x - 1, wall.y));
+      final hasRight = walls.contains(Point(wall.x + 1, wall.y));
+      final hasUp = walls.contains(Point(wall.x, wall.y - 1));
+      final hasDown = walls.contains(Point(wall.x, wall.y + 1));
+
+      // Draw lines to neighbors
+      if (hasRight) {
+        path.moveTo(center.dx, center.dy);
+        path.lineTo(center.dx + cellWidth / 2, center.dy);
+      }
+      if (hasLeft) {
+        path.moveTo(center.dx, center.dy);
+        path.lineTo(center.dx - cellWidth / 2, center.dy);
+      }
+      if (hasDown) {
+        path.moveTo(center.dx, center.dy);
+        path.lineTo(center.dx, center.dy + cellHeight / 2);
+      }
+      if (hasUp) {
+        path.moveTo(center.dx, center.dy);
+        path.lineTo(center.dx, center.dy - cellHeight / 2);
+      }
     }
-    for (double y = 0; y <= size.height; y += dy) {
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
-    }
+
+    canvas.drawPath(path, paint);
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(_MazePainter oldDelegate) => oldDelegate.walls != walls;
 }
 
 class _PacmanClipper extends CustomClipper<Path> {
+  final double mouthExtent;
+  _PacmanClipper({this.mouthExtent = 0.15});
+
   @override
   Path getClip(Size s) {
-    final r = min(s.width, s.height) / 2;
-    const mouth = pi / 4;
+    final startAngle = mouthExtent * pi;
+    final sweepAngle = (2 - mouthExtent * 2) * pi;
     return Path()
-      ..moveTo(r, r)
-      ..arcTo(Rect.fromCircle(center: Offset(r, r), radius: r), mouth, 2 * pi - 2 * mouth, false)
+      ..moveTo(s.width / 2, s.height / 2)
+      ..arcTo(
+          Rect.fromLTWH(0, 0, s.width, s.height), startAngle, sweepAngle, false)
       ..close();
   }
 
   @override
-  bool shouldReclip(oldClipper) => false;
+  bool shouldReclip(_PacmanClipper oldClipper) =>
+      mouthExtent != oldClipper.mouthExtent;
 }
