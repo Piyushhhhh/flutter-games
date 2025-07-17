@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:async';
@@ -32,7 +31,6 @@ class TetrisController extends ChangeNotifier {
   Timer? _lineClearTimer;
 
   // Random generator for pieces
-  final math.Random _random = math.Random();
 
   // Public getters - read-only access to state
   GameState get gameState => _gameState;

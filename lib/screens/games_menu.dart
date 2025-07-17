@@ -4,6 +4,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_games/games/pacman/views/pacman_screen.dart';
 import '../games/tic_tac_toe/tic_tac_toe.dart';
 import '../games/bomberman/bomberman_game.dart';
+import '../games/mario/mario_game.dart';
+import 'mario_face_icon.dart';
 import '../games/game_2048/game_2048.dart';
 import '../games/space_invaders/space_invaders.dart';
 import '../games/neon_runner/views/neon_runner.dart';
@@ -408,6 +410,16 @@ class _GamesMenuState extends State<GamesMenu> with TickerProviderStateMixin {
                 ),
                 const SizedBox(height: 16),
                 _buildRetroGameCard(
+                  'SUPER MARIO',
+                  'PLATFORMER',
+                  const Color(0xFF43FF00), // Neon Green
+                  const Color(0xFF00FFF7), // Neon Cyan
+                  true,
+                  'mario',
+                  icon: MarioFaceIcon(),
+                ),
+                const SizedBox(height: 16),
+                _buildRetroGameCard(
                   'CYBER QUEST',
                   'RPG ADVENTURE',
                   const Color(0xFF8A2BE2),
@@ -424,7 +436,7 @@ class _GamesMenuState extends State<GamesMenu> with TickerProviderStateMixin {
   }
 
   Widget _buildRetroGameCard(String title, String subtitle, Color primaryColor,
-      Color accentColor, bool isAvailable, String gameId) {
+      Color accentColor, bool isAvailable, String gameId, {Widget? icon}) {
     return GestureDetector(
       onTap: () {
         HapticFeedback.heavyImpact();
@@ -473,16 +485,16 @@ class _GamesMenuState extends State<GamesMenu> with TickerProviderStateMixin {
                   width: 2,
                 ),
               ),
-              child: gameId == 'pacman'
-                  ? _PacmanIcon(
-                      color:
-                          isAvailable ? primaryColor : const Color(0xFF666666))
-                  : Icon(
-                      _getGameIcon(gameId),
-                      size: 30,
-                      color:
-                          isAvailable ? primaryColor : const Color(0xFF666666),
-                    ),
+              child: icon != null
+                  ? icon
+                  : gameId == 'pacman'
+                      ? _PacmanIcon(
+                          color: isAvailable ? primaryColor : const Color(0xFF666666))
+                      : Icon(
+                          _getGameIcon(gameId),
+                          color: isAvailable ? primaryColor : const Color(0xFF666666),
+                          size: 40,
+                        ),
             ),
             const SizedBox(width: 16),
             // Game info
@@ -559,7 +571,7 @@ class _GamesMenuState extends State<GamesMenu> with TickerProviderStateMixin {
                     width: 2,
                   ),
                 ),
-                child: Icon(
+                child: icon ?? Icon(
                   Icons.play_arrow,
                   color: primaryColor,
                   size: 20,
@@ -588,8 +600,10 @@ class _GamesMenuState extends State<GamesMenu> with TickerProviderStateMixin {
     );
   }
 
-  IconData _getGameIcon(String gameId) {
+  IconData? _getGameIcon(String gameId) {
     switch (gameId) {
+      case 'mario':
+        return null;
       case 'tic_tac_toe':
         return Icons.grid_3x3;
       case '2048':
@@ -633,6 +647,9 @@ class _GamesMenuState extends State<GamesMenu> with TickerProviderStateMixin {
         break;
       case 'bomberman':
         gameWidget = const BombermanGame();
+        break;
+      case 'mario':
+        gameWidget = const MarioGame();
         break;
 
       case 'cyber_quest':

@@ -13,7 +13,7 @@ class BombermanGame extends StatefulWidget {
 class _BombermanGameState extends State<BombermanGame> {
   static const int gridSize = 13;
   static const int tileSize = 30;
-  
+
   // Game state
   List<List<TileType>> grid = [];
   PlayerPosition player = PlayerPosition(1, 1);
@@ -23,26 +23,27 @@ class _BombermanGameState extends State<BombermanGame> {
   bool gameOver = false;
   bool gameWon = false;
   int score = 0;
-  
+
   Timer? gameTimer;
-  
+
   @override
   void initState() {
     super.initState();
     initializeGame();
     startGameLoop();
   }
-  
+
   @override
   void dispose() {
     gameTimer?.cancel();
     super.dispose();
   }
-  
+
   void initializeGame() {
     // Initialize grid
-    grid = List.generate(gridSize, (i) => List.generate(gridSize, (j) => TileType.empty));
-    
+    grid = List.generate(
+        gridSize, (i) => List.generate(gridSize, (j) => TileType.empty));
+
     // Create walls pattern
     for (int i = 0; i < gridSize; i++) {
       for (int j = 0; j < gridSize; j++) {
@@ -53,14 +54,14 @@ class _BombermanGameState extends State<BombermanGame> {
         }
       }
     }
-    
+
     // Add destructible blocks
     Random random = Random();
     for (int i = 1; i < gridSize - 1; i++) {
       for (int j = 1; j < gridSize - 1; j++) {
-        if (grid[i][j] == TileType.empty && 
+        if (grid[i][j] == TileType.empty &&
             !(i == 1 && j == 1) && // Don't block player start
-            !(i == 1 && j == 2) && 
+            !(i == 1 && j == 2) &&
             !(i == 2 && j == 1)) {
           if (random.nextDouble() < 0.3) {
             grid[i][j] = TileType.destructible;
@@ -68,13 +69,13 @@ class _BombermanGameState extends State<BombermanGame> {
         }
       }
     }
-    
+
     // Add enemies
     enemies.clear();
     enemies.add(Enemy(gridSize - 2, gridSize - 2));
     enemies.add(Enemy(gridSize - 2, 1));
     enemies.add(Enemy(1, gridSize - 2));
-    
+
     // Reset player position
     player = PlayerPosition(1, 1);
     bombs.clear();
@@ -83,16 +84,16 @@ class _BombermanGameState extends State<BombermanGame> {
     gameWon = false;
     score = 0;
   }
-  
+
   void startGameLoop() {
     gameTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
       updateGame();
     });
   }
-  
+
   void updateGame() {
     if (gameOver || gameWon) return;
-    
+
     setState(() {
       // Update bombs
       bombs.removeWhere((bomb) {
@@ -103,21 +104,21 @@ class _BombermanGameState extends State<BombermanGame> {
         }
         return false;
       });
-      
+
       // Update explosions
       explosions.removeWhere((explosion) {
         explosion.timer--;
         return explosion.timer <= 0;
       });
-      
+
       // Update enemies
       for (var enemy in enemies) {
         moveEnemy(enemy);
       }
-      
+
       // Check collisions
       checkCollisions();
-      
+
       // Check win condition
       if (enemies.isEmpty) {
         gameWon = true;
@@ -125,17 +126,17 @@ class _BombermanGameState extends State<BombermanGame> {
       }
     });
   }
-  
+
   void moveEnemy(Enemy enemy) {
     Random random = Random();
     List<Direction> possibleMoves = [];
-    
+
     // Check all directions
     if (canMoveTo(enemy.x - 1, enemy.y)) possibleMoves.add(Direction.up);
     if (canMoveTo(enemy.x + 1, enemy.y)) possibleMoves.add(Direction.down);
     if (canMoveTo(enemy.x, enemy.y - 1)) possibleMoves.add(Direction.left);
     if (canMoveTo(enemy.x, enemy.y + 1)) possibleMoves.add(Direction.right);
-    
+
     if (possibleMoves.isNotEmpty) {
       Direction direction = possibleMoves[random.nextInt(possibleMoves.length)];
       switch (direction) {
@@ -154,22 +155,22 @@ class _BombermanGameState extends State<BombermanGame> {
       }
     }
   }
-  
+
   bool canMoveTo(int x, int y) {
     if (x < 0 || x >= gridSize || y < 0 || y >= gridSize) return false;
     return grid[x][y] == TileType.empty;
   }
-  
+
   void explodeBomb(Bomb bomb) {
     // Create explosion at bomb position
     explosions.add(Explosion(bomb.x, bomb.y, 30));
-    
+
     // Create explosions in all directions
     for (Direction direction in Direction.values) {
       for (int i = 1; i <= bomb.range; i++) {
         int newX = bomb.x;
         int newY = bomb.y;
-        
+
         switch (direction) {
           case Direction.up:
             newX -= i;
@@ -184,13 +185,13 @@ class _BombermanGameState extends State<BombermanGame> {
             newY += i;
             break;
         }
-        
+
         if (newX < 0 || newX >= gridSize || newY < 0 || newY >= gridSize) break;
-        
+
         if (grid[newX][newY] == TileType.wall) break;
-        
+
         explosions.add(Explosion(newX, newY, 30));
-        
+
         if (grid[newX][newY] == TileType.destructible) {
           grid[newX][newY] = TileType.empty;
           score += 10;
@@ -199,7 +200,7 @@ class _BombermanGameState extends State<BombermanGame> {
       }
     }
   }
-  
+
   void checkCollisions() {
     // Check player-enemy collision
     for (var enemy in enemies) {
@@ -209,7 +210,7 @@ class _BombermanGameState extends State<BombermanGame> {
         return;
       }
     }
-    
+
     // Check player-explosion collision
     for (var explosion in explosions) {
       if (explosion.x == player.x && explosion.y == player.y) {
@@ -218,7 +219,7 @@ class _BombermanGameState extends State<BombermanGame> {
         return;
       }
     }
-    
+
     // Check enemy-explosion collision
     enemies.removeWhere((enemy) {
       for (var explosion in explosions) {
@@ -230,13 +231,13 @@ class _BombermanGameState extends State<BombermanGame> {
       return false;
     });
   }
-  
+
   void movePlayer(Direction direction) {
     if (gameOver || gameWon) return;
-    
+
     int newX = player.x;
     int newY = player.y;
-    
+
     switch (direction) {
       case Direction.up:
         newX--;
@@ -251,7 +252,7 @@ class _BombermanGameState extends State<BombermanGame> {
         newY++;
         break;
     }
-    
+
     if (canMoveTo(newX, newY)) {
       setState(() {
         player.x = newX;
@@ -259,19 +260,20 @@ class _BombermanGameState extends State<BombermanGame> {
       });
     }
   }
-  
+
   void placeBomb() {
     if (gameOver || gameWon) return;
-    
+
     // Check if there's already a bomb at this position
-    bool bombExists = bombs.any((bomb) => bomb.x == player.x && bomb.y == player.y);
+    bool bombExists =
+        bombs.any((bomb) => bomb.x == player.x && bomb.y == player.y);
     if (bombExists) return;
-    
+
     setState(() {
       bombs.add(Bomb(player.x, player.y, 30, 2)); // 3 second timer, range 2
     });
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -283,7 +285,8 @@ class _BombermanGameState extends State<BombermanGame> {
         actions: [
           Padding(
             padding: const EdgeInsets.all(16.0),
-            child: Text('Score: $score', style: const TextStyle(color: Colors.white, fontSize: 16)),
+            child: Text('Score: $score',
+                style: const TextStyle(color: Colors.white, fontSize: 16)),
           ),
         ],
       ),
@@ -377,7 +380,10 @@ class _BombermanGameState extends State<BombermanGame> {
                   children: [
                     const Text(
                       'Game Over!',
-                      style: TextStyle(color: Colors.red, fontSize: 24, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                          color: Colors.red,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold),
                     ),
                     ElevatedButton(
                       onPressed: () {
@@ -393,7 +399,10 @@ class _BombermanGameState extends State<BombermanGame> {
                   children: [
                     const Text(
                       'You Win!',
-                      style: TextStyle(color: Colors.green, fontSize: 24, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                          color: Colors.green,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold),
                     ),
                     ElevatedButton(
                       onPressed: () {
@@ -415,7 +424,7 @@ class _BombermanGameState extends State<BombermanGame> {
       ),
     );
   }
-  
+
   List<Widget> buildGrid() {
     List<Widget> tiles = [];
     for (int i = 0; i < gridSize; i++) {
@@ -439,7 +448,7 @@ class _BombermanGameState extends State<BombermanGame> {
     }
     return tiles;
   }
-  
+
   Color getTileColor(TileType type) {
     switch (type) {
       case TileType.empty:
@@ -450,7 +459,7 @@ class _BombermanGameState extends State<BombermanGame> {
         return Colors.brown.shade600;
     }
   }
-  
+
   Widget? getTileIcon(TileType type) {
     switch (type) {
       case TileType.wall:
@@ -461,7 +470,7 @@ class _BombermanGameState extends State<BombermanGame> {
         return null;
     }
   }
-  
+
   Widget buildPlayer() {
     return Positioned(
       left: player.y * tileSize.toDouble(),
@@ -477,57 +486,63 @@ class _BombermanGameState extends State<BombermanGame> {
       ),
     );
   }
-  
+
   List<Widget> buildEnemies() {
-    return enemies.map((enemy) => Positioned(
-      left: enemy.y * tileSize.toDouble(),
-      top: enemy.x * tileSize.toDouble(),
-      child: Container(
-        width: tileSize.toDouble(),
-        height: tileSize.toDouble(),
-        child: const Icon(
-          Icons.bug_report,
-          color: Colors.red,
-          size: 25,
-        ),
-      ),
-    )).toList();
+    return enemies
+        .map((enemy) => Positioned(
+              left: enemy.y * tileSize.toDouble(),
+              top: enemy.x * tileSize.toDouble(),
+              child: Container(
+                width: tileSize.toDouble(),
+                height: tileSize.toDouble(),
+                child: const Icon(
+                  Icons.bug_report,
+                  color: Colors.red,
+                  size: 25,
+                ),
+              ),
+            ))
+        .toList();
   }
-  
+
   List<Widget> buildBombs() {
-    return bombs.map((bomb) => Positioned(
-      left: bomb.y * tileSize.toDouble(),
-      top: bomb.x * tileSize.toDouble(),
-      child: Container(
-        width: tileSize.toDouble(),
-        height: tileSize.toDouble(),
-        child: Icon(
-          Icons.circle,
-          color: bomb.timer > 15 ? Colors.black : Colors.red,
-          size: 20,
-        ),
-      ),
-    )).toList();
+    return bombs
+        .map((bomb) => Positioned(
+              left: bomb.y * tileSize.toDouble(),
+              top: bomb.x * tileSize.toDouble(),
+              child: Container(
+                width: tileSize.toDouble(),
+                height: tileSize.toDouble(),
+                child: Icon(
+                  Icons.circle,
+                  color: bomb.timer > 15 ? Colors.black : Colors.red,
+                  size: 20,
+                ),
+              ),
+            ))
+        .toList();
   }
-  
+
   List<Widget> buildExplosions() {
-    return explosions.map((explosion) => Positioned(
-      left: explosion.y * tileSize.toDouble(),
-      top: explosion.x * tileSize.toDouble(),
-      child: Container(
-        width: tileSize.toDouble(),
-        height: tileSize.toDouble(),
-        decoration: BoxDecoration(
-          color: Colors.orange.withOpacity(0.8),
-          borderRadius: BorderRadius.circular(15),
-        ),
-        child: const Icon(
-          Icons.local_fire_department,
-          color: Colors.yellow,
-          size: 20,
-        ),
-      ),
-    )).toList();
+    return explosions
+        .map((explosion) => Positioned(
+              left: explosion.y * tileSize.toDouble(),
+              top: explosion.x * tileSize.toDouble(),
+              child: Container(
+                width: tileSize.toDouble(),
+                height: tileSize.toDouble(),
+                decoration: BoxDecoration(
+                  color: Colors.orange.withOpacity(0.8),
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: const Icon(
+                  Icons.local_fire_department,
+                  color: Colors.yellow,
+                  size: 20,
+                ),
+              ),
+            ))
+        .toList();
   }
 }
 
@@ -553,4 +568,5 @@ class Enemy {
 }
 
 enum TileType { empty, wall, destructible }
+
 enum Direction { up, down, left, right }
