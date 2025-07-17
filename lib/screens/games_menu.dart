@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_games/games/pacman/views/pacman_screen.dart';
 import '../games/tic_tac_toe/tic_tac_toe.dart';
+import '../games/bomberman/bomberman_game.dart';
 import '../games/game_2048/game_2048.dart';
 import '../games/space_invaders/space_invaders.dart';
 import '../games/neon_runner/views/neon_runner.dart';
@@ -389,6 +390,15 @@ class _GamesMenuState extends State<GamesMenu> with TickerProviderStateMixin {
                 ),
                 const SizedBox(height: 16),
                 _buildRetroGameCard(
+                  'BOMBERMAN',
+                  'BOMB MAZE ACTION',
+                  Colors.orange,
+                  Colors.deepOrangeAccent,
+                  true,
+                  'bomberman',
+                ),
+                const SizedBox(height: 16),
+                _buildRetroGameCard(
                   'PACMAN',
                   'CLASSIC MAZE CHASE',
                   const Color(0xFFFFD700), // Yellow
@@ -590,6 +600,8 @@ class _GamesMenuState extends State<GamesMenu> with TickerProviderStateMixin {
         return Icons.directions_run;
       case 'tetris':
         return Icons.view_module;
+      case 'bomberman':
+        return Icons.local_fire_department;
       case 'cyber_quest':
         return Icons.psychology;
       default:
@@ -618,6 +630,9 @@ class _GamesMenuState extends State<GamesMenu> with TickerProviderStateMixin {
         break;
       case 'pacman':
         gameWidget = const PacmanScreen();
+        break;
+      case 'bomberman':
+        gameWidget = const BombermanGame();
         break;
 
       case 'cyber_quest':
