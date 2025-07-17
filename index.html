@@ -107,6 +107,23 @@
     margin-top: 24px;
     letter-spacing: 2px;
     animation: flicker 1.5s infinite alternate;
+    max-width: 90vw;
+    padding: 0 10px;
+    box-sizing: border-box;
+    word-break: break-word;
+    text-align: center;
+  }
+  @media (max-width: 500px) {
+    .loading-text {
+      font-size: 13px;
+      margin-top: 18px;
+      max-width: 98vw;
+      padding: 0 4vw;
+    }
+    .ghost-splash {
+      width: 70px;
+      height: 70px;
+    }
   }
   @keyframes flicker {
     0%, 100% { opacity: 1; }
