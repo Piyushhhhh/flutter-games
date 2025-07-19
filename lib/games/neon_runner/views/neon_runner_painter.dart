@@ -8,7 +8,6 @@ class NeonRunnerPainter extends CustomPainter {
   // Enhanced paint objects for professional look
   late final Paint _backgroundPaint;
   late final Paint _starPaint;
-  late final Paint _cloudPaint;
   late final Paint _groundPaint;
   late final Paint _groundGlowPaint;
   late final Paint _gridPaint;
@@ -31,10 +30,6 @@ class NeonRunnerPainter extends CustomPainter {
     _starPaint = Paint()
       ..color = const Color(0xFFFFFFFF).withOpacity(0.9)
       ..strokeWidth = 2;
-
-    _cloudPaint = Paint()
-      ..color = const Color(0xFF2D1B69).withOpacity(0.3)
-      ..style = PaintingStyle.fill;
 
     _groundPaint = Paint()
       ..color = const Color(0xFF00FFFF)

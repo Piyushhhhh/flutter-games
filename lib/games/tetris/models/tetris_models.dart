@@ -414,7 +414,7 @@ class GameStats {
   // Calculate drop speed based on level
   Duration getDropSpeed() {
     // Speed increases with level
-    final baseSpeed = 1000; // milliseconds
+    const baseSpeed = 1000; // milliseconds
     final speedReduction = (level - 1) * 50;
     final speed = math.max(50, baseSpeed - speedReduction);
     return Duration(milliseconds: speed);
