@@ -48,6 +48,7 @@ class MarioPlayer extends ChangeNotifier implements CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+  print('MarioPlayer.paint called, size=[32m$size[0m, x=$x, y=$y');
     // TODO: Draw Mario sprite (placeholder: red square)
     final double tileSize = size.width / world.tiles[0].length;
     final paint = Paint()..color = Colors.red;

@@ -26,6 +26,12 @@ class MarioWorld extends ChangeNotifier implements CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+  // DEBUG: Fill background so we know painting is happening
+  canvas.drawRect(
+    Rect.fromLTWH(0, 0, size.width, size.height),
+    Paint()..color = Colors.blueGrey,
+  );
+  print('MarioWorld.paint called, size=[32m$size[0m');
     final int rows = _tiles.length;
     final int cols = _tiles[0].length;
     final double tileW = size.width / cols;
